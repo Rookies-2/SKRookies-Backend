@@ -23,12 +23,6 @@
 - WebSocket (실시간 채팅)
 - JPA / Oracle
 
-### Frontend 예시
-- React
-- Axios
-- Tailwind CSS
-- Socket.io-client
-
 ### Infra & Tools
 - Git / GitHub
 - Notion
