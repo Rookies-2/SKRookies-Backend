@@ -3,11 +3,9 @@ package com.agit.peerflow.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-/**
- * 사용자(User) Entity
- * - 학생, 강사, 시스템관리자 구분
- * - 회원가입 승인 상태 관리
- */
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "users")
 @Data
@@ -18,35 +16,38 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // PK, 자동 생성
+    private Long userId;
 
     @Column(nullable = false, unique = true)
-    private String email; // 이메일 (로그인 ID)
+    private String email;
 
     @Column(nullable = false)
-    private String password; // 비밀번호
+    private String password;
 
     @Column(nullable = false)
-    private String username; // 이름
+    private String username;
 
     @Column(nullable = false, unique = true)
-    private String nickname; // 닉네임
+    private String nickname;
 
-    /**
-     * 역할(role)
-     * - STUDENT : 학생
-     * - INSTRUCTOR : 강사
-     * - ADMIN : 시스템 관리자
-     */
+    // STUDENT / TEACHER / ADMIN
     @Column(nullable = false)
     private String role;
 
-    /**
-     * 상태(status)
-     * - PENDING : 승인 대기
-     * - ACTIVE : 승인 완료
-     * - REJECTED : 승인 거부
-     */
+    // ACTIVE / PENDING / INACTIVE
     @Column(nullable = false)
     private String status;
+
+    // 학생 → 수강중인 BootcampClass
+    @ManyToMany
+    @JoinTable(
+            name = "user_bootcamp_classes",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "bootcamp_class_id")
+    )
+    private List<BootcampClass> enrolledClasses = new ArrayList<>();
+
+    // 강사 → 담당 BootcampClass
+    @OneToMany(mappedBy = "teacher")
+    private List<BootcampClass> teachingClasses = new ArrayList<>();
 }

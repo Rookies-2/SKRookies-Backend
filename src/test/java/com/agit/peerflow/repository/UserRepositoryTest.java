@@ -1,7 +1,6 @@
 package com.agit.peerflow.repository;
 
 import com.agit.peerflow.entity.User;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -9,7 +8,6 @@ import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -24,15 +22,19 @@ class UserRepositoryTest {
      */
     @Test
     @Transactional
-    @Rollback(false) // DB에 실제 저장
+    @Rollback(false)
     void testRegisterUser() {
+        long timestamp = System.currentTimeMillis();
+        String uniqueEmail = "student" + timestamp + "@example.com";
+        String uniqueNickname = "hong" + timestamp;  // 닉네임도 유니크하게
+
         User user = User.builder()
-                .email("student1@example.com")
+                .email(uniqueEmail)
                 .password("password123")
                 .username("홍길동")
-                .nickname("hong123")
+                .nickname(uniqueNickname)
                 .role("STUDENT")
-                .status("PENDING") // 가입 시 기본 승인 대기
+                .status("PENDING")
                 .build();
 
         User savedUser = userRepository.save(user);
@@ -41,13 +43,27 @@ class UserRepositoryTest {
         assertThat(savedUser.getStatus()).isEqualTo("PENDING");
     }
 
+
+
     /**
      * 승인 대기 사용자 조회 테스트
      */
     @Test
+    @Transactional
     void testFindPendingUsers() {
+        // 테스트용 사용자 등록
+        User user = User.builder()
+                .email("pendinguser@example.com")
+                .password("1234")
+                .username("대기자")
+                .nickname("pending123")
+                .role("STUDENT")
+                .status("PENDING")
+                .build();
+        userRepository.save(user);
+
         List<User> pendingUsers = userRepository.findByStatus("PENDING");
-        assertThat(pendingUsers).isNotEmpty(); // 하나 이상 존재해야 함
+        assertThat(pendingUsers).isNotEmpty();
         pendingUsers.forEach(u -> assertThat(u.getStatus()).isEqualTo("PENDING"));
     }
 
@@ -56,16 +72,24 @@ class UserRepositoryTest {
      */
     @Test
     @Transactional
-    @Rollback(false)
     void testApproveUser() {
-        // 예시: 이메일로 사용자 조회
-        Optional<User> userOpt = userRepository.findById(1L);
-        userOpt.ifPresent(u -> {
-            u.setStatus("ACTIVE");
-            userRepository.save(u);
-        });
+        // 테스트용 사용자 생성
+        User user = User.builder()
+                .email("approve@example.com")
+                .password("1234")
+                .username("승인대상")
+                .nickname("approve123")
+                .role("STUDENT")
+                .status("PENDING")
+                .build();
+        User savedUser = userRepository.save(user);
 
-        User approvedUser = userRepository.findById(1L).orElseThrow();
+        // 승인 처리
+        savedUser.setStatus("ACTIVE");
+        userRepository.save(savedUser);
+
+        // 검증
+        User approvedUser = userRepository.findById(savedUser.getUserId()).orElseThrow();
         assertThat(approvedUser.getStatus()).isEqualTo("ACTIVE");
     }
 
@@ -74,15 +98,24 @@ class UserRepositoryTest {
      */
     @Test
     @Transactional
-    @Rollback(false)
     void testRejectUser() {
-        Optional<User> userOpt = userRepository.findById(2L);
-        userOpt.ifPresent(u -> {
-            u.setStatus("REJECTED");
-            userRepository.save(u);
-        });
+        // 테스트용 사용자 생성
+        User user = User.builder()
+                .email("reject@example.com")
+                .password("1234")
+                .username("거부대상")
+                .nickname("reject123")
+                .role("STUDENT")
+                .status("PENDING")
+                .build();
+        User savedUser = userRepository.save(user);
 
-        User rejectedUser = userRepository.findById(2L).orElseThrow();
+        // 거부 처리
+        savedUser.setStatus("REJECTED");
+        userRepository.save(savedUser);
+
+        // 검증
+        User rejectedUser = userRepository.findById(savedUser.getUserId()).orElseThrow();
         assertThat(rejectedUser.getStatus()).isEqualTo("REJECTED");
     }
 
@@ -90,9 +123,11 @@ class UserRepositoryTest {
      * 존재하지 않는 사용자 조회 예외 테스트
      */
     @Test
-    @Disabled
     void testNotFoundUser() {
-        User notFoundUser = userRepository.findById(999L)
-                .orElseThrow(() -> new RuntimeException("User Not Found"));
+        // 존재하지 않는 ID로 조회 시 RuntimeException 발생
+        org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class, () -> {
+            userRepository.findById(9999L)
+                    .orElseThrow(() -> new RuntimeException("User Not Found"));
+        });
     }
 }
