@@ -1,6 +1,7 @@
 package com.agit.peerflow.controller;
 
 import com.agit.peerflow.entity.User;
+import com.agit.peerflow.repository.UserRepository;
 import com.agit.peerflow.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,15 +19,24 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
-
+    private  final UserRepository userRepository;
     /**
      * 회원가입 요청
      * - status = PENDING
      */
     @PostMapping("/register")
     public ResponseEntity<User> registerUser(@RequestBody User user) {
-        User registeredUser = userService.registerUser(user);
-        return ResponseEntity.ok(registeredUser);
+        // 이메일, 닉네임 유니크 체크 (간단하게)
+        if (userRepository.existsByEmail(user.getEmail())) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        if (userRepository.existsByNickname(user.getNickname())) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        User savedUser = userRepository.save(user);
+        return ResponseEntity.ok(savedUser);
     }
 
     /**

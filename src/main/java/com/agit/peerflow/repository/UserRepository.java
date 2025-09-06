@@ -6,10 +6,18 @@ import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
-    //이메일로 검색
+    // 이메일로 검색
     Optional<User> findByEmail(String email);
-    //사용자 승인상태
+
+    // 사용자 승인상태
     List<User> findByStatus(String status);
-    //사용자역할로 검색
+
+    // 사용자 역할로 검색
     List<User> findByRole(String role);
+
+    // 이메일 존재 여부 확인
+    boolean existsByEmail(String email);
+
+    // 닉네임 존재 여부 확인
+    boolean existsByNickname(String nickname);
 }
