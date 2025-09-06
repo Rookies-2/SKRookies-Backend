@@ -57,6 +57,7 @@ public class UserService {
      * 전체 사용자 조회 (관리자용)
      */
     public List<User> getAllUsers() {
+
         return userRepository.findAll();
     }
 }
