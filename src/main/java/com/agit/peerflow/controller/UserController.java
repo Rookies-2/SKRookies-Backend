@@ -7,15 +7,12 @@ import com.agit.peerflow.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * User 관련 API Controller
- * - 회원가입, 승인, 거부, 조회
- */
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
@@ -26,23 +23,19 @@ public class UserController {
 
     /**
      * 회원가입 요청
-     * - status = PENDING
      */
     @PostMapping("/register")
     public ResponseEntity<UserDTO.Response> registerUser(@Valid @RequestBody UserDTO.Request request) {
-        System.out.println("회원가입 요청 DTO: " + request);
-
         if (userRepository.existsByEmail(request.getEmail())) {
             return ResponseEntity.badRequest().build();
         }
-
         if (userRepository.existsByNickname(request.getNickname())) {
             return ResponseEntity.badRequest().build();
         }
 
         User user = User.builder()
                 .email(request.getEmail())
-                .password(request.getPassword())
+                .password("{noop}" + request.getPassword()) // 보안 적용 전: 단순 저장
                 .username(request.getUsername())
                 .nickname(request.getNickname())
                 .role(request.getRole())
@@ -51,8 +44,6 @@ public class UserController {
 
         User savedUser = userRepository.save(user);
 
-        System.out.println("저장된 User: " + savedUser);
-
         return ResponseEntity.ok(UserDTO.Response.fromEntity(savedUser));
     }
 
@@ -60,6 +51,7 @@ public class UserController {
      * 승인 대기 사용자 조회
      */
     @GetMapping("/pending")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<UserDTO.Response>> getPendingUsers() {
         List<UserDTO.Response> pendingUsers = userService.getPendingUsers()
                 .stream()
@@ -72,6 +64,7 @@ public class UserController {
      * 회원 승인
      */
     @PutMapping("/approve/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserDTO.Response> approveUser(@PathVariable Long id) {
         return userService.approveUser(id)
                 .map(user -> ResponseEntity.ok(UserDTO.Response.fromEntity(user)))
@@ -82,6 +75,7 @@ public class UserController {
      * 회원 거부
      */
     @PutMapping("/reject/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserDTO.Response> rejectUser(@PathVariable Long id) {
         return userService.rejectUser(id)
                 .map(user -> ResponseEntity.ok(UserDTO.Response.fromEntity(user)))
@@ -89,9 +83,10 @@ public class UserController {
     }
 
     /**
-     * 전체 사용자 조회 (관리자용)
+     * 전체 사용자 조회 (관리자 전용)
      */
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<UserDTO.Response>> getAllUsers() {
         List<UserDTO.Response> allUsers = userService.getAllUsers()
                 .stream()
