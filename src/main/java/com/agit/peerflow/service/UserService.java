@@ -25,7 +25,7 @@ public class UserService {
     @Transactional
     public User signupUser(UserDTO.Request request) {
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new DuplicateResourceException("이미 사용 중인 이메일입니다.");
+            throw new BusinessException(ErrorCode.RESOURCE_DUPLICATE, "User", "email", request.getEmail());
         }
 
         User user = User.builder()
@@ -42,14 +42,14 @@ public class UserService {
     // 본인 정보 조회 (이메일)
     public User getUserByEmail(String email) {
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException(email));
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "User", "email", email));
     }
 
     // 본인 정보 수정 (이메일)
     @Transactional
     public User updateUserByEmail(String email, UserDTO.Request request) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException(email));
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "User", "email", email));
 
         user.setUsername(request.getUsername());
         user.setNickname(request.getNickname());
@@ -65,7 +65,7 @@ public class UserService {
     @Transactional
     public User updateUserById(Long id, UserDTO.Request request) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException(id));
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "User", "id", id));
 
         user.setUsername(request.getUsername());
         user.setNickname(request.getNickname());
@@ -80,7 +80,7 @@ public class UserService {
     @Transactional
     public void deleteUserByEmail(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException(email));
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "User", "email", email));
         userRepository.delete(user);
     }
 
@@ -94,20 +94,21 @@ public class UserService {
     @Transactional
     public void deleteUserById(Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException(id));
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "User", "id", id));
         userRepository.delete(user);
     }
 
     // 비밀번호 변경 (본인 확인 필요)
+    @Transactional
     public User changePassword(String email, String oldPassword, String newPassword) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException(email));
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "User", "email", email));
 
         if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
-            throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다.");
+            throw new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "Password", "current password", "불일치");
         }
 
         user.setPassword(passwordEncoder.encode(newPassword));
-        userRepository.save(user);
+        return userRepository.save(user);
     }
 }
