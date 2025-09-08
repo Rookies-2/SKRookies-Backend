@@ -5,9 +5,9 @@ import com.agit.peerflow.domain.entity.ChatRoom;
 import com.agit.peerflow.domain.entity.Message;
 import com.agit.peerflow.domain.entity.User;
 import com.agit.peerflow.dto.message.ChatMessageDTO;
-import com.agit.peerflow.dto.chatroom.ChatRoomResponse;
-import com.agit.peerflow.dto.chatroom.CreateRoomRequest;
-import com.agit.peerflow.dto.user.UserResponse;
+import com.agit.peerflow.dto.chatroom.ChatRoomResponseDTO;
+import com.agit.peerflow.dto.chatroom.CreateRoomRequestDTO;
+import com.agit.peerflow.dto.user.UserResponseDTO;
 import com.agit.peerflow.service.ChatParticipantService;
 import com.agit.peerflow.service.ChatroomService;
 import com.agit.peerflow.service.MessageService;
@@ -21,7 +21,7 @@ import java.security.Principal;
 import java.util.List;
 
 /**
- * @author    Do
+ * @author    백두현
  * @version   1.0.0
  * @since     2025-09-08
  * @description
@@ -40,9 +40,9 @@ public class ChatRoomController {
 
     // 채팅방 생성
     @PostMapping
-    public ResponseEntity<ChatRoomResponse> createRoom(@RequestBody @Valid CreateRoomRequest request) {
+    public ResponseEntity<ChatRoomResponseDTO> createRoom(@RequestBody @Valid CreateRoomRequestDTO request) {
         ChatRoom room = chatroomService.createRoom(request.roomName(), request.type());
-        return ResponseEntity.ok(ChatRoomResponse.from(room));
+        return ResponseEntity.ok(ChatRoomResponseDTO.from(room));
     }
 
     // 채팅방 참여
@@ -65,11 +65,11 @@ public class ChatRoomController {
 
     // 참여자 목록 조회
     @GetMapping("/{roomId}/participants")
-    public ResponseEntity<List<UserResponse>> getParticipants(@PathVariable Long roomId) {
+    public ResponseEntity<List<UserResponseDTO>> getParticipants(@PathVariable Long roomId) {
         ChatRoom room = chatroomService.getRoom(roomId);
         List<ChatParticipant> participants = chatParticipantService.getParticipants(room);
-        List<UserResponse> response = participants.stream()
-                .map(p -> UserResponse.from(p.getUser()))
+        List<UserResponseDTO> response = participants.stream()
+                .map(p -> UserResponseDTO.from(p.getUser()))
                 .toList();
         return ResponseEntity.ok(response);
     }

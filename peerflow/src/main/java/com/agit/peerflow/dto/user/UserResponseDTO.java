@@ -4,15 +4,15 @@ import com.agit.peerflow.domain.entity.User;
 import com.agit.peerflow.domain.enums.UserRole;
 import com.agit.peerflow.domain.enums.UserStatus;
 
-public record UserResponse(
+public record UserResponseDTO(
         Long id,
         String username,
         String nickname,
         UserRole role,
         UserStatus status
 ) {
-    public static UserResponse from(User user) {
-        return new UserResponse(
+    public static UserResponseDTO from(User user) {
+        return new UserResponseDTO(
                 user.getId(),
                 user.getUsername(),
                 user.getNickname(),

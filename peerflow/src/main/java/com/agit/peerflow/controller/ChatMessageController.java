@@ -19,7 +19,7 @@ import org.springframework.stereotype.Controller;
 import java.security.Principal;
 
 /**
- * @author    Do
+ * @author    백두현
  * @version   1.0.0
  * @since     2025-09-08
  * @description
@@ -37,15 +37,16 @@ public class ChatMessageController {
     public void handleMessage(@DestinationVariable Long roomId,
                               @Payload @Valid SendMessageRequestDTO dto,
                               Principal principal) {
-        // principal이 null이면 게스트 유저로 처리
-        String username = (principal != null) ? principal.getName() : "guest";
-
-        // 게스트 계정이 없으면 생성
-        User sender = userService.getByUsername(username);
-        if (sender == null && "guest".equals(username)) {
-            sender = userService.register("guest", "guest123", "게스트", null);
+        if (principal == null) {
+            // 인증되지 않은 사용자는 메시지 전송 불가
+            throw new IllegalStateException("인증된 사용자만 메시지를 전송할 수 있습니다.");
         }
 
+        String username = principal.getName();
+        User sender = userService.getByUsername(username);
+        if (sender == null) {
+            throw new IllegalStateException("사용자 정보를 찾을 수 없습니다: " + username);
+        }
         ChatRoom room = chatroomService.getRoom(roomId);
 
         Message saved = messageService.sendMessage(room, sender, dto.content(), MessageType.TEXT);
