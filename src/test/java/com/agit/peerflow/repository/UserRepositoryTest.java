@@ -1,6 +1,6 @@
 package com.agit.peerflow.repository;
 
-import com.agit.peerflow.entity.User;
+import com.agit.peerflow.domain.entity.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
