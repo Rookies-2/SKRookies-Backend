@@ -1,63 +1,80 @@
 package com.agit.peerflow.service;
 
-import com.agit.peerflow.entity.User;
+import com.agit.peerflow.domain.entity.User;
+import com.agit.peerflow.domain.enums.UserStatus;
+import com.agit.peerflow.dto.UserDTO;
 import com.agit.peerflow.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 
-/**
- * User 관련 비즈니스 로직 처리
- */
 @Service
 @RequiredArgsConstructor
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    /**
-     * 회원가입 요청 처리
-     * - 가입 시 상태를 PENDING으로 설정
-     */
-    public User registerUser(User user) {
-        user.setStatus("PENDING"); // 기본 승인 대기
+    // 회원가입
+    public User signupUser(UserDTO.Request request) {
+        User user = User.builder()
+                .email(request.getEmail())
+                .username(request.getUsername())
+                .nickname(request.getNickname())
+                .password(passwordEncoder.encode(request.getPassword())) // 암호화
+                .role(request.getRole()) // STUDENT, TEACHER 등
+                .status(UserStatus.PENDING)
+                .build();
         return userRepository.save(user);
     }
 
-    /**
-     * 승인 대기 사용자 목록 조회
-     */
-    public List<User> getPendingUsers() {
-        return userRepository.findByStatus("PENDING");
+    // 본인 정보 조회 (이메일)
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
-    /**
-     * 사용자 승인 처리
-     */
-    public Optional<User> approveUser(Long id) {
-        Optional<User> user = userRepository.findById(id);
-        user.ifPresent(u -> u.setStatus("ACTIVE")); // 상태 ACTIVE로 변경
-        user.ifPresent(userRepository::save); // DB 저장
-        return user;
+    // 본인 정보 수정 (이메일)
+    public User updateUserByEmail(String email, UserDTO.Request request) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        user.setUsername(request.getUsername());
+        user.setNickname(request.getNickname());
+        user.setPassword(passwordEncoder.encode(request.getPassword())); // 암호화
+        return userRepository.save(user);
     }
 
-    /**
-     * 사용자 승인 거부 처리
-     */
-    public Optional<User> rejectUser(Long id) {
-        Optional<User> user = userRepository.findById(id);
-        user.ifPresent(u -> u.setStatus("REJECTED")); // 상태 REJECTED로 변경
-        user.ifPresent(userRepository::save);
-        return user;
+    // 사용자 수정 (id)
+    public User updateUserById(Long id, UserDTO.Request request) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        user.setUsername(request.getUsername());
+        user.setNickname(request.getNickname());
+        user.setPassword(passwordEncoder.encode(request.getPassword())); // 암호화
+        return userRepository.save(user);
     }
 
-    /**
-     * 전체 사용자 조회 (관리자용)
-     */
-    public List<User> getAllUsers() {
+    // 본인 계정 삭제 (이메일)
+    public void deleteUserByEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        userRepository.delete(user);
+    }
 
-        return userRepository.findAll();
+    // id로 사용자 조회
+    public User getUserById(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+    // id로 사용자 삭제
+    public void deleteUserById(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        userRepository.delete(user);
     }
 }

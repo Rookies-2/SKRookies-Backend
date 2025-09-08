@@ -1,17 +1,13 @@
 package com.agit.peerflow.controller;
 
-import com.agit.peerflow.entity.User;
-import com.agit.peerflow.entity.dto.UserDTO;
+import com.agit.peerflow.domain.entity.User;
+import com.agit.peerflow.dto.UserDTO;
 import com.agit.peerflow.repository.UserRepository;
 import com.agit.peerflow.service.UserService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/users")
@@ -21,79 +17,38 @@ public class UserController {
     private final UserService userService;
     private final UserRepository userRepository;
 
-    /**
-     * 회원가입 요청
-     */
-    @PostMapping("/register")
-    public ResponseEntity<UserDTO.Response> registerUser(@Valid @RequestBody UserDTO.Request request) {
-        if (userRepository.existsByEmail(request.getEmail())) {
-            return ResponseEntity.badRequest().build();
-        }
-        if (userRepository.existsByNickname(request.getNickname())) {
-            return ResponseEntity.badRequest().build();
-        }
-
-        User user = User.builder()
-                .email(request.getEmail())
-                .password("{noop}" + request.getPassword()) // 보안 적용 전: 단순 저장
-                .username(request.getUsername())
-                .nickname(request.getNickname())
-                .role(request.getRole())
-                .status("PENDING")
-                .build();
-
-        User savedUser = userRepository.save(user);
-
+    // 회원가입 (학생/선생님)
+    @PostMapping("/signup")
+    public ResponseEntity<UserDTO.Response> signupUser(@RequestBody UserDTO.Request request) {
+        User savedUser = userService.signupUser(request);
         return ResponseEntity.ok(UserDTO.Response.fromEntity(savedUser));
     }
 
-    /**
-     * 승인 대기 사용자 조회
-     */
-    @GetMapping("/pending")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<UserDTO.Response>> getPendingUsers() {
-        List<UserDTO.Response> pendingUsers = userService.getPendingUsers()
-                .stream()
-                .map(UserDTO.Response::fromEntity)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(pendingUsers);
+    // 본인 정보 조회
+    @GetMapping("/me")
+    public ResponseEntity<UserDTO.Response> getMyInfo(@AuthenticationPrincipal org.springframework.security.core.userdetails.User userDetails) {
+        User user = userService.getUserByEmail(userDetails.getUsername()); // JWT에서 추출한 email
+        return ResponseEntity.ok(UserDTO.Response.fromEntity(user));
     }
 
-    /**
-     * 회원 승인
-     */
-    @PutMapping("/approve/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<UserDTO.Response> approveUser(@PathVariable Long id) {
-        return userService.approveUser(id)
-                .map(user -> ResponseEntity.ok(UserDTO.Response.fromEntity(user)))
-                .orElse(ResponseEntity.notFound().build());
+    // 본인 정보 수정
+    @PutMapping("/me")
+    public ResponseEntity<UserDTO.Response> updateMyInfo(
+            @AuthenticationPrincipal org.springframework.security.core.userdetails.User userDetails,
+            @RequestBody UserDTO.Request request) {
+
+        // JWT에서 추출한 이메일로 사용자 조회 후 수정
+        User updatedUser = userService.updateUserByEmail(userDetails.getUsername(), request);
+        return ResponseEntity.ok(UserDTO.Response.fromEntity(updatedUser));
     }
 
-    /**
-     * 회원 거부
-     */
-    @PutMapping("/reject/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<UserDTO.Response> rejectUser(@PathVariable Long id) {
-        return userService.rejectUser(id)
-                .map(user -> ResponseEntity.ok(UserDTO.Response.fromEntity(user)))
-                .orElse(ResponseEntity.notFound().build());
+    // 본인 계정 삭제
+    @DeleteMapping("/me")
+    public ResponseEntity<Void> deleteMyAccount(
+            @AuthenticationPrincipal org.springframework.security.core.userdetails.User userDetails) {
+
+        // JWT에서 추출한 이메일로 사용자 조회 후 삭제
+        userService.deleteUserByEmail(userDetails.getUsername());
+        return ResponseEntity.noContent().build();
     }
-
-    /**
-     * 전체 사용자 조회 (관리자 전용)
-     */
-    @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<UserDTO.Response>> getAllUsers() {
-        List<UserDTO.Response> allUsers = userService.getAllUsers()
-                .stream()
-                .map(UserDTO.Response::fromEntity)
-                .toList();
-
-        return ResponseEntity.ok(allUsers);
-    }
-
 }
