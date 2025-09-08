@@ -31,3 +31,11 @@ build/
 
 ### VS Code ###
 .vscode/
+
+peerflow/settings.gradle
+*.gitattributes
+*.gradle
+peerflow/gradlew
+*.bat
+peerflow/src/test
+peerflow/gradle
