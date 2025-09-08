@@ -1,5 +1,6 @@
 package com.agit.peerflow.config;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
@@ -21,12 +22,6 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @Configuration
 @EnableWebSocketMessageBroker
 public class WebSocketStompConfig implements WebSocketMessageBrokerConfigurer {
-    private final TaskScheduler messageBrokerTaskScheduler;
-
-    public WebSocketStompConfig(TaskScheduler messageBrokerTaskScheduler) {
-        this.messageBrokerTaskScheduler = messageBrokerTaskScheduler;
-    }
-
     // 웹소켓 클라이언트들이 서버에 접속할 수 있는 엔드포인트 설정
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
@@ -43,7 +38,7 @@ public class WebSocketStompConfig implements WebSocketMessageBrokerConfigurer {
         // /queue - 1:1 messaging
         registry.enableSimpleBroker("/topic", "/queue")
                 .setHeartbeatValue(new long[]{10000, 10000})
-                .setTaskScheduler(messageBrokerTaskScheduler); // 서버 <-> 클라이언트 간 heartbeat
+                .setTaskScheduler(myMessageBrokerTaskScheduler()); // 서버 <-> 클라이언트 간 heartbeat
         // /app - @MessageMapping 메서드로 라우팅, 클라이언트가 메시지 발행
         registry.setApplicationDestinationPrefixes("/app");
         // /user - 유저 별
@@ -51,7 +46,7 @@ public class WebSocketStompConfig implements WebSocketMessageBrokerConfigurer {
     }
 
     @Bean
-    public TaskScheduler messageBrokerTaskScheduler() {
+    public TaskScheduler myMessageBrokerTaskScheduler() {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
         scheduler.setPoolSize(1);
         scheduler.setThreadNamePrefix("heartbeat-thread-");
