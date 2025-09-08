@@ -108,6 +108,11 @@ public class UserService {
             throw new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "Password", "current password", "불일치");
         }
 
+        // 현재 비밀번호와 새 비밀번호 동일 여부 체크
+        if (passwordEncoder.matches(newPassword, user.getPassword())) {
+            throw new BusinessException(ErrorCode.PASSWORD_SAME_AS_CURRENT);
+        }
+
         user.setPassword(passwordEncoder.encode(newPassword));
         return userRepository.save(user);
     }
