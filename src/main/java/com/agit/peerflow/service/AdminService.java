@@ -2,14 +2,16 @@ package com.agit.peerflow.service;
 
 import com.agit.peerflow.domain.entity.User;
 import com.agit.peerflow.domain.enums.UserStatus;
+import com.agit.peerflow.exception.BusinessException;
+import com.agit.peerflow.exception.ErrorCode;
 import com.agit.peerflow.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -17,13 +19,13 @@ import java.util.Optional;
 public class AdminService {
 
     private final UserRepository userRepository;
-
+    private final PasswordEncoder passwordEncoder;
 
     // 사용자 승인
     @Transactional
     public User approveUserById(Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException(id));
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "User", "id", id));
         user.setStatus(UserStatus.ACTIVE);
         user.setApprovedAt(LocalDateTime.now());
         // 후처리 (알림, 히스토리 기록)
@@ -37,7 +39,7 @@ public class AdminService {
     @Transactional
     public User rejectUser(Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException(id));
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "User", "id", id));
 
         user.setStatus(UserStatus.REJECTED);
         // 후처리 (알림, 히스토리 기록)
@@ -59,7 +61,7 @@ public class AdminService {
     // 관리자용 사용자 비밀번호 초기화 (본인 인증 없음, 사용자 email 기준)
     public User resetPasswordByEmail(String email, String newPassword) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException(email));
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "User", "email", email));
 
         user.setPassword(passwordEncoder.encode(newPassword));
         return userRepository.save(user);
