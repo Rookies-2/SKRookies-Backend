@@ -12,14 +12,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/admin")
+@RequestMapping("/api/admin/users")
 @RequiredArgsConstructor
 public class AdminController {
 
     private final AdminService adminService;
     private final UserService userService;
     // 모든 사용자 조회
-    @GetMapping("/users")
+    @GetMapping
     public ResponseEntity<List<UserDTO.Response>> getAllUsers() {
         List<UserDTO.Response> users = adminService.getAllUsers()
                 .stream()
@@ -29,7 +29,7 @@ public class AdminController {
     }
 
     // 사용자 승인 대기 조회
-    @GetMapping("/users/pending")
+    @GetMapping("/pending")
     public ResponseEntity<List<UserDTO.Response>> getPendingUsers() {
         List<UserDTO.Response> pendingUsers = adminService.getPendingUsers()
                 .stream()
@@ -39,21 +39,28 @@ public class AdminController {
     }
 
     // 사용자 승인 (PENDING -> ACTIVE)
-    @PutMapping("/users/{id}/approve")
+    @PutMapping("/{id}/approve")
     public ResponseEntity<UserDTO.Response> approveUser(@PathVariable Long id) {
         User approvedUser = adminService.approveUserById(id);
         return ResponseEntity.ok(UserDTO.Response.fromEntity(approvedUser));
     }
 
     // 사용자 수정
-    @PutMapping("/users/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<UserDTO.Response> updateUser(@PathVariable Long id, @RequestBody UserDTO.Request request) {
         User updatedUser = userService.updateUserById(id, request);
         return ResponseEntity.ok(UserDTO.Response.fromEntity(updatedUser));
     }
+    // 관리자 권한으로 비밀번호 초기화
+    @PostMapping("/{email}/reset-password")
+    public ResponseEntity<User> resetPassword(
+            @PathVariable String email,
+            @RequestParam String newPassword) {
+        return ResponseEntity.ok(adminService.resetPasswordByEmail(email, newPassword));
+    }
 
     // 사용자 삭제
-    @DeleteMapping("/users/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         userService.deleteUserById(id);
         return ResponseEntity.noContent().build();
