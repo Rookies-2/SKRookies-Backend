@@ -25,7 +25,7 @@ public class UserServiceImpl implements UserService {
         if (userRepository.existsByUsername(requestDTO.getUsername())) {
             throw new BusinessException(ErrorCode.RESOURCE_DUPLICATE, "User", "username", requestDTO.getUsername());
         }
-        if (userRepository.existsByNickname(requestDTO.getNickname())) {
+        if (userRepository.existsByNickName(requestDTO.getNickname())) {
             throw new BusinessException(ErrorCode.RESOURCE_DUPLICATE, "User", "nickname", requestDTO.getNickname());
         }
         if (userRepository.existsByEmail(requestDTO.getEmail())) {
@@ -44,7 +44,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getMyInfo(String username) {
-        return userRepository.findByUsername(username)
+        return userRepository.findByUserName(username)
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "User", "username", username));
     }
 

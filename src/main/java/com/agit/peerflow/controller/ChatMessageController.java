@@ -43,11 +43,11 @@ public class ChatMessageController {
         }
 
         String username = principal.getName();
-        User sender = userService.getByUsername(username);
+        User sender = userService.getMyInfo(username);
         if (sender == null) {
             throw new IllegalStateException("사용자 정보를 찾을 수 없습니다: " + username);
         }
-        ChatRoom room = chatroomService.getRoom(roomId);
+        ChatRoom room = chatroomService.getRoomById(roomId);
 
         Message saved = messageService.sendMessage(room, sender, dto.content(), MessageType.TEXT);
         ChatMessageDTO response = ChatMessageDTO.from(saved);

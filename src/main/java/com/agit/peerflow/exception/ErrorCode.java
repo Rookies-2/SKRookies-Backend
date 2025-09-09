@@ -7,9 +7,12 @@ import org.springframework.http.HttpStatus;
 @Getter
 @RequiredArgsConstructor
 public enum ErrorCode {
-    // Common errors - 공통으로 사용할 수 있는 일반적인 에러 코드
-    RESOURCE_NOT_FOUND("%s not found with %s: %s", HttpStatus.NOT_FOUND),
-    RESOURCE_DUPLICATE("%s already exists with %s: %s", HttpStatus.CONFLICT),
+    // Common Errors
+    INVALID_INPUT_VALUE("입력값이 올바르지 않습니다.", HttpStatus.BAD_REQUEST),
+    RESOURCE_NOT_FOUND("%s(을)를 찾을 수 없습니다. (%s: %s)", HttpStatus.NOT_FOUND),
+    RESOURCE_DUPLICATE("이미 존재하는 %s입니다. (%s: %s)", HttpStatus.CONFLICT),
+
+    // User Errors
     PASSWORD_SAME_AS_CURRENT("새 비밀번호는 현재 비밀번호와 동일할 수 없습니다.", HttpStatus.BAD_REQUEST);
 
     private final String messageTemplate;

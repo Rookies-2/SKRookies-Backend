@@ -81,7 +81,7 @@ public class SecurityConfig {
     public UserDetailsService userDetailsService() {
         return username -> {
             // username은 로그인 시 입력한 값 (여기서는 username 필드 기준)
-            User user = userService.getByUsername(username);
+            User user = userService.getMyInfo(username);
             if (user == null) {
                 throw new UsernameNotFoundException("사용자를 찾을 수 없습니다: " + username);
             }
