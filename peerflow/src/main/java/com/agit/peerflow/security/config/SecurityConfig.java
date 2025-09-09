@@ -1,0 +1,96 @@
+package com.agit.peerflow.security.config;
+
+import com.agit.peerflow.domain.entity.User;
+import com.agit.peerflow.security.jwt.JwtAuthenticationFilter;
+import com.agit.peerflow.security.service.UserDetailsServiceImpl;
+import com.agit.peerflow.service.UserService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+/**
+ * @author 백두현
+ * @version   1.0.0
+ * @since     2025-09-08
+ * @description
+ * 세션관리방식: JWT 인증에 맞게 비활성화
+ * formLogin/logout: JWT 기반은 프론트 단에서 처리.
+ * TODO 01. 인증 실패 시 401 Unauthorized 에러를 표출하고 프론트가 로그인 처리를 담당하게 하기 (logout, 인증 실패)
+ */
+@Configuration
+@EnableWebSecurity
+public class SecurityConfig {
+
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final UserService userService;
+
+    @Autowired
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter, UserService userService) {
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.userService = userService;
+    }
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http, UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) throws Exception {
+        http.httpBasic(AbstractHttpConfigurer::disable) // basic authentication filter 비활성화
+                .csrf(AbstractHttpConfigurer::disable) // csrf 비활성화
+                // 세션을 사용하지 않는 Stateless 방식으로 설정
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/users/signup", "/api/auth/login", "/stomp/**").permitAll()
+                        .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll() // 정적 자원에 대해서 인증을 하지 않도록 허가
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/users/**").authenticated()
+                        .anyRequest().authenticated()
+                )
+                .formLogin(AbstractHttpConfigurer::disable)
+                .logout(AbstractHttpConfigurer::disable)
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                // spring security6 부턴 람다 스타일로 authenticationManager 설정
+                .authenticationProvider(authenticationProvider(userDetailsService, passwordEncoder));
+
+        return http.build();
+    }
+
+    // Spring security6 부터는 DaoAuthenticationProvider#setUserDetailsService(...) 메서드가 Deprecated되어 생성자에서 바로 주입받는 방식으로 바뀜.
+    @Bean
+    public DaoAuthenticationProvider authenticationProvider(UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService);
+        authProvider.setPasswordEncoder(passwordEncoder);
+        return authProvider;
+    }
+
+    /*
+        UserDetailsService 구현
+     */
+    @Bean
+    public UserDetailsService userDetailsService() {
+        return username -> {
+            // username은 로그인 시 입력한 값 (여기서는 username 필드 기준)
+            User user = userService.getByUsername(username);
+            if (user == null) {
+                throw new UsernameNotFoundException("사용자를 찾을 수 없습니다: " + username);
+            }
+
+            return org.springframework.security.core.userdetails.User
+                    .withUsername(user.getUsername())
+                    .password(user.getPassword()) // 암호화된 비밀번호
+                    .roles(user.getRole().name()) // Enum → String
+                    .build();
+        };
+    }
+}
