@@ -51,4 +51,15 @@ public class UserController {
         userService.deleteUserByEmail(userDetails.getUsername());
         return ResponseEntity.noContent().build();
     }
+
+    // 본인 비밀번호 변경 (현재 비밀번호 확인 후)
+    @PostMapping("/me/change-password")
+    public ResponseEntity<UserDTO.Response> changePassword(
+            @AuthenticationPrincipal org.springframework.security.core.userdetails.User userDetails,
+            @RequestParam String currentPassword,
+            @RequestParam String newPassword) {
+
+        User updatedUser = userService.changePassword(userDetails.getUsername(), currentPassword, newPassword);
+        return ResponseEntity.ok(UserDTO.Response.fromEntity(updatedUser));
+    }
 }

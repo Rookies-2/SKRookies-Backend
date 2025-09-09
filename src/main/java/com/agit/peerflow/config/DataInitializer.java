@@ -15,14 +15,14 @@ public class DataInitializer {
     CommandLineRunner init(UserRepository userRepository) {
         return args -> {
             if (!userRepository.existsByEmail("admin@example.com")) {
-                User admin = User.createUser(
-                        "관리자",
-                        "{noop}admin123",
-                        "admin",
-                        "example@naver.com",
-                        UserRole.ADMIN,
-                        UserStatus.ACTIVE
-                );
+                User admin = User.builder()
+                        .email("admin@example.com")
+                        .userName("관리자")
+                        .password("{noop}admin123") // NoOpPasswordEncoder
+                        .nickName("admin")
+                        .role(UserRole.ADMIN)       // Enum 사용
+                        .status(UserStatus.ACTIVE)  // Enum 사용
+                        .build();
                 userRepository.save(admin);
                 System.out.println("✅ Admin account created: admin@example.com / admin123");
             }
