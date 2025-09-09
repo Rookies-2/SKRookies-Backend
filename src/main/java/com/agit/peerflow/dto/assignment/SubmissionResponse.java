@@ -1,6 +1,6 @@
 package com.agit.peerflow.dto.assignment;
 
-import com.agit.peerflow.domain.Submission;
+import com.agit.peerflow.domain.entity.Submission;
 import com.agit.peerflow.domain.enums.AssignmentStatus;
 import lombok.Builder;
 import lombok.Getter;

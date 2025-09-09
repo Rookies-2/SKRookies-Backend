@@ -1,6 +1,6 @@
-package com.agit.peerflow.domain;
+package com.agit.peerflow.domain.entity;
 
-import com.agit.peerflow.domain.enums.NotificationType;
+import com.agit.peerflow.domain.enums.HistoryType;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -12,15 +12,15 @@ import java.time.LocalDateTime;
 
 /**
  * @author  김현근
- * @version 1.0
+ * @version 1.1
  * @since   2025-09-08
- * @description 사용자에게 전달될 알림(히스토리) 정보를 담는 엔티티
+ * @description 사용자 알림(히스토리) 정보를 담는 엔티티
  */
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
-public class Notification {
+public class History {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,41 +28,36 @@ public class Notification {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private User user; // 알림을 수신할 사용자
+    private User user;
 
     @Column(nullable = false)
-    private String content; // 알림 내용
+    private String content;
 
     @Column(nullable = false)
-    private String relatedUrl; // 클릭 시 이동할 URL
+    private String relatedUrl;
 
     @Column(nullable = false)
-    private boolean isRead = false; // 읽음 여부
+    private boolean isRead = false;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private NotificationType notificationType;
+    private HistoryType historyType;
 
     @CreatedDate
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    //== 생성 로직 ==//
-    private Notification(User user, String content, String relatedUrl, NotificationType notificationType) {
+    private History(User user, String content, String relatedUrl, HistoryType historyType) {
         this.user = user;
         this.content = content;
         this.relatedUrl = relatedUrl;
-        this.notificationType = notificationType;
+        this.historyType = historyType;
     }
 
-    /**
-     * 정적 팩토리 메소드
-     */
-    public static Notification createNotification(User user, String content, String relatedUrl, NotificationType notificationType) {
-        return new Notification(user, content, relatedUrl, notificationType);
+    public static History createHistory(User user, String content, String relatedUrl, HistoryType historyType) {
+        return new History(user, content, relatedUrl, historyType);
     }
 
-    //== 비즈니스 로직 ==//
     public void markAsRead() {
         this.isRead = true;
     }

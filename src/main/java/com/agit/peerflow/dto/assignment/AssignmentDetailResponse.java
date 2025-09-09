@@ -1,7 +1,7 @@
 package com.agit.peerflow.dto.assignment;
 
-import com.agit.peerflow.domain.Assignment;
-import com.agit.peerflow.domain.Submission;
+import com.agit.peerflow.domain.entity.Assignment;
+import com.agit.peerflow.domain.entity.Submission;
 import lombok.Builder;
 import lombok.Getter;
 

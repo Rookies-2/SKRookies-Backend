@@ -1,4 +1,4 @@
-package com.agit.peerflow.domain;
+package com.agit.peerflow.domain.entity;
 
 import com.agit.peerflow.domain.enums.AssignmentStatus;
 import jakarta.persistence.*;
@@ -12,9 +12,9 @@ import java.time.LocalDateTime;
 
 /**
  * @author  김현근
- * @version 1.2
+ * @version 1.4
  * @since   2025-09-08
- * @description 학생 제출물 정보를 담는 엔티티 클래스 (정적 팩토리 메소드 적용)
+ * @description 학생 제출물 엔티티 (텍스트 제출 필드 추가 및 fileUrl 선택사항으로 변경)
  */
 @Entity
 @Getter
@@ -34,7 +34,10 @@ public class Submission {
     @JoinColumn(name = "student_id", nullable = false)
     private User student;
 
-    @Column(nullable = false)
+    @Lob
+    private String textContent;
+
+    @Column(nullable = true)
     private String fileUrl;
 
     private String grade;
@@ -50,22 +53,21 @@ public class Submission {
     @Column(nullable = false, updatable = false)
     private LocalDateTime submittedAt;
 
-    //== 생성 로직 ==//
-    private Submission(Assignment assignment, User student, String fileUrl) {
+    private Submission(Assignment assignment, User student, String textContent, String fileUrl) {
+        if ((textContent == null || textContent.isBlank()) && fileUrl == null) {
+            throw new IllegalArgumentException("텍스트나 파일 중 하나는 반드시 제출해야 합니다.");
+        }
         this.assignment = assignment;
         this.student = student;
+        this.textContent = textContent;
         this.fileUrl = fileUrl;
         this.status = AssignmentStatus.SUBMITTED;
     }
 
-    /**
-     * 정적 팩토리 메소드
-     */
-    public static Submission createSubmission(Assignment assignment, User student, String fileUrl) {
-        return new Submission(assignment, student, fileUrl);
+    public static Submission createSubmission(Assignment assignment, User student, String textContent, String fileUrl) {
+        return new Submission(assignment, student, textContent, fileUrl);
     }
 
-    //== 비즈니스 로직 ==//
     public void grade(String grade, String feedback) {
         this.grade = grade;
         this.feedback = feedback;

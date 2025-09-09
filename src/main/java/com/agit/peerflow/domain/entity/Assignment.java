@@ -1,4 +1,4 @@
-package com.agit.peerflow.domain;
+package com.agit.peerflow.domain.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -12,9 +12,9 @@ import java.util.List;
 
 /**
  * @author  김현근
- * @version 1.2
+ * @version 1.3
  * @since   2025-09-08
- * @description 과제 정보를 담는 엔티티 클래스 (정적 팩토리 메소드 적용)
+ * @description 과제 정보를 담는 엔티티 클래스
  */
 @Entity
 @Getter
@@ -49,7 +49,6 @@ public class Assignment {
     @Column(name = "attachment_url")
     private List<String> attachmentUrls;
 
-    //== 생성 로직 ==//
     private Assignment(String title, String description, User creator, LocalDateTime dueDate, List<String> attachmentUrls) {
         this.title = title;
         this.description = description;
@@ -58,9 +57,6 @@ public class Assignment {
         this.attachmentUrls = attachmentUrls;
     }
 
-    /**
-     * 정적 팩토리 메소드
-     */
     public static Assignment createAssignment(String title, String description, User creator, LocalDateTime dueDate, List<String> attachmentUrls) {
         return new Assignment(title, description, creator, dueDate, attachmentUrls);
     }
