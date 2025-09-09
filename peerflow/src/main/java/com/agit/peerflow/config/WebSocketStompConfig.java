@@ -1,5 +1,6 @@
 package com.agit.peerflow.config;
 
+import com.agit.peerflow.security.component.JwtHandshakeInterceptor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,13 +22,17 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
  */
 @Configuration
 @EnableWebSocketMessageBroker
+@RequiredArgsConstructor
 public class WebSocketStompConfig implements WebSocketMessageBrokerConfigurer {
+    private final JwtHandshakeInterceptor jwtHandshakeInterceptor; // 채팅 시 사용자 princple 세팅 위한 인터셉터
+
     // 웹소켓 클라이언트들이 서버에 접속할 수 있는 엔드포인트 설정
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         // 연결 엔드포인트 => /stomp
         registry.addEndpoint("/stomp")
                 .setAllowedOriginPatterns("*")
+                .addInterceptors(jwtHandshakeInterceptor)
                 .withSockJS(); // 오래된 브라우저 호환을 위해서 필요.
     }
 

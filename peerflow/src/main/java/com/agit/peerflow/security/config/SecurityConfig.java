@@ -5,6 +5,7 @@ import com.agit.peerflow.security.jwt.JwtAuthenticationFilter;
 import com.agit.peerflow.security.service.UserDetailsServiceImpl;
 import com.agit.peerflow.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -37,6 +38,7 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final UserService userService;
 
+    @Autowired
     public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter, UserService userService) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.userService = userService;
@@ -49,7 +51,7 @@ public class SecurityConfig {
                 // 세션을 사용하지 않는 Stateless 방식으로 설정
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/users/signup", "/api/auth/login").permitAll()
+                        .requestMatchers("/api/users/signup", "/api/auth/login", "/stomp/**").permitAll()
                         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll() // 정적 자원에 대해서 인증을 하지 않도록 허가
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/users/**").authenticated()
