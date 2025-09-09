@@ -43,9 +43,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User getMyInfo(String username) {
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "User", "username", username));
+    public User getMyInfo(String email) { // username -> email로 변경
+        return userRepository.findByEmail(email) // findByUsername -> findByEmail로 변경
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "User", "email", email));
     }
 
     @Override

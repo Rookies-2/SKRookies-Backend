@@ -16,30 +16,30 @@ public class JwtTokenProvider {
     private final long validityInMilliseconds = 1000L * 60 * 60; // 1시간
 
     public JwtTokenProvider() {
-        // 원래는 환경변수나 yml에서 Base64 인코딩된 키를 불러와서 디코딩해야하는 데 키 값 하드코딩함.
         String base64Secret = "u8nFz9J3Q1y7m4aVt0pX9qL2s5Yh8BvCj3kR6nW0zPqU1xY2rT5vZ8mN1oQ4wE7";
         this.key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(base64Secret));
     }
 
-    // 토큰 생성
-    public String createToken(String username, Map<String, Object> extraClaims) {
+    // 토큰 생성 시, email을 subject로 설정
+    public String createToken(String email, Map<String, Object> extraClaims) {
+
         Date now = new Date();
         Date expiry = new Date(now.getTime() + validityInMilliseconds);
 
         Claims claims = Jwts.claims()
-                .subject(username) // setSubject → subject
-                .add(extraClaims)  // 추가 클레임
+                .subject(email) // <<-- 이 부분이 수정되었습니다.
+                .add(extraClaims)
                 .build();
 
         return Jwts.builder()
-                .claims(claims)    // setClaims → claims
-                .issuedAt(now)     // setIssuedAt → issuedAt
-                .expiration(expiry) // setExpiration → expiration
+                .claims(claims)
+                .issuedAt(now)
+                .expiration(expiry)
                 .signWith(key, Jwts.SIG.HS256)
                 .compact();
     }
 
-    // 토큰에서 username 추출
+    // 토큰에서 email 추출
     public String getUsernameFromToken(String token) {
         return Jwts.parser()
                 .verifyWith(key)

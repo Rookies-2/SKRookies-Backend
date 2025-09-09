@@ -24,9 +24,9 @@ import java.util.stream.Collectors;
 
 /**
  * @author  김현근
- * @version 1.6
+ * @version 1.7
  * @since   2025-09-09
- * @description 과제 관련 비즈니스 로직의 구현체 클래스
+ * @description 과제 관련 비즈니스 로직의 구현체 클래스 (Fetch Join 적용 최종본)
  */
 @Service
 @RequiredArgsConstructor
@@ -37,7 +37,7 @@ public class AssignmentServiceImpl implements AssignmentService {
     private final SubmissionRepository submissionRepository;
     private final UserRepository userRepository;
     private final HistoryService historyService;
-    // private final FileStorageService fileStorageService;
+    // private final FileStorageService fileStorageService; // 파일 기능 구현 시 주석 해제
 
     @Override
     @Transactional
@@ -84,7 +84,7 @@ public class AssignmentServiceImpl implements AssignmentService {
     @Override
     @Transactional
     public void updateAssignment(Long assignmentId, AssignmentUpdateRequestDTO request, User updater) {
-        Assignment assignment = assignmentRepository.findById(assignmentId)
+        Assignment assignment = assignmentRepository.findByIdWithCreator(assignmentId)
                 .orElseThrow(() -> new IllegalArgumentException("과제를 찾을 수 없습니다. ID: " + assignmentId));
 
         boolean isAdmin = updater.getRole().equals(UserRole.ADMIN);
@@ -113,7 +113,7 @@ public class AssignmentServiceImpl implements AssignmentService {
     @Override
     @Transactional
     public void gradeSubmission(Long submissionId, GradeRequestDTO request, User grader) {
-        Submission submission = submissionRepository.findById(submissionId)
+        Submission submission = submissionRepository.findByIdWithStudentAndAssignment(submissionId)
                 .orElseThrow(() -> new IllegalArgumentException("제출물을 찾을 수 없습니다. ID: " + submissionId));
 
         submission.grade(request.getGrade(), request.getFeedback());

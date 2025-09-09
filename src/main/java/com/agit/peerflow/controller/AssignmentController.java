@@ -2,10 +2,12 @@ package com.agit.peerflow.controller;
 
 import com.agit.peerflow.domain.entity.User;
 import com.agit.peerflow.dto.assignment.*;
+import com.agit.peerflow.repository.UserRepository;
 import com.agit.peerflow.service.AssignmentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -17,11 +19,17 @@ import java.util.List;
 public class AssignmentController {
 
     private final AssignmentService assignmentService;
+    private final UserRepository userRepository;
 
     @PostMapping
     public ResponseEntity<Void> createAssignment(
             @RequestBody AssignmentCreateRequestDTO request,
-            @AuthenticationPrincipal User creator) {
+            @AuthenticationPrincipal UserDetails principal) {
+
+        // principal.getUsername() == email
+        User creator = userRepository.findByEmail(principal.getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
         Long assignmentId = assignmentService.createAssignment(request, creator);
         return ResponseEntity.created(URI.create("/api/assignments/" + assignmentId)).build();
     }

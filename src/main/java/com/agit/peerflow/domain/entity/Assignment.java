@@ -49,6 +49,7 @@ public class Assignment {
     @Column(name = "attachment_url")
     private List<String> attachmentUrls;
 
+    // 생성자에서 createdAt 필드를 제거
     private Assignment(String title, String description, User creator, LocalDateTime dueDate, List<String> attachmentUrls) {
         this.title = title;
         this.description = description;
@@ -57,6 +58,7 @@ public class Assignment {
         this.attachmentUrls = attachmentUrls;
     }
 
+    // 정적 팩토리 메서드도 createdAt 인자를 제거
     public static Assignment createAssignment(String title, String description, User creator, LocalDateTime dueDate, List<String> attachmentUrls) {
         return new Assignment(title, description, creator, dueDate, attachmentUrls);
     }

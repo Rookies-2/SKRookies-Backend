@@ -23,6 +23,7 @@ public class UserController {
 
     @GetMapping("/me")
     public ResponseEntity<UserDTO.Response> getMyInfo(@AuthenticationPrincipal User user) {
+        // user.getUsername()은 JWT의 'sub' 값인 이메일을 반환
         User myInfo = userService.getMyInfo(user.getUsername());
         return ResponseEntity.ok(UserDTO.Response.fromEntity(myInfo));
     }

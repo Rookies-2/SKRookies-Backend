@@ -7,10 +7,16 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface SubmissionRepository extends JpaRepository<Submission, Long> {
     @Query("SELECT s FROM Submission s JOIN FETCH s.student WHERE s.assignment.id = :assignmentId")
     List<Submission> findAllByAssignmentIdWithStudent(@Param("assignmentId") Long assignmentId);
 
     List<Submission> findAllByStudent(User student);
+
+    // ID로 Submission 조회 시 연관된 Student와 Assignment 정보도 함께 가져오는 메소드
+    @Query("SELECT s FROM Submission s JOIN FETCH s.student JOIN FETCH s.assignment WHERE s.id = :id")
+    Optional<Submission> findByIdWithStudentAndAssignment(@Param("id") Long id);
+
 }

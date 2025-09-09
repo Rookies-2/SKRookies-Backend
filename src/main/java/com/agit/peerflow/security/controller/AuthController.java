@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 
 @RestController
 @RequestMapping("/api/auth")
@@ -29,8 +31,14 @@ public class AuthController {
             return ResponseEntity.status(401).body("Invalid credentials");
         }
 
-        // generateToken 대신 JwtTokenProvider의 createToken 메서드 사용
-        String token = jwtTokenProvider.createToken(user.getUsername(), null);
+        // `creator_id`가 null이 되지 않도록 user.getId()를 추가합니다.
+        Map<String, Object> extraClaims = Map.of(
+                "userId", user.getId(),
+                "userRole", user.getRole()
+        );
+
+        // 올바른 코드: getEmail()을 호출하여 토큰 생성
+        String token = jwtTokenProvider.createToken(user.getEmail(), extraClaims);
 
         return ResponseEntity.ok().body(token);
     }
