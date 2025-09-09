@@ -11,6 +11,6 @@ import lombok.NoArgsConstructor;
  */
 @Getter
 @NoArgsConstructor
-public class SubmissionRequest {
+public class SubmissionRequestDTO {
     private String textContent; // 학생이 제출하는 텍스트
 }

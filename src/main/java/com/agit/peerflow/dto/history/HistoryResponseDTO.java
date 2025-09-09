@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @Builder
-public class HistoryResponse {
+public class HistoryResponseDTO {
     private final Long id;
     private final String content;
     private final String relatedUrl;
@@ -17,8 +17,8 @@ public class HistoryResponse {
     private final HistoryType historyType;
     private final LocalDateTime createdAt;
 
-    public static HistoryResponse from(History history) {
-        return HistoryResponse.builder()
+    public static HistoryResponseDTO from(History history) {
+        return HistoryResponseDTO.builder()
                 .id(history.getId())
                 .content(history.getContent())
                 .relatedUrl(history.getRelatedUrl())

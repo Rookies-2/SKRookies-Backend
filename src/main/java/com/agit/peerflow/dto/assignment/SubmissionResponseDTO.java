@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
  */
 @Getter
 @Builder
-public class SubmissionResponse {
+public class SubmissionResponseDTO {
     private final Long submissionId;
     private final String studentName;
     private final String fileUrl;
@@ -24,8 +24,8 @@ public class SubmissionResponse {
     private final String grade;
     private final String feedback;
 
-    public static SubmissionResponse from(Submission submission) {
-        return SubmissionResponse.builder()
+    public static SubmissionResponseDTO from(Submission submission) {
+        return SubmissionResponseDTO.builder()
                 .submissionId(submission.getId())
                 .studentName(submission.getStudent().getNickname())
                 .fileUrl(submission.getFileUrl())

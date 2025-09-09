@@ -28,6 +28,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
+        String requestURI = request.getRequestURI();
+        if (requestURI.equals("/api/auth/login") || requestURI.equals("/api/users/signup")) {
+            filterChain.doFilter(request, response);
+            return; // 다음 필터로 바로 넘어가고, 아래의 토큰 검사 로직을 실행하지 않음
+        }
+
         final String authHeader = request.getHeader("Authorization");
         String token = null;
         String username = null;

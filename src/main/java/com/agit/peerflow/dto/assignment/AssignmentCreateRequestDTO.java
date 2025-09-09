@@ -15,14 +15,14 @@ import java.util.List;
  */
 @Getter
 @NoArgsConstructor
-public class AssignmentCreateRequest {
+public class AssignmentCreateRequestDTO {
     private String title;
     private String description;
     private LocalDateTime dueDate;
     private List<String> attachmentUrls;
 
     @Builder
-    public AssignmentCreateRequest(String title, String description, LocalDateTime dueDate, List<String> attachmentUrls) {
+    public AssignmentCreateRequestDTO(String title, String description, LocalDateTime dueDate, List<String> attachmentUrls) {
         this.title = title;
         this.description = description;
         this.dueDate = dueDate;

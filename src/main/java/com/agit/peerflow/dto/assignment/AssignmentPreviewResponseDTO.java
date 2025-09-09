@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
  */
 @Getter
 @Builder
-public class AssignmentPreviewResponse {
+public class AssignmentPreviewResponseDTO {
     private final Long id;
     private final String title;
     private final String creatorName;
@@ -23,8 +23,8 @@ public class AssignmentPreviewResponse {
     private final LocalDateTime dueDate;
     private final AssignmentStatus mySubmissionStatus;
 
-    public static AssignmentPreviewResponse from(Assignment assignment, AssignmentStatus myStatus) {
-        return AssignmentPreviewResponse.builder()
+    public static AssignmentPreviewResponseDTO from(Assignment assignment, AssignmentStatus myStatus) {
+        return AssignmentPreviewResponseDTO.builder()
                 .id(assignment.getId())
                 .title(assignment.getTitle())
                 .creatorName(assignment.getCreator().getNickname())

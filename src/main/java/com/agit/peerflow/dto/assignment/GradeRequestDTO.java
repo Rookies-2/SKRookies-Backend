@@ -12,12 +12,12 @@ import lombok.NoArgsConstructor;
  */
 @Getter
 @NoArgsConstructor
-public class GradeRequest {
+public class GradeRequestDTO {
     private String grade;
     private String feedback;
 
     @Builder
-    public GradeRequest(String grade, String feedback) {
+    public GradeRequestDTO(String grade, String feedback) {
         this.grade = grade;
         this.feedback = feedback;
     }

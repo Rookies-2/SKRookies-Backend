@@ -3,7 +3,7 @@ package com.agit.peerflow.service;
 import com.agit.peerflow.domain.entity.History;
 import com.agit.peerflow.domain.entity.User;
 import com.agit.peerflow.domain.enums.HistoryType;
-import com.agit.peerflow.dto.history.HistoryResponse;
+import com.agit.peerflow.dto.history.HistoryResponseDTO;
 import com.agit.peerflow.repository.HistoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,10 +25,10 @@ public class HistoryService {
         historyRepository.save(history);
     }
 
-    public List<HistoryResponse> getUserHistories(Long userId) {
+    public List<HistoryResponseDTO> getUserHistories(Long userId) {
         List<History> histories = historyRepository.findAllByUserIdOrderByCreatedAtDesc(userId);
         return histories.stream()
-                .map(HistoryResponse::from)
+                .map(HistoryResponseDTO::from)
                 .collect(Collectors.toList());
     }
 
@@ -37,7 +37,7 @@ public class HistoryService {
         History history = historyRepository.findById(historyId)
                 .orElseThrow(() -> new IllegalArgumentException("알림을 찾을 수 없습니다."));
 
-        if (!history.getUser().getUserId().equals(userId)) {
+        if (!history.getUser().getId().equals(userId)) {
             throw new SecurityException("자신의 알림만 읽음 처리할 수 있습니다.");
         }
         history.markAsRead();

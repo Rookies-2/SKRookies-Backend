@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
  */
 @Getter
 @Builder
-public class AssignmentDetailResponse {
+public class AssignmentDetailResponseDTO {
     private final Long id;
     private final String title;
     private final String description;
@@ -25,10 +25,10 @@ public class AssignmentDetailResponse {
     private final LocalDateTime createdAt;
     private final LocalDateTime dueDate;
     private final List<String> attachmentUrls;
-    private final List<SubmissionResponse> submissions;
+    private final List<SubmissionResponseDTO> submissions;
 
-    public static AssignmentDetailResponse from(Assignment assignment, List<Submission> submissionList) {
-        return AssignmentDetailResponse.builder()
+    public static AssignmentDetailResponseDTO from(Assignment assignment, List<Submission> submissionList) {
+        return AssignmentDetailResponseDTO.builder()
                 .id(assignment.getId())
                 .title(assignment.getTitle())
                 .description(assignment.getDescription())
@@ -37,7 +37,7 @@ public class AssignmentDetailResponse {
                 .dueDate(assignment.getDueDate())
                 .attachmentUrls(assignment.getAttachmentUrls())
                 .submissions(submissionList.stream()
-                        .map(SubmissionResponse::from)
+                        .map(SubmissionResponseDTO::from)
                         .collect(Collectors.toList()))
                 .build();
     }

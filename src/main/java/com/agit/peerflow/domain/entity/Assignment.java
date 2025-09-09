@@ -60,4 +60,11 @@ public class Assignment {
     public static Assignment createAssignment(String title, String description, User creator, LocalDateTime dueDate, List<String> attachmentUrls) {
         return new Assignment(title, description, creator, dueDate, attachmentUrls);
     }
+
+    public void update(String title, String description, LocalDateTime dueDate, List<String> attachmentUrls) {
+        this.title = title;
+        this.description = description;
+        this.dueDate = dueDate;
+        this.attachmentUrls = attachmentUrls;
+    }
 }

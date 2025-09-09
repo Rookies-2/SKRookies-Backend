@@ -20,12 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-/**
- * @author  김현근
- * @version 1.5
- * @since   2025-09-08
- * @description 과제 서비스 (파일 저장 기능 임시 비활성화)
- */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -35,12 +29,10 @@ public class AssignmentService {
     private final SubmissionRepository submissionRepository;
     private final UserRepository userRepository;
     private final HistoryService historyService;
-    // private final FileStorageService fileStorageService; // 👈 1. 파일 서비스 주석 처리
-
-    // createAssignment, gradeSubmission, getAllAssignments, getAssignmentDetails 메소드는 변경 없음
+    // private final FileStorageService fileStorageService;
 
     @Transactional
-    public Long createAssignment(AssignmentCreateRequest request, User creator) {
+    public Long createAssignment(AssignmentCreateRequestDTO request, User creator) {
         Assignment newAssignment = Assignment.createAssignment(
                 request.getTitle(),
                 request.getDescription(),
@@ -50,7 +42,7 @@ public class AssignmentService {
         );
         Assignment savedAssignment = assignmentRepository.save(newAssignment);
 
-        List<User> students = userRepository.findAllByRole(UserRole.STUDENT);
+        List<User> students = userRepository.findByRole(UserRole.STUDENT);
         String content = String.format("새로운 과제 '%s'가 등록되었습니다.", savedAssignment.getTitle());
         String url = "/assignments/" + savedAssignment.getId();
 
@@ -60,11 +52,8 @@ public class AssignmentService {
         return savedAssignment.getId();
     }
 
-    /**
-     * [학생] 과제 제출 (파일 로직 비활성화)
-     */
     @Transactional
-    public void submitAssignment(Long assignmentId, SubmissionRequest request, User student) {
+    public void submitAssignment(Long assignmentId, SubmissionRequestDTO request, User student) {
         Assignment assignment = assignmentRepository.findById(assignmentId)
                 .orElseThrow(() -> new IllegalArgumentException("과제를 찾을 수 없습니다. ID: " + assignmentId));
 
@@ -72,14 +61,14 @@ public class AssignmentService {
             throw new IllegalStateException("제출 기한이 지났습니다.");
         }
 
-        // 👈 2. 파일 저장 로직을 null로 고정
         String fileUrl = null;
-        // if (file != null && !file.isEmpty()) {
-        //     fileUrl = fileStorageService.store(file);
-        // }
+        /*
+        if (file != null && !file.isEmpty()) {
+             fileUrl = fileStorageService.store(file);
+        }
+        */
 
         String textContent = request.getTextContent();
-
         Submission submission = Submission.createSubmission(assignment, student, textContent, fileUrl);
         submissionRepository.save(submission);
 
@@ -89,7 +78,35 @@ public class AssignmentService {
     }
 
     @Transactional
-    public void gradeSubmission(Long submissionId, GradeRequest request, User grader) {
+    public void updateAssignment(Long assignmentId, AssignmentUpdateRequestDTO request, User updater) {
+        Assignment assignment = assignmentRepository.findById(assignmentId)
+                .orElseThrow(() -> new IllegalArgumentException("과제를 찾을 수 없습니다. ID: " + assignmentId));
+
+        boolean isAdmin = updater.getRole().equals(UserRole.ADMIN);
+        boolean isCreator = assignment.getCreator().getId().equals(updater.getId());
+
+        if (!isAdmin && !isCreator) {
+            throw new SecurityException("과제를 수정할 권한이 없습니다.");
+        }
+
+        assignment.update(
+                request.getTitle(),
+                request.getDescription(),
+                request.getDueDate(),
+                request.getAttachmentUrls()
+        );
+
+        List<User> students = userRepository.findByRole(UserRole.STUDENT);
+        String content = String.format("과제 '%s'의 내용이 수정되었습니다.", assignment.getTitle());
+        String url = "/assignments/" + assignment.getId();
+
+        students.forEach(student ->
+                historyService.createHistory(student, content, url, HistoryType.ASSIGNMENT)
+        );
+    }
+
+    @Transactional
+    public void gradeSubmission(Long submissionId, GradeRequestDTO request, User grader) {
         Submission submission = submissionRepository.findById(submissionId)
                 .orElseThrow(() -> new IllegalArgumentException("제출물을 찾을 수 없습니다. ID: " + submissionId));
 
@@ -100,7 +117,7 @@ public class AssignmentService {
         historyService.createHistory(submission.getStudent(), content, url, HistoryType.ASSIGNMENT);
     }
 
-    public List<AssignmentPreviewResponse> getAllAssignments(User currentUser) {
+    public List<AssignmentPreviewResponseDTO> getAllAssignments(User currentUser) {
         List<Assignment> assignments = assignmentRepository.findAll();
         Map<Long, Submission> userSubmissions = submissionRepository.findAllByStudent(currentUser)
                 .stream().collect(Collectors.toMap(sub -> sub.getAssignment().getId(), sub -> sub));
@@ -109,17 +126,17 @@ public class AssignmentService {
                 .map(assignment -> {
                     Submission submission = userSubmissions.get(assignment.getId());
                     AssignmentStatus status = (submission != null) ? submission.getStatus() : AssignmentStatus.NOT_SUBMITTED;
-                    return AssignmentPreviewResponse.from(assignment, status);
+                    return AssignmentPreviewResponseDTO.from(assignment, status);
                 })
                 .collect(Collectors.toList());
     }
 
-    public AssignmentDetailResponse getAssignmentDetails(Long assignmentId) {
+    public AssignmentDetailResponseDTO getAssignmentDetails(Long assignmentId) {
         Assignment assignment = assignmentRepository.findByIdWithCreator(assignmentId)
                 .orElseThrow(() -> new IllegalArgumentException("과제를 찾을 수 없습니다. ID: " + assignmentId));
 
         List<Submission> submissions = submissionRepository.findAllByAssignmentIdWithStudent(assignmentId);
 
-        return AssignmentDetailResponse.from(assignment, submissions);
+        return AssignmentDetailResponseDTO.from(assignment, submissions);
     }
 }
