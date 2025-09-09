@@ -17,12 +17,6 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
-/**
- * @author  신명철 (수정: 김현근)
- * @version 1.4
- * @since   2025-09-09
- * @description 사용자 엔티티 (Best Practice 적용 최종본)
- */
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -32,7 +26,7 @@ public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // 필드 이름을 'id'로 표준화
+    private Long id;
 
     @Column(nullable = false, unique = true, length = 50)
     private String username;
@@ -67,7 +61,8 @@ public class User implements UserDetails {
         this.nickname = nickname;
         this.email = email;
         this.role = role;
-        this.status = (status != null) ? status : UserStatus.PENDING; // status가 null이면 PENDING, 아니면 받은 값으로 설정
+        this.status = (status != null) ? status : UserStatus.PENDING;
+        this.createdAt = LocalDateTime.now();
     }
 
     //== 비즈니스 로직 ==//
@@ -85,12 +80,8 @@ public class User implements UserDetails {
     }
 
     public void updateProfile(String newUsername, String newNickname) {
-        if (newUsername != null && !newUsername.isBlank()) {
-            this.username = newUsername;
-        }
-        if (newNickname != null && !newNickname.isBlank()) {
-            this.nickname = newNickname;
-        }
+        if (newUsername != null && !newUsername.isBlank()) this.username = newUsername;
+        if (newNickname != null && !newNickname.isBlank()) this.nickname = newNickname;
     }
 
     public void changePassword(String newEncodedPassword) {
@@ -98,33 +89,18 @@ public class User implements UserDetails {
     }
 
     // --- UserDetails 구현 메소드 --- //
-
     @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(role.name()));
-    }
-
+    public Collection<? extends GrantedAuthority> getAuthorities() { return List.of(new SimpleGrantedAuthority(role.name())); }
     @Override
-    public String getUsername() {
-        return username;
-    }
-
+    public String getUsername() { return username; }
     @Override
-    public String getPassword() {
-        return password;
-    }
-
+    public String getPassword() { return password; }
     @Override
-    public boolean isEnabled() {
-        return status == UserStatus.ACTIVE;
-    }
-
+    public boolean isEnabled() { return status == UserStatus.ACTIVE; }
     @Override
     public boolean isAccountNonExpired() { return true; }
-
     @Override
     public boolean isAccountNonLocked() { return true; }
-
     @Override
     public boolean isCredentialsNonExpired() { return true; }
 }
