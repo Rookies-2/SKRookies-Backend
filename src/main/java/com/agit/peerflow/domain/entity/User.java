@@ -3,33 +3,48 @@ package com.agit.peerflow.domain.entity;
 import com.agit.peerflow.domain.enums.UserRole;
 import com.agit.peerflow.domain.enums.UserStatus;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.List;
 
+/**
+ * @author  신명철 (수정: 김현근)
+ * @version 1.4
+ * @since   2025-09-09
+ * @description 사용자 엔티티 (Best Practice 적용 최종본)
+ */
 @Entity
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "users")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class User {
+@EntityListeners(AuditingEntityListener.class)
+public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "user_id")
-    private Long userId;
+    private Long id; // 필드 이름을 'id'로 표준화
 
-    @Column(name = "username",nullable = false, unique = true, length = 20)
-    private String userName;
+    @Column(nullable = false, unique = true, length = 50)
+    private String username;
 
     @Column(nullable = false, length = 255)
     private String password;
 
-    @Column(name = "nickname",nullable = false, unique = true, length = 20)
-    private String nickName;
+    @Column(nullable = false, unique = true, length = 50)
+    private String nickname;
+
+    @Column(nullable = false, unique = true)
+    private String email;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -39,19 +54,77 @@ public class User {
     @Column(nullable = false)
     private UserStatus status;
 
-    @Column(nullable = false, unique = true)
-    private String email;
-
     @CreatedDate
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @LastModifiedDate
     private LocalDateTime approvedAt;
 
-    @PrePersist
-    public void prePersist() {
-        createdAt = LocalDateTime.now();
-        if (status == null) status = UserStatus.PENDING;
+    @Builder
+    private User(String username, String password, String nickname, String email, UserRole role, UserStatus status) {
+        this.username = username;
+        this.password = password;
+        this.nickname = nickname;
+        this.email = email;
+        this.role = role;
+        this.status = (status != null) ? status : UserStatus.PENDING; // status가 null이면 PENDING, 아니면 받은 값으로 설정
     }
+
+    //== 비즈니스 로직 ==//
+    public void approve() {
+        if (this.status == UserStatus.PENDING) {
+            this.status = UserStatus.ACTIVE;
+            this.approvedAt = LocalDateTime.now();
+        }
+    }
+
+    public void reject() {
+        if (this.status == UserStatus.PENDING) {
+            this.status = UserStatus.REJECTED;
+        }
+    }
+
+    public void updateProfile(String newUsername, String newNickname) {
+        if (newUsername != null && !newUsername.isBlank()) {
+            this.username = newUsername;
+        }
+        if (newNickname != null && !newNickname.isBlank()) {
+            this.nickname = newNickname;
+        }
+    }
+
+    public void changePassword(String newEncodedPassword) {
+        this.password = newEncodedPassword;
+    }
+
+    // --- UserDetails 구현 메소드 --- //
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority(role.name()));
+    }
+
+    @Override
+    public String getUsername() {
+        return username;
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return status == UserStatus.ACTIVE;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() { return true; }
+
+    @Override
+    public boolean isAccountNonLocked() { return true; }
+
+    @Override
+    public boolean isCredentialsNonExpired() { return true; }
 }

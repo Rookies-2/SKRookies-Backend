@@ -6,7 +6,7 @@ import com.agit.peerflow.domain.entity.User;
 import com.agit.peerflow.domain.enums.MessageType;
 import com.agit.peerflow.dto.message.ChatMessageDTO;
 import com.agit.peerflow.dto.message.SendMessageRequestDTO;
-import com.agit.peerflow.service.ChatroomService;
+import com.agit.peerflow.service.ChatRoomService;
 import com.agit.peerflow.service.MessageService;
 import com.agit.peerflow.service.UserService;
 import jakarta.validation.Valid;
@@ -30,7 +30,7 @@ import java.security.Principal;
 @RequiredArgsConstructor
 public class ChatMessageController {
     private final MessageService messageService;
-    private final ChatroomService chatroomService;
+    private final ChatRoomService chatroomService;
     private final UserService userService;
 
     @MessageMapping("/rooms/{roomId}")

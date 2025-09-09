@@ -1,106 +1,77 @@
 package com.agit.peerflow.service.Impl;
 
 import com.agit.peerflow.domain.entity.User;
-import com.agit.peerflow.domain.enums.UserRole;
-import com.agit.peerflow.domain.enums.UserStatus;
 import com.agit.peerflow.dto.user.UserDTO;
+import com.agit.peerflow.exception.BusinessException;
+import com.agit.peerflow.exception.ErrorCode;
 import com.agit.peerflow.repository.UserRepository;
 import com.agit.peerflow.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-@Service
+@Service("userServiceImpl")
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public User getByUsername(String username) {
-        return userRepository.findByUsername(username).orElse(null);
-    }
-
-    public User register(String username, String rawPassword, String nickname, String email, String profileImageUrl) {
-        User user = User.createUser(
-                username,
-                passwordEncoder.encode(rawPassword),
-                nickname,
-                email,
-                UserRole.STUDENT,
-                UserStatus.ACTIVE
-        );
-        return userRepository.save(user);
-    }
-
-    // 회원가입
-    public User signupUser(UserDTO.Request request) {
-        User user = User.createUser(
-                request.getUsername(),
-                passwordEncoder.encode(request.getPassword()), // 암호화
-                request.getNickname(),
-                request.getEmail(),
-                request.getRole(), // STUDENT, TEACHER 등
-                UserStatus.PENDING
-        );
-        return userRepository.save(user);
-    }
-
-    // 본인 정보 조회 (이메일)
-    public User getUserByEmail(String email) {
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-    }
-
-    // 본인 정보 수정 (이메일)
-    public User updateUserByEmail(String email, UserDTO.Request request) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("User not found: " + email));
-
-        if (request.getUsername() != null && !request.getUsername().isBlank()) {
-            user.setUsername(request.getUsername());
+    @Override
+    @Transactional
+    public User signup(UserDTO.Request requestDTO) {
+        if (userRepository.existsByUsername(requestDTO.getUsername())) {
+            throw new BusinessException(ErrorCode.RESOURCE_DUPLICATE, "User", "username", requestDTO.getUsername());
+        }
+        if (userRepository.existsByNickname(requestDTO.getNickname())) {
+            throw new BusinessException(ErrorCode.RESOURCE_DUPLICATE, "User", "nickname", requestDTO.getNickname());
+        }
+        if (userRepository.existsByEmail(requestDTO.getEmail())) {
+            throw new BusinessException(ErrorCode.RESOURCE_DUPLICATE, "User", "email", requestDTO.getEmail());
         }
 
-        if (request.getNickname() != null && !request.getNickname().isBlank()) {
-            user.setNickname(request.getNickname());
-        }
-
-        if (request.getPassword() != null && !request.getPassword().isBlank()) {
-            user.setPassword(passwordEncoder.encode(request.getPassword())); // 암호화
-        }
-
-        return userRepository.save(user);
-
+        User newUser = User.builder()
+                .username(requestDTO.getUsername())
+                .password(passwordEncoder.encode(requestDTO.getPassword()))
+                .nickname(requestDTO.getNickname())
+                .email(requestDTO.getEmail())
+                .role(requestDTO.getRole())
+                .build();
+        return userRepository.save(newUser);
     }
 
-    // 사용자 수정 (id)
-    public User updateUserById(Long id, UserDTO.Request request) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        user.setUsername(request.getUsername());
-        user.setNickname(request.getNickname());
-        user.setPassword(passwordEncoder.encode(request.getPassword())); // 암호화
-        return userRepository.save(user);
+    @Override
+    public User getMyInfo(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "User", "username", username));
     }
 
-    // 본인 계정 삭제 (이메일)
-    public void deleteUserByEmail(String email) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+    @Override
+    @Transactional
+    public void updateMyInfo(String username, UserDTO.Request requestDTO) {
+        User user = getMyInfo(username);
+        user.updateProfile(null, requestDTO.getNickname()); // 본인은 닉네임만 변경 가능
+    }
+
+    @Override
+    @Transactional
+    public void deleteMyAccount(String username) {
+        User user = getMyInfo(username);
         userRepository.delete(user);
     }
 
-    // id로 사용자 조회
-    public User getUserById(Long id) {
-        return userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-    }
-
-    // id로 사용자 삭제
-    public void deleteUserById(Long id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        userRepository.delete(user);
+    @Override
+    @Transactional
+    public void changePassword(String username, String oldPassword, String newPassword) {
+        User user = getMyInfo(username);
+        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+            throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE, "Password", "current password", "불일치");
+        }
+        if (passwordEncoder.matches(newPassword, user.getPassword())) {
+            throw new BusinessException(ErrorCode.PASSWORD_SAME_AS_CURRENT);
+        }
+        user.changePassword(passwordEncoder.encode(newPassword));
     }
 }
