@@ -1,8 +1,7 @@
 package com.agit.peerflow.controller;
 
 import com.agit.peerflow.domain.entity.User;
-import com.agit.peerflow.dto.UserDTO;
-import com.agit.peerflow.repository.UserRepository;
+import com.agit.peerflow.dto.user.UserDTO;
 import com.agit.peerflow.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -15,51 +14,40 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
-    private final UserRepository userRepository;
 
-    // 회원가입 (학생/선생님)
     @PostMapping("/signup")
     public ResponseEntity<UserDTO.Response> signupUser(@RequestBody UserDTO.Request request) {
-        User savedUser = userService.signupUser(request);
+        User savedUser = userService.signup(request);
         return ResponseEntity.ok(UserDTO.Response.fromEntity(savedUser));
     }
 
-    // 본인 정보 조회
     @GetMapping("/me")
-    public ResponseEntity<UserDTO.Response> getMyInfo(@AuthenticationPrincipal org.springframework.security.core.userdetails.User userDetails) {
-        User user = userService.getUserByEmail(userDetails.getUsername()); // JWT에서 추출한 email
-        return ResponseEntity.ok(UserDTO.Response.fromEntity(user));
+    public ResponseEntity<UserDTO.Response> getMyInfo(@AuthenticationPrincipal User user) {
+        // user.getUsername()은 JWT의 'sub' 값인 이메일을 반환
+        User myInfo = userService.getMyInfo(user.getUsername());
+        return ResponseEntity.ok(UserDTO.Response.fromEntity(myInfo));
     }
 
-    // 본인 정보 수정
     @PutMapping("/me")
-    public ResponseEntity<UserDTO.Response> updateMyInfo(
-            @AuthenticationPrincipal org.springframework.security.core.userdetails.User userDetails,
+    public ResponseEntity<Void> updateMyInfo(
+            @AuthenticationPrincipal User user,
             @RequestBody UserDTO.Request request) {
-
-        // JWT에서 추출한 이메일로 사용자 조회 후 수정
-        User updatedUser = userService.updateUserByEmail(userDetails.getUsername(), request);
-        return ResponseEntity.ok(UserDTO.Response.fromEntity(updatedUser));
+        userService.updateMyInfo(user.getUsername(), request);
+        return ResponseEntity.ok().build();
     }
 
-    // 본인 계정 삭제
     @DeleteMapping("/me")
-    public ResponseEntity<Void> deleteMyAccount(
-            @AuthenticationPrincipal org.springframework.security.core.userdetails.User userDetails) {
-
-        // JWT에서 추출한 이메일로 사용자 조회 후 삭제
-        userService.deleteUserByEmail(userDetails.getUsername());
+    public ResponseEntity<Void> deleteMyAccount(@AuthenticationPrincipal User user) {
+        userService.deleteMyAccount(user.getUsername());
         return ResponseEntity.noContent().build();
     }
 
-    // 본인 비밀번호 변경 (현재 비밀번호 확인 후)
     @PostMapping("/me/change-password")
-    public ResponseEntity<UserDTO.Response> changePassword(
-            @AuthenticationPrincipal org.springframework.security.core.userdetails.User userDetails,
-            @RequestParam String currentPassword,
+    public ResponseEntity<Void> changePassword(
+            @AuthenticationPrincipal User user,
+            @RequestParam String oldPassword,
             @RequestParam String newPassword) {
-
-        User updatedUser = userService.changePassword(userDetails.getUsername(), currentPassword, newPassword);
-        return ResponseEntity.ok(UserDTO.Response.fromEntity(updatedUser));
+        userService.changePassword(user.getUsername(), oldPassword, newPassword);
+        return ResponseEntity.ok().build();
     }
 }
