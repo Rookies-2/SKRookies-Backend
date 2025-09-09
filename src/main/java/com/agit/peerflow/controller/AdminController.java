@@ -31,49 +31,70 @@ public class AdminController {
         Page<UserDTO.Response> dtoPage = users.map(UserDTO.Response::fromEntity); // DTO 변환
 
         return ResponseEntity.ok(dtoPage);
-    }
+    }//getAllUsers
 
-    // 사용자 승인 대기 조회
-    @GetMapping("/pending")
-    public ResponseEntity<Page<UserDTO.Response>> getPendingUsers(
+    // 사용자 승인 상태 조회
+    @GetMapping("/status/{status}")
+    public ResponseEntity<Page<UserDTO.Response>> getUsersByStatus(
+            @PathVariable("status") String status,
             @PageableDefault(size = 10, sort = "userId", direction = Sort.Direction.ASC) Pageable pageable) {
-        Page<User> pendingUsers = adminService.getPendingUsers(pageable); // DB에서 Page<User> 조회
-        // 디버그 로그
-        pendingUsers.forEach(u -> {
-            System.out.println("DEBUG: userId=" + u.getUserId() +
-                    ", userName=" + u.getUserName() +
-                    ", nickName=" + u.getNickName());
-        });
+        Page<User> users  = adminService.getUsersByStatus(
+                Enum.valueOf(com.agit.peerflow.domain.enums.UserStatus.class, status.toUpperCase()),
+                pageable
+        ); // DB에서 Page<User> 상태별 조회
 
-        Page<UserDTO.Response> dtoPage = pendingUsers.map(UserDTO.Response::fromEntity); // DTO 변환
+        Page<UserDTO.Response> dtoPage = users.map(UserDTO.Response::fromEntity); // DTO 변환
         return ResponseEntity.ok(dtoPage);
-    }
+    }//getUsersByStatus
+
+    // 역할별 사용자 조회 (예: ADMIN, STUDENT)
+    @GetMapping("/role/{role}")
+    public ResponseEntity<Page<UserDTO.Response>> getUsersByRole(
+            @PathVariable("role") String role,
+            @PageableDefault(size = 10, sort = "userId", direction = Sort.Direction.ASC) Pageable pageable) {
+
+        Page<User> users = adminService.getUsersByRole(
+                Enum.valueOf(com.agit.peerflow.domain.enums.UserRole.class, role.toUpperCase()),
+                pageable
+        );
+
+        Page<UserDTO.Response> dtoPage = users.map(UserDTO.Response::fromEntity);
+        return ResponseEntity.ok(dtoPage);
+    }//getUsersByRole
 
     // 사용자 승인 (PENDING -> ACTIVE)
     @PutMapping("/{id}/approve")
     public ResponseEntity<UserDTO.Response> approveUser(@PathVariable Long id) {
         User approvedUser = adminService.approveUserById(id);
         return ResponseEntity.ok(UserDTO.Response.fromEntity(approvedUser));
-    }
+    }//approveUser
+
+    // 사용자 승인 거부 (PENDING -> REJECTED)
+    @PutMapping("/{id}/reject")
+    public ResponseEntity<UserDTO.Response> rejectUser(@PathVariable Long id) {
+        User rejectedUser = adminService.rejectUser(id);
+        return ResponseEntity.ok(UserDTO.Response.fromEntity(rejectedUser));
+    }//rejectUser
 
     // 사용자 수정
     @PutMapping("/{id}")
     public ResponseEntity<UserDTO.Response> updateUser(@PathVariable Long id, @RequestBody UserDTO.Request request) {
         User updatedUser = userService.updateUserById(id, request);
         return ResponseEntity.ok(UserDTO.Response.fromEntity(updatedUser));
-    }
+    }//updateUser
+
     // 관리자 권한으로 비밀번호 초기화
     @PostMapping("/{email}/reset-password")
     public ResponseEntity<User> resetPassword(
             @PathVariable String email,
             @RequestParam String newPassword) {
         return ResponseEntity.ok(adminService.resetPasswordByEmail(email, newPassword));
-    }
+    }//resetPassword
 
     // 사용자 삭제
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         userService.deleteUserById(id);
         return ResponseEntity.noContent().build();
-    }
+    }//deleteUser
 }

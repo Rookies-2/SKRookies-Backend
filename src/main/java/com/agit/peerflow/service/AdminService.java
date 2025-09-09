@@ -51,11 +51,6 @@ public class AdminService {
         // historyService.recordRejection(user);
         return userRepository.save(user);
     }
-    // 승인 대기 사용자 조회
-    public Page<User> getPendingUsers(Pageable pageable) {
-
-        return userRepository.findByStatus(UserStatus.PENDING, pageable);
-    }
 
     // 전체 사용자 조회
     public Page<User> getAllUsers(Pageable pageable) {
