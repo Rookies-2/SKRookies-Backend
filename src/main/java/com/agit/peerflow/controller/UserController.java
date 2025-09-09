@@ -1,7 +1,7 @@
 package com.agit.peerflow.controller;
 
 import com.agit.peerflow.domain.entity.User;
-import com.agit.peerflow.dto.UserDTO;
+import com.agit.peerflow.dto.user.UserDTO;
 import com.agit.peerflow.repository.UserRepository;
 import com.agit.peerflow.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +21,6 @@ public class UserController {
     @PostMapping("/signup")
     public ResponseEntity<UserDTO.Response> signupUser(@RequestBody UserDTO.Request request) {
         User savedUser = userService.signupUser(request);
-
         return ResponseEntity.ok(UserDTO.Response.fromEntity(savedUser));
     }
 

@@ -1,7 +1,7 @@
 package com.agit.peerflow.controller;
 
 import com.agit.peerflow.domain.entity.User;
-import com.agit.peerflow.dto.UserDTO;
+import com.agit.peerflow.dto.user.UserDTO;
 import com.agit.peerflow.service.AdminService;
 import com.agit.peerflow.service.UserService;
 import lombok.RequiredArgsConstructor;

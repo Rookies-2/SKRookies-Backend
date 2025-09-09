@@ -13,7 +13,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByUsername(String username);
     // 사용자 승인상태
     List<User> findByStatus(UserStatus status);
-    List<User> findAllByRole(UserRole role);
+
+    // 사용자 역할로 검색
+    List<User> findByRole(UserRole role);
 
     // 이메일 존재 여부 확인
     boolean existsByEmail(String email);

@@ -20,20 +20,19 @@ public class AdminService {
     // 사용자 승인
     public User approveUserById(Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        user.setStatus(UserStatus.ACTIVE);
-        user.setApprovedAt(LocalDateTime.now());
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다. ID: " + id));
+
+        // 상태 변경
+        user.changeStatus(UserStatus.ACTIVE);
         return userRepository.save(user);
     }
 
     // 사용자 거부
     public Optional<User> rejectUser(Long id) {
-        Optional<User> user = userRepository.findById(id);
-        user.ifPresent(u -> {
-            u.setStatus(UserStatus.REJECTED);
-            userRepository.save(u);
+        return userRepository.findById(id).map(user -> {
+            user.changeStatus(UserStatus.REJECTED);
+            return userRepository.save(user);
         });
-        return user;
     }
     // 승인 대기 사용자 조회
     public List<User> getPendingUsers() {
