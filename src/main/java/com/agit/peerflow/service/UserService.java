@@ -30,8 +30,8 @@ public class UserService {
 
         User user = User.builder()
                 .email(request.getEmail())
-                .username(request.getUsername())
-                .nickname(request.getNickname())
+                .userName(request.getUsername())
+                .nickName(request.getNickname())
                 .password(passwordEncoder.encode(request.getPassword())) // 암호화
                 .role(request.getRole()) // STUDENT, TEACHER 등
                 .status(UserStatus.PENDING)
@@ -51,8 +51,8 @@ public class UserService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "User", "email", email));
 
-        user.setUsername(request.getUsername());
-        user.setNickname(request.getNickname());
+        user.setUserName(request.getUsername());
+        user.setNickName(request.getNickname());
 
         if (request.getPassword() != null && !request.getPassword().isBlank()) {
             user.setPassword(passwordEncoder.encode(request.getPassword())); // 암호화
@@ -67,8 +67,8 @@ public class UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "User", "id", id));
 
-        user.setUsername(request.getUsername());
-        user.setNickname(request.getNickname());
+        user.setUserName(request.getUsername());
+        user.setNickName(request.getNickname());
         if (request.getPassword() != null && !request.getPassword().isBlank()) {
             user.setPassword(passwordEncoder.encode(request.getPassword()));
         }// 암호화

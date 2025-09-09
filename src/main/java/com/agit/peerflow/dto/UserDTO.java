@@ -42,8 +42,8 @@ public class UserDTO {
 
         public static Response fromEntity(User user) {
             return Response.builder()
-                    .username(user.getUsername())
-                    .nickname(user.getNickname())
+                    .username(user.getUserName())
+                    .nickname(user.getNickName())
                     .email(user.getEmail())
                     .role(user.getRole().name())
                     .status(user.getStatus().name())

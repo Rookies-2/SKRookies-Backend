@@ -5,6 +5,10 @@ import com.agit.peerflow.dto.UserDTO;
 import com.agit.peerflow.service.AdminService;
 import com.agit.peerflow.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,24 +22,31 @@ public class AdminController {
 
     private final AdminService adminService;
     private final UserService userService;
-    // 모든 사용자 조회
+
+    // 모든 사용자 조회(페이징 + 정렬)
     @GetMapping
-    public ResponseEntity<List<UserDTO.Response>> getAllUsers() {
-        List<UserDTO.Response> users = adminService.getAllUsers()
-                .stream()
-                .map(UserDTO.Response::fromEntity)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(users);
+    public ResponseEntity<Page<UserDTO.Response>> getAllUsers(
+            @PageableDefault(size = 10, sort = "userId", direction = Sort.Direction.ASC) Pageable pageable) {
+        Page<User> users = adminService.getAllUsers(pageable); // DB에서 Page<User> 조회
+        Page<UserDTO.Response> dtoPage = users.map(UserDTO.Response::fromEntity); // DTO 변환
+
+        return ResponseEntity.ok(dtoPage);
     }
 
     // 사용자 승인 대기 조회
     @GetMapping("/pending")
-    public ResponseEntity<List<UserDTO.Response>> getPendingUsers() {
-        List<UserDTO.Response> pendingUsers = adminService.getPendingUsers()
-                .stream()
-                .map(UserDTO.Response::fromEntity)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(pendingUsers);
+    public ResponseEntity<Page<UserDTO.Response>> getPendingUsers(
+            @PageableDefault(size = 10, sort = "userId", direction = Sort.Direction.ASC) Pageable pageable) {
+        Page<User> pendingUsers = adminService.getPendingUsers(pageable); // DB에서 Page<User> 조회
+        // 디버그 로그
+        pendingUsers.forEach(u -> {
+            System.out.println("DEBUG: userId=" + u.getUserId() +
+                    ", userName=" + u.getUserName() +
+                    ", nickName=" + u.getNickName());
+        });
+
+        Page<UserDTO.Response> dtoPage = pendingUsers.map(UserDTO.Response::fromEntity); // DTO 변환
+        return ResponseEntity.ok(dtoPage);
     }
 
     // 사용자 승인 (PENDING -> ACTIVE)
