@@ -22,6 +22,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     // 닉네임 존재 여부 확인
     boolean existsByNickName(String nickName);
 
+    // 사용자이름(ID) 존재 여부 확인
+    boolean existsByUserName(String username);
 
     //Paging 과 Search(검색) 관련 메서드들
     // 사용자 승인상태
@@ -29,6 +31,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     // 사용자 역할로 검색
     Page<User> findByRole(UserRole role, Pageable pageable);
-    //Id 검색
-    List<User> findByUserId(Long userId);
+
 }

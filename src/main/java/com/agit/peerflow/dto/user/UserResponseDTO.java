@@ -6,8 +6,8 @@ import com.agit.peerflow.domain.enums.UserStatus;
 
 public record UserResponseDTO(
         Long id,
-        String username,
-        String nickname,
+        String userName,
+        String nickName,
         UserRole role,
         UserStatus status
 ) {
@@ -15,7 +15,7 @@ public record UserResponseDTO(
         return new UserResponseDTO(
                 user.getId(),
                 user.getUsername(),
-                user.getNickname(),
+                user.getNickName(),
                 user.getRole(),
                 user.getStatus()
         );

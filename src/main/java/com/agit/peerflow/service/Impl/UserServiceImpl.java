@@ -22,20 +22,20 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public User signup(UserDTO.Request requestDTO) {
-        if (userRepository.existsByUsername(requestDTO.getUsername())) {
-            throw new BusinessException(ErrorCode.RESOURCE_DUPLICATE, "User", "username", requestDTO.getUsername());
+        if (userRepository.existsByUserName(requestDTO.getUserName())) {
+            throw new BusinessException(ErrorCode.RESOURCE_DUPLICATE, "User", "username", requestDTO.getUserName());
         }
-        if (userRepository.existsByNickname(requestDTO.getNickname())) {
-            throw new BusinessException(ErrorCode.RESOURCE_DUPLICATE, "User", "nickname", requestDTO.getNickname());
+        if (userRepository.existsByNickName(requestDTO.getNickName())) {
+            throw new BusinessException(ErrorCode.RESOURCE_DUPLICATE, "User", "nickname", requestDTO.getNickName());
         }
         if (userRepository.existsByEmail(requestDTO.getEmail())) {
             throw new BusinessException(ErrorCode.RESOURCE_DUPLICATE, "User", "email", requestDTO.getEmail());
         }
 
         User newUser = User.builder()
-                .username(requestDTO.getUsername())
+                .userName(requestDTO.getUserName())
                 .password(passwordEncoder.encode(requestDTO.getPassword()))
-                .nickname(requestDTO.getNickname())
+                .nickName(requestDTO.getNickName())
                 .email(requestDTO.getEmail())
                 .role(requestDTO.getRole())
                 .build();
@@ -52,7 +52,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void updateMyInfo(String username, UserDTO.Request requestDTO) {
         User user = getMyInfo(username);
-        user.updateProfile(null, requestDTO.getNickname()); // 본인은 닉네임만 변경 가능
+        user.updateProfile(null, requestDTO.getNickName()); // 본인은 닉네임만 변경 가능
     }
 
     @Override

@@ -17,9 +17,9 @@ public class DataInitializer {
             if (!userRepository.existsByEmail("admin@example.com")) {
                 User admin = User.builder()
                         .email("admin@example.com")
-                        .username("관리자")
+                        .userName("관리자")
                         .password("{noop}admin123") // NoOpPasswordEncoder
-                        .nickname("admin")
+                        .nickName("admin")
                         .role(UserRole.ADMIN)       // Enum 사용
                         .status(UserStatus.ACTIVE)  // Enum 사용
                         .build();

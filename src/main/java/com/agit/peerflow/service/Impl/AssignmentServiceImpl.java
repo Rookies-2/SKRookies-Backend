@@ -76,7 +76,7 @@ public class AssignmentServiceImpl implements AssignmentService {
         Submission submission = Submission.createSubmission(assignment, student, textContent, fileUrl);
         submissionRepository.save(submission);
 
-        String content = String.format("'%s' 학생이 '%s' 과제를 제출했습니다.", student.getNickname(), assignment.getTitle());
+        String content = String.format("'%s' 학생이 '%s' 과제를 제출했습니다.", student.getNickName(), assignment.getTitle());
         String url = "/assignments/" + assignmentId;
         historyService.createHistory(assignment.getCreator(), content, url, HistoryType.ASSIGNMENT);
     }
