@@ -90,7 +90,10 @@ public class User implements UserDetails {
 
     // --- UserDetails 구현 메소드 --- //
     @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() { return List.of(new SimpleGrantedAuthority(role.name())); }
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        //SHIN ("ROLE_" + role.name())로 변경
+        return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
+    }
     @Override
     public String getUsername() { return username; }
     @Override

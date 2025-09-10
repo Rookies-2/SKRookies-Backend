@@ -1,6 +1,7 @@
 package com.agit.peerflow.security.config;
 
 import com.agit.peerflow.domain.entity.User;
+import com.agit.peerflow.security.handler.CustomAccessDeniedHandler;
 import com.agit.peerflow.security.jwt.JwtAuthenticationFilter;
 import com.agit.peerflow.security.service.UserDetailsServiceImpl;
 import com.agit.peerflow.service.UserService;
@@ -43,11 +44,15 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final UserService userService;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
     @Autowired
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter, UserService userService) {
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter,
+                          UserService userService,
+                          CustomAccessDeniedHandler customAccessDeniedHandler) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.userService = userService;
+        this.customAccessDeniedHandler = customAccessDeniedHandler;
     }
 
     @Bean
@@ -83,7 +88,10 @@ public class SecurityConfig {
                 .logout(AbstractHttpConfigurer::disable)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 // spring security6 부턴 람다 스타일로 authenticationManager 설정
-                .authenticationProvider(authenticationProvider(userDetailsService, passwordEncoder));
+                .authenticationProvider(authenticationProvider(userDetailsService, passwordEncoder))
+                .exceptionHandling(ex -> ex
+                        .accessDeniedHandler(customAccessDeniedHandler)
+                ); // 권한 예외 처리기 등록
 
         return http.build();
     }
