@@ -11,9 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -39,13 +37,13 @@ public class UserService {
                 .status(UserStatus.PENDING)
                 .build();
         return userRepository.save(user);
-    }//signupUser
+    }
 
     // 본인 정보 조회 (이메일)
     public User getUserByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "User", "email", email));
-    }//getUserByEmail
+    }
 
     // 본인 정보 수정 (이메일)
     @Transactional
@@ -61,7 +59,7 @@ public class UserService {
         }
 
         return userRepository.save(user);
-    }//updateUserByEmail
+    }
 
     // 사용자 수정 (id)
     @Transactional
@@ -76,7 +74,7 @@ public class UserService {
         }// 암호화
 
         return userRepository.save(user);
-    }//updateUserById
+    }
 
     // 본인 계정 삭제 (이메일)
     @Transactional
@@ -84,13 +82,13 @@ public class UserService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "User", "email", email));
         userRepository.delete(user);
-    }//deleteUserByEmail
+    }
 
     // id로 사용자 조회
     public User getUserById(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "User", "id", id));
-    }//getUserById
+    }
 
     // id로 사용자 삭제
     @Transactional
@@ -98,44 +96,24 @@ public class UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "User", "id", id));
         userRepository.delete(user);
-    }//deleteUserById
-
-    // 비밀번호 초기화 요청
-    public void requestPasswordReset(String email) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("등록된 사용자가 없습니다."));
-
-        String token = UUID.randomUUID().toString();
-        user.setResetToken(token);
-        user.setResetTokenExpiry(LocalDateTime.now().plusHours(1)); // 1시간 유효
-
-        userRepository.save(user);
-
-        // TODO: 이메일 전송 로직 추가 (MailService 등)
-        System.out.println("Reset Token (임시): " + token);
     }
 
     // 비밀번호 변경 (본인 확인 필요)
     @Transactional
     public User changePassword(String email, String oldPassword, String newPassword) {
-        // 1. 이메일로 사용자 조회
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "User", "email", email));
 
-        // 2. 입력된 현재 비밀번호(oldPassword) 확인
         if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
             throw new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "Password", "current password", "불일치");
         }
 
-        // 3. 새 비밀번호가 기존 비밀번호와 동일하면 거부
+        // 현재 비밀번호와 새 비밀번호 동일 여부 체크
         if (passwordEncoder.matches(newPassword, user.getPassword())) {
             throw new BusinessException(ErrorCode.PASSWORD_SAME_AS_CURRENT);
         }
 
-        // 4. 새 비밀번호 암호화 후 저장
         user.setPassword(passwordEncoder.encode(newPassword));
-
-        // 5. @Transactional 이므로 save 호출 시점에 DB update 발생
         return userRepository.save(user);
-    }//changePassword
+    }
 }

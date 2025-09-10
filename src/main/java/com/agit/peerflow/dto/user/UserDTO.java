@@ -1,9 +1,8 @@
-package com.agit.peerflow.dto;
+package com.agit.peerflow.dto.user;
 
 import com.agit.peerflow.domain.entity.User;
 import com.agit.peerflow.domain.enums.UserRole;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.*;
 
 public class UserDTO {
@@ -76,8 +75,8 @@ public class UserDTO {
 
         public static Response fromEntity(User user) {
             return Response.builder()
-                    .username(user.getUserName())
-                    .nickname(user.getNickName())
+                    .username(user.getUsername())
+                    .nickname(user.getNickname())
                     .email(user.getEmail())
                     .role(user.getRole().name())
                     .status(user.getStatus().name())
