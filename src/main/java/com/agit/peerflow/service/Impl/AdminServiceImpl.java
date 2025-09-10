@@ -58,7 +58,7 @@ public class AdminServiceImpl implements AdminService {
     @Transactional
     public void updateUserByAdmin(Long userId, UserDTO.Request requestDTO) {
         User user = findUserById(userId);
-        user.updateProfile(requestDTO.getUsername(), requestDTO.getNickname());
+        user.updateProfile(requestDTO.getUserName(), requestDTO.getNickName());
     }
 
     @Override

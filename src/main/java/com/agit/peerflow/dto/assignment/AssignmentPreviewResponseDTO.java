@@ -27,7 +27,7 @@ public class AssignmentPreviewResponseDTO {
         return AssignmentPreviewResponseDTO.builder()
                 .id(assignment.getId())
                 .title(assignment.getTitle())
-                .creatorName(assignment.getCreator().getNickname())
+                .creatorName(assignment.getCreator().getNickName())
                 .createdAt(assignment.getCreatedAt())
                 .dueDate(assignment.getDueDate())
                 .mySubmissionStatus(myStatus)

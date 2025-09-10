@@ -32,7 +32,7 @@ public class AssignmentDetailResponseDTO {
                 .id(assignment.getId())
                 .title(assignment.getTitle())
                 .description(assignment.getDescription())
-                .creatorName(assignment.getCreator().getNickname())
+                .creatorName(assignment.getCreator().getNickName())
                 .createdAt(assignment.getCreatedAt())
                 .dueDate(assignment.getDueDate())
                 .attachmentUrls(assignment.getAttachmentUrls())

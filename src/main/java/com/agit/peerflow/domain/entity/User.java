@@ -29,13 +29,13 @@ public class User implements UserDetails {
     private Long id;
 
     @Column(nullable = false, unique = true, length = 50)
-    private String username;
+    private String userName;
 
     @Column(nullable = false, length = 255)
     private String password;
 
     @Column(nullable = false, unique = true, length = 50)
-    private String nickname;
+    private String nickName;
 
     @Column(nullable = false, unique = true)
     private String email;
@@ -55,10 +55,10 @@ public class User implements UserDetails {
     private LocalDateTime approvedAt;
 
     @Builder
-    private User(String username, String password, String nickname, String email, UserRole role, UserStatus status) {
-        this.username = username;
+    private User(String userName, String password, String nickName, String email, UserRole role, UserStatus status) {
+        this.userName = userName;
         this.password = password;
-        this.nickname = nickname;
+        this.nickName = nickName;
         this.email = email;
         this.role = role;
         this.status = (status != null) ? status : UserStatus.PENDING;
@@ -79,9 +79,9 @@ public class User implements UserDetails {
         }
     }
 
-    public void updateProfile(String newUsername, String newNickname) {
-        if (newUsername != null && !newUsername.isBlank()) this.username = newUsername;
-        if (newNickname != null && !newNickname.isBlank()) this.nickname = newNickname;
+    public void updateProfile(String newUserName, String newNickName) {
+        if (newUserName != null && !newUserName.isBlank()) this.userName = newUserName;
+        if (newNickName != null && !newNickName.isBlank()) this.nickName = newNickName;
     }
 
     public void changePassword(String newEncodedPassword) {
@@ -95,7 +95,7 @@ public class User implements UserDetails {
         return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
     }
     @Override
-    public String getUsername() { return username; }
+    public String getUsername() { return userName; }
     @Override
     public String getPassword() { return password; }
     @Override

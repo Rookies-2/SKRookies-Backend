@@ -19,18 +19,30 @@ public class UserDTO {
     @Builder
     public static class Request {
         @NotBlank
-        private String username;
+        private String userName;
 
         @NotBlank
         private String password;
 
         @NotBlank
-        private String nickname;
+        private String nickName;
 
         @NotBlank
         private String email;
 
         private UserRole role;
+    }
+    // ================= 비밀번호 변경 DTO =================
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class PasswordChangeRequest {
+        @NotBlank
+        private String currentPassword;
+
+        @NotBlank
+        private String newPassword;
     }
 
     /**
@@ -40,19 +52,51 @@ public class UserDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
+    public static class PasswordResetRequest {
+        @NotBlank
+        private String email;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class PasswordUpdateRequest {
+        @NotBlank
+        private String token;
+
+        @NotBlank
+        private String newPassword;
+    }
+
+    // ================= Response DTO =================
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
     public static class Response {
+<<<<<<< HEAD
         private Long id;
         private String username;
         private String nickname;
+=======
+        private String userName;
+        private String nickName;
+>>>>>>> f6a98f1fa00588fe08cfc97f653c4ca10eb2e422
         private String email;
         private String role;
         private String status;
 
         public static Response fromEntity(User user) {
             return Response.builder()
+<<<<<<< HEAD
                     .id(user.getId())
                     .username(user.getUsername())
                     .nickname(user.getNickname())
+=======
+                    .userName(user.getUsername())
+                    .nickName(user.getNickName())
+>>>>>>> f6a98f1fa00588fe08cfc97f653c4ca10eb2e422
                     .email(user.getEmail())
                     .role(user.getRole().name())
                     .status(user.getStatus().name())

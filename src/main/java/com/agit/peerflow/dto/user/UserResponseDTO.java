@@ -4,6 +4,7 @@ import com.agit.peerflow.domain.entity.User;
 import lombok.Builder;
 import lombok.Getter;
 
+<<<<<<< HEAD
 @Getter
 @Builder
 public class UserResponseDTO {
@@ -23,5 +24,22 @@ public class UserResponseDTO {
                 .role(user.getRole().name())
                 .status(user.getStatus().name())
                 .build();
+=======
+public record UserResponseDTO(
+        Long id,
+        String userName,
+        String nickName,
+        UserRole role,
+        UserStatus status
+) {
+    public static UserResponseDTO from(User user) {
+        return new UserResponseDTO(
+                user.getId(),
+                user.getUsername(),
+                user.getNickName(),
+                user.getRole(),
+                user.getStatus()
+        );
+>>>>>>> f6a98f1fa00588fe08cfc97f653c4ca10eb2e422
     }
 }
