@@ -29,13 +29,13 @@ public class User implements UserDetails {
     private Long id;
 
     @Column(nullable = false, unique = true, length = 50)
-    private String userName;
+    private String username;
 
     @Column(nullable = false, length = 255)
     private String password;
 
     @Column(nullable = false, unique = true, length = 50)
-    private String nickName;
+    private String nickname;
 
     @Column(nullable = false, unique = true)
     private String email;
@@ -56,9 +56,9 @@ public class User implements UserDetails {
 
     @Builder
     private User(String userName, String password, String nickName, String email, UserRole role, UserStatus status) {
-        this.userName = userName;
+        this.username = userName;
         this.password = password;
-        this.nickName = nickName;
+        this.nickname = nickName;
         this.email = email;
         this.role = role;
         this.status = (status != null) ? status : UserStatus.PENDING;
@@ -80,8 +80,8 @@ public class User implements UserDetails {
     }
 
     public void updateProfile(String newUserName, String newNickName) {
-        if (newUserName != null && !newUserName.isBlank()) this.userName = newUserName;
-        if (newNickName != null && !newNickName.isBlank()) this.nickName = newNickName;
+        if (newUserName != null && !newUserName.isBlank()) this.username = newUserName;
+        if (newNickName != null && !newNickName.isBlank()) this.nickname = newNickName;
     }
 
     public void changePassword(String newEncodedPassword) {
@@ -95,7 +95,7 @@ public class User implements UserDetails {
         return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
     }
     @Override
-    public String getUsername() { return userName; }
+    public String getUsername() { return username; }
     @Override
     public String getPassword() { return password; }
     @Override

@@ -87,7 +87,7 @@ public class UserDTO {
             return Response.builder()
                     .id(user.getId())
                     .userName(user.getUsername())
-                    .nickName(user.getNickName())
+                    .nickName(user.getNickname())
                     .email(user.getEmail())
                     .role(user.getRole().name())
                     .status(user.getStatus().name())
