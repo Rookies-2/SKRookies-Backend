@@ -64,10 +64,11 @@ public class SecurityConfig {
                         .requestMatchers("/api/users/signup").permitAll()
                         .requestMatchers("/stomp/**").permitAll()
                         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
-                        // 2. 관리자 전용
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        // 3. 나머지 /api/users/**는 인증 필요
+                        // 2. 나머지 /api/users/**, /api/chatrooms/**는 인증 필요
                         .requestMatchers("/api/users/**").authenticated()
+                        .requestMatchers("/api/chatrooms/**").authenticated()
+                        // 3. 관리자 전용
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         // 4. 김현근 : 스웨거 문서 접근허용
                         .requestMatchers(
                                 "/swagger-ui.html",

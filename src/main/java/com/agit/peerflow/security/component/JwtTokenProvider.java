@@ -27,7 +27,7 @@ public class JwtTokenProvider {
         Date expiry = new Date(now.getTime() + validityInMilliseconds);
 
         Claims claims = Jwts.claims()
-                .subject(email) // <<-- 이 부분이 수정되었습니다.
+                .subject(email)
                 .add(extraClaims)
                 .build();
 
