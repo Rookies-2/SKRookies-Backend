@@ -6,11 +6,13 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener; // ★ 추가
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users")
+@EntityListeners(AuditingEntityListener.class) // ★ Auditing 리스너
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -41,6 +43,10 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
+    /** 프로필 이미지 URL */
+    @Column(name = "avatar_url", length = 500)  // 길이는 넉넉히
+    private String avatarUrl;
+
     @CreatedDate
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -54,3 +60,4 @@ public class User {
         if (status == null) status = UserStatus.PENDING;
     }
 }
+
