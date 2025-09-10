@@ -3,10 +3,7 @@ package com.agit.peerflow.domain.entity;
 import com.agit.peerflow.domain.enums.UserRole;
 import com.agit.peerflow.domain.enums.UserStatus;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.security.core.GrantedAuthority;
@@ -18,7 +15,7 @@ import java.util.Collection;
 import java.util.List;
 
 @Entity
-@Getter
+@Data
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "users")
 @EntityListeners(AuditingEntityListener.class)
@@ -53,6 +50,11 @@ public class User implements UserDetails {
     private LocalDateTime createdAt;
 
     private LocalDateTime approvedAt;
+
+    // 비밀번호 재설정 토큰 관련
+    private String passwordResetToken;
+
+    private LocalDateTime passwordResetTokenExpiration;
 
     @Builder
     private User(String username, String password, String nickname, String email, UserRole role, UserStatus status) {

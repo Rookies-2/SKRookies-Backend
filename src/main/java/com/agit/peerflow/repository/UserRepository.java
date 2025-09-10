@@ -13,6 +13,8 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Long> {
     // 이메일로 검색
     Optional<User> findByEmail(String email);
+
+    Optional<User> findByPasswordResetToken(String token);
     // 사용자이름으로 검색
     Optional<User> findByUsername(String userName);
 

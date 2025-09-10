@@ -4,6 +4,7 @@ import com.agit.peerflow.domain.entity.User;
 import com.agit.peerflow.dto.user.UserDTO;
 import com.agit.peerflow.repository.UserRepository;
 import com.agit.peerflow.security.component.JwtTokenProvider;
+import com.agit.peerflow.service.MailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -17,6 +18,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AuthController {
 
+    private final MailService mailService;
     private final UserRepository userRepository;
     private final JwtTokenProvider jwtTokenProvider;
     private final PasswordEncoder passwordEncoder;
@@ -43,4 +45,16 @@ public class AuthController {
 
         return ResponseEntity.ok(response);
     }
+    @PostMapping("/password/reset")
+    public ResponseEntity<?> requestPasswordReset(@RequestParam String email) {
+        mailService.sendPasswordResetToken(email);
+        return ResponseEntity.ok("Password reset link has been sent.");
+    }
+
+    @PostMapping("/password/update")
+    public ResponseEntity<?> updatePassword(@RequestParam String token, @RequestParam String newPassword) {
+        mailService.resetPassword(token, newPassword);
+        return ResponseEntity.ok("Password has been updated.");
+    }
+
 }
