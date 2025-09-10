@@ -66,6 +66,7 @@ public class SecurityConfig {
                         // 백두현: Spring Security의 필터체인은 순차적으로 검사하므로 아래 순서를 지켜야 함.
                         // 1. 인증 없이 접근 가능한 경로
                         .requestMatchers("/api/auth/login").permitAll()
+                        .requestMatchers("/api/auth/password/reset","/api/auth/password/update").permitAll()
                         .requestMatchers("/api/users/signup").permitAll()
                         .requestMatchers("/stomp/**").permitAll()
                         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()

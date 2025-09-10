@@ -10,8 +10,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -50,11 +52,27 @@ public class AuthController {
         mailService.sendPasswordResetToken(email);
         return ResponseEntity.ok("Password reset link has been sent.");
     }
+    @GetMapping("/password/update")
+    public ResponseEntity<?> showResetForm(@RequestParam String token) {
+        // 토큰 검증
+        Optional<User> optionalUser = userRepository.findByPasswordResetToken(token);
+        if(optionalUser.isEmpty() || optionalUser.get().getPasswordResetTokenExpiration().isBefore(LocalDateTime.now())) {
+            return ResponseEntity.badRequest().body("Invalid or expired token");
+        }
 
+        // 토큰 유효 → 프론트에서 폼 보여주기
+        // API만 있다면 token을 그대로 프론트로 전달
+        Map<String, String> response = new HashMap<>();
+        response.put("token", token);
+        return ResponseEntity.ok(response);
+    }
     @PostMapping("/password/update")
-    public ResponseEntity<?> updatePassword(@RequestParam String token, @RequestParam String newPassword) {
+    public ResponseEntity<?> updatePassword(@RequestBody Map<String, String> body) {
+        String token = body.get("token");
+        String newPassword = body.get("newPassword");
         mailService.resetPassword(token, newPassword);
         return ResponseEntity.ok("Password has been updated.");
     }
+
 
 }
