@@ -9,6 +9,8 @@ import com.agit.peerflow.dto.message.SendMessageRequestDTO;
 import com.agit.peerflow.service.ChatRoomService;
 import com.agit.peerflow.service.MessageService;
 import com.agit.peerflow.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -26,6 +28,7 @@ import java.security.Principal;
  * - STOMP 기반 실시간 메시지 처리 컨트롤러
  * - 메시지 수신 및 브로드캐스트
  */
+@Tag(name = "Chat Message API (WebSocket)", description = "STOMP 프로토콜을 이용한 실시간 메시지 처리")
 @Controller
 @RequiredArgsConstructor
 public class ChatMessageController {
@@ -33,6 +36,10 @@ public class ChatMessageController {
     private final ChatRoomService chatroomService;
     private final UserService userService;
 
+    @Operation(summary = "채팅 메시지 발신",
+            description = "클라이언트가 서버로 메시지를 보냅니다. (STOMP: /app/chat/rooms/{roomId}) " +
+                    "서버는 이 메시지를 /topic/chat/rooms/{roomId}를 구독 중인 모든 클라이언트에게 브로드캐스트합니다. " +
+                    "**Swagger UI에서는 직접 테스트할 수 없습니다.**")
     @MessageMapping("/rooms/{roomId}")
     public void handleMessage(@DestinationVariable Long roomId,
                               @Payload @Valid SendMessageRequestDTO dto,

@@ -68,8 +68,15 @@ public class SecurityConfig {
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         // 3. 나머지 /api/users/**는 인증 필요
                         .requestMatchers("/api/users/**").authenticated()
-                        // 4. 그 외 모든 요청 인증 필요
+                        // 4. 김현근 : 스웨거 문서 접근허용
+                        .requestMatchers(
+                                "/swagger-ui.html",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**"
+                        ).permitAll()
+                        // 5. 그 외 모든 요청 인증 필요
                         .anyRequest().authenticated()
+
 
                 )
                 .formLogin(AbstractHttpConfigurer::disable)

@@ -43,16 +43,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User getMyInfo(String email) { // username -> email로 변경
-        return userRepository.findByEmail(email) // findByUsername -> findByEmail로 변경
-                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "User", "email", email));
+    public User getMyInfo(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "User", "username", username));
     }
 
     @Override
     @Transactional
-    public void updateMyInfo(String username, UserDTO.Request requestDTO) {
+    public User updateMyInfo(String username, UserDTO.Request requestDTO) {
         User user = getMyInfo(username);
-        user.updateProfile(null, requestDTO.getNickname()); // 본인은 닉네임만 변경 가능
+        user.updateProfile(null, requestDTO.getNickname());
+        return user;
     }
 
     @Override
@@ -64,7 +65,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void changePassword(String username, String oldPassword, String newPassword) {
+    public User changePassword(String username, String oldPassword, String newPassword) {
         User user = getMyInfo(username);
         if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE, "Password", "current password", "불일치");
@@ -73,5 +74,6 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException(ErrorCode.PASSWORD_SAME_AS_CURRENT);
         }
         user.changePassword(passwordEncoder.encode(newPassword));
+        return user;
     }
 }
