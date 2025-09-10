@@ -51,11 +51,19 @@ public class SecurityConfig {
                 // 세션을 사용하지 않는 Stateless 방식으로 설정
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/users/signup", "/api/auth/login", "/stomp/**").permitAll()
-                        .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll() // 정적 자원에 대해서 인증을 하지 않도록 허가
+                        // 백두현: Spring Security의 필터체인은 순차적으로 검사하므로 아래 순서를 지켜야 함.
+                        // 1. 인증 없이 접근 가능한 경로
+                        .requestMatchers("/api/auth/login").permitAll()
+                        .requestMatchers("/api/users/signup").permitAll()
+                        .requestMatchers("/stomp/**").permitAll()
+                        .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
+                        // 2. 관리자 전용
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        // 3. 나머지 /api/users/**는 인증 필요
                         .requestMatchers("/api/users/**").authenticated()
+                        // 4. 그 외 모든 요청 인증 필요
                         .anyRequest().authenticated()
+
                 )
                 .formLogin(AbstractHttpConfigurer::disable)
                 .logout(AbstractHttpConfigurer::disable)
