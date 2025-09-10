@@ -51,6 +51,11 @@ public class SecurityConfig {
                 // 세션을 사용하지 않는 Stateless 방식으로 설정
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+                                "/swagger-ui.html",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**"
+                        ).permitAll()
                         .requestMatchers("/api/users/signup", "/api/auth/login", "/stomp/**").permitAll()
                         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll() // 정적 자원에 대해서 인증을 하지 않도록 허가
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
