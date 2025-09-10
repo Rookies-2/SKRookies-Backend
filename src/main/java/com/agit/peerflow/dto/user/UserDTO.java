@@ -19,13 +19,13 @@ public class UserDTO {
     @Builder
     public static class Request {
         @NotBlank
-        private String userName;
+        private String username;
 
         @NotBlank
         private String password;
 
         @NotBlank
-        private String nickName;
+        private String nickname;
 
         @NotBlank
         private String email;
@@ -77,8 +77,8 @@ public class UserDTO {
     public static class Response {
 
         private Long id;
-        private String userName;
-        private String nickName;
+        private String username;
+        private String nickname;
         private String email;
         private String role;
         private String status;
@@ -86,8 +86,8 @@ public class UserDTO {
         public static Response fromEntity(User user) {
             return Response.builder()
                     .id(user.getId())
-                    .userName(user.getUsername())
-                    .nickName(user.getNickname())
+                    .username(user.getUsername())
+                    .nickname(user.getNickname())
                     .email(user.getEmail())
                     .role(user.getRole().name())
                     .status(user.getStatus().name())

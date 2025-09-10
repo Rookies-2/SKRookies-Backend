@@ -55,10 +55,10 @@ public class User implements UserDetails {
     private LocalDateTime approvedAt;
 
     @Builder
-    private User(String userName, String password, String nickName, String email, UserRole role, UserStatus status) {
-        this.username = userName;
+    private User(String username, String password, String nickname, String email, UserRole role, UserStatus status) {
+        this.username = username;
         this.password = password;
-        this.nickname = nickName;
+        this.nickname = nickname;
         this.email = email;
         this.role = role;
         this.status = (status != null) ? status : UserStatus.PENDING;
@@ -79,9 +79,9 @@ public class User implements UserDetails {
         }
     }
 
-    public void updateProfile(String newUserName, String newNickName) {
-        if (newUserName != null && !newUserName.isBlank()) this.username = newUserName;
-        if (newNickName != null && !newNickName.isBlank()) this.nickname = newNickName;
+    public void updateProfile(String newUsername, String newNickname) {
+        if (newUsername != null && !newUsername.isBlank()) this.username = newUsername;
+        if (newNickname != null && !newNickname.isBlank()) this.nickname = newNickname;
     }
 
     public void changePassword(String newEncodedPassword) {
