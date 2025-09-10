@@ -50,7 +50,7 @@ public class AuthController {
     @PostMapping("/password/reset")
     public ResponseEntity<?> requestPasswordReset(@RequestParam String email) {
         mailService.sendPasswordResetToken(email);
-        return ResponseEntity.ok("Password reset link has been sent.");
+        return ResponseEntity.ok("비밀번호 재설정 링크가 전송되었습니다.");
     }
     @GetMapping("/password/update")
     public ResponseEntity<?> showResetForm(@RequestParam String token) {
@@ -71,7 +71,7 @@ public class AuthController {
         String token = body.get("token");
         String newPassword = body.get("newPassword");
         mailService.resetPassword(token, newPassword);
-        return ResponseEntity.ok("Password has been updated.");
+        return ResponseEntity.ok("비밀번호가 변경되었습니다..");
     }
 
 
