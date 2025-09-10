@@ -43,15 +43,15 @@ import java.util.List;
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    private final UserService userService;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
+    private final UserDetailsServiceImpl userDetailsService;
 
     @Autowired
     public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter,
-                          UserService userService,
+                          UserDetailsServiceImpl userDetailsService,
                           CustomAccessDeniedHandler customAccessDeniedHandler) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
-        this.userService = userService;
+        this.userDetailsService = userDetailsService;
         this.customAccessDeniedHandler = customAccessDeniedHandler;
     }
 
@@ -118,23 +118,4 @@ public class SecurityConfig {
         return authProvider;
     }
 
-    /*
-        UserDetailsService 구현
-     */
-    @Bean
-    public UserDetailsService userDetailsService() {
-        return username -> {
-            // username은 로그인 시 입력한 값 (여기서는 username 필드 기준)
-            User user = userService.getMyInfo(username);
-            if (user == null) {
-                throw new UsernameNotFoundException("사용자를 찾을 수 없습니다: " + username);
-            }
-
-            return org.springframework.security.core.userdetails.User
-                    .withUsername(user.getUsername())
-                    .password(user.getPassword()) // 암호화된 비밀번호
-                    .roles(user.getRole().name()) // Enum → String
-                    .build();
-        };
-    }
 }

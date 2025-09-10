@@ -23,10 +23,10 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public User signup(UserDTO.Request requestDTO) {
         if (userRepository.existsByUserName(requestDTO.getUserName())) {
-            throw new BusinessException(ErrorCode.RESOURCE_DUPLICATE, "User", "username", requestDTO.getUserName());
+            throw new BusinessException(ErrorCode.RESOURCE_DUPLICATE, "User", "userName", requestDTO.getUserName());
         }
         if (userRepository.existsByNickName(requestDTO.getNickName())) {
-            throw new BusinessException(ErrorCode.RESOURCE_DUPLICATE, "User", "nickname", requestDTO.getNickName());
+            throw new BusinessException(ErrorCode.RESOURCE_DUPLICATE, "User", "nickName", requestDTO.getNickName());
         }
         if (userRepository.existsByEmail(requestDTO.getEmail())) {
             throw new BusinessException(ErrorCode.RESOURCE_DUPLICATE, "User", "email", requestDTO.getEmail());
@@ -43,34 +43,31 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User getMyInfo(String username) {
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "User", "username", username));
+    public User getMyInfo(String userName) {
+        return userRepository.findByUserName(userName)
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "User", "username", userName));
     }
 
     @Override
     @Transactional
-    public User updateMyInfo(String username, UserDTO.Request requestDTO) {
-        User user = getMyInfo(username);
-<<<<<<< HEAD
-        user.updateProfile(null, requestDTO.getNickname());
-        return user;
-=======
+    public User updateMyInfo(String userName, UserDTO.Request requestDTO) {
+        User user = getMyInfo(userName);
         user.updateProfile(null, requestDTO.getNickName()); // 본인은 닉네임만 변경 가능
->>>>>>> f6a98f1fa00588fe08cfc97f653c4ca10eb2e422
+
+        return user;
     }
 
     @Override
     @Transactional
-    public void deleteMyAccount(String username) {
-        User user = getMyInfo(username);
+    public void deleteMyAccount(String userName) {
+        User user = getMyInfo(userName);
         userRepository.delete(user);
     }
 
     @Override
     @Transactional
-    public User changePassword(String username, String oldPassword, String newPassword) {
-        User user = getMyInfo(username);
+    public User changePassword(String userName, String oldPassword, String newPassword) {
+        User user = getMyInfo(userName);
         if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE, "Password", "current password", "불일치");
         }
