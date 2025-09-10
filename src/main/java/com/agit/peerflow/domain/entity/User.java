@@ -28,6 +28,7 @@ public class User implements UserDetails {
     @Column(nullable = false, unique = true, length = 50)
     private String username;
 
+    @Setter(AccessLevel.NONE) // 외부에서 직접 변경 불가
     @Column(nullable = false, length = 255)
     private String password;
 

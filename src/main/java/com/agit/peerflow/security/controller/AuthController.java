@@ -46,15 +46,16 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
     @PostMapping("/password/reset")
-    public ResponseEntity<?> requestPasswordReset(@RequestParam String email) {
+    public ResponseEntity<String> requestPasswordReset(@RequestParam String email) {
         mailService.sendPasswordResetToken(email);
-        return ResponseEntity.ok("Password reset link has been sent.");
+        return ResponseEntity.ok("Password reset email has been sent.");
     }
 
     @PostMapping("/password/update")
-    public ResponseEntity<?> updatePassword(@RequestParam String token, @RequestParam String newPassword) {
+    public ResponseEntity<String> updatePassword(@RequestParam String token,
+                                                 @RequestParam String newPassword) {
         mailService.resetPassword(token, newPassword);
-        return ResponseEntity.ok("Password has been updated.");
+        return ResponseEntity.ok("Password has been updated successfully.");
     }
 
 }
