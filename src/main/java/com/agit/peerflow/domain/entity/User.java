@@ -49,6 +49,13 @@ public class User {
     @LastModifiedDate
     private LocalDateTime approvedAt;
 
+    //비밀번호 찾기 관련
+    @Column(name = "reset_token")
+    private String resetToken;
+
+    @Column(name = "reset_token_expiry")
+    private LocalDateTime resetTokenExpiry;
+
     @PrePersist
     public void prePersist() {
         createdAt = LocalDateTime.now();

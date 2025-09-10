@@ -28,7 +28,41 @@ public class UserDTO {
         @NotBlank
         private UserRole role; // STUDENT, TEACHER
     }
+    // ================= 비밀번호 변경 DTO =================
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class PasswordChangeRequest {
+        @NotBlank
+        private String currentPassword;
 
+        @NotBlank
+        private String newPassword;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class PasswordResetRequest {
+        @NotBlank
+        private String email;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class PasswordUpdateRequest {
+        @NotBlank
+        private String token;
+
+        @NotBlank
+        private String newPassword;
+    }
+
+    // ================= Response DTO =================
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
