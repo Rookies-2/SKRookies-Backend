@@ -26,7 +26,7 @@ public class AdminController {
     // 모든 사용자 조회(페이징 + 정렬)
     @GetMapping
     public ResponseEntity<Page<UserDTO.Response>> getAllUsers(
-            @PageableDefault(size = 10, sort = "userId", direction = Sort.Direction.ASC) Pageable pageable) {
+            @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.ASC) Pageable pageable) {
         Page<User> users = adminService.getAllUsers(pageable); // DB에서 Page<User> 조회
         Page<UserDTO.Response> dtoPage = users.map(UserDTO.Response::fromEntity); // DTO 변환
 
@@ -37,7 +37,7 @@ public class AdminController {
     @GetMapping("/status/{status}")
     public ResponseEntity<Page<UserDTO.Response>> getUsersByStatus(
             @PathVariable("status") String status,
-            @PageableDefault(size = 10, sort = "userId", direction = Sort.Direction.ASC) Pageable pageable) {
+            @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.ASC) Pageable pageable) {
         Page<User> users  = adminService.getUsersByStatus(
                 Enum.valueOf(com.agit.peerflow.domain.enums.UserStatus.class, status.toUpperCase()),
                 pageable
@@ -51,7 +51,7 @@ public class AdminController {
     @GetMapping("/role/{role}")
     public ResponseEntity<Page<UserDTO.Response>> getUsersByRole(
             @PathVariable("role") String role,
-            @PageableDefault(size = 10, sort = "userId", direction = Sort.Direction.ASC) Pageable pageable) {
+            @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.ASC) Pageable pageable) {
 
         Page<User> users = adminService.getUsersByRole(
                 Enum.valueOf(com.agit.peerflow.domain.enums.UserRole.class, role.toUpperCase()),

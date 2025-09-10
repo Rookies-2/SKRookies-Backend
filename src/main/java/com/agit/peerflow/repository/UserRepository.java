@@ -29,6 +29,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     // 사용자 역할로 검색
     Page<User> findByRole(UserRole role, Pageable pageable);
-    //Id 검색
-    List<User> findByUserId(Long userId);
+
 }
