@@ -25,4 +25,7 @@ public interface ChatParticipantRepository extends JpaRepository<ChatParticipant
 
     // 특정 유저가 참여중인 모든 방
     List<ChatParticipant> findByUser(User user);
+
+    // 채팅방의 참여자 삭제
+    void deleteByChatRoom(ChatRoom chatRoom);
 }

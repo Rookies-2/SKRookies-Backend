@@ -7,6 +7,8 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -33,6 +35,10 @@ public class ChatParticipant {
     @Column(nullable = false)
     private ParticipantType status;
 
+    // 사용자가 채팅방을 나간 시각
+    @Column(name = "left_at")
+    private LocalDateTime leftAt;
+
     // 생성 시점에 User와 ChatRoom을 반드시 받도록 강제
     private ChatParticipant(User user, ChatRoom chatRoom) {
         this.user = user;
@@ -50,7 +56,10 @@ public class ChatParticipant {
         if (this.status == ParticipantType.BANNED && type == ParticipantType.ACTIVE) {
             throw new IllegalStateException("강퇴된 사용자는 재참여할 수 없습니다.");
         }
-
         this.status = type;
+    }
+
+    public void setLeftAt(LocalDateTime leftAt) {
+        this.leftAt = leftAt;
     }
 }
