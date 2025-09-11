@@ -47,4 +47,20 @@ public class UserChatRoom {
     public static UserChatRoom create(User user, ChatRoom chatRoom) {
         return new UserChatRoom(user, chatRoom);
     }
+
+    public void toggleMute() {
+        this.muted = !this.muted;
+    }
+
+    public void togglePinned() {
+        this.pinned = !this.pinned;
+    }
+
+    public void setMute(boolean mute) {
+        this.muted = mute;
+    }
+
+    public void setPinned(boolean pinned) {
+        this.pinned = pinned;
+    }
 }
