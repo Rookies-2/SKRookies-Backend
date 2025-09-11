@@ -6,11 +6,17 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 @Entity
 @Getter
+@Table(name = "message")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@EntityListeners(AuditingEntityListener.class)
 public class Message {
 
     @Id
@@ -18,6 +24,7 @@ public class Message {
     @Column(name = "message_id")
     private Long id;
 
+    @Lob
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
@@ -25,7 +32,8 @@ public class Message {
     @Column(nullable = false)
     private MessageType type;
 
-    @Column(name = "sent_at", nullable = false)
+    @CreatedDate
+    @Column(name = "sent_at", nullable = false, updatable = false)
     private LocalDateTime sentAt;
 
     // 연관관계 매핑
