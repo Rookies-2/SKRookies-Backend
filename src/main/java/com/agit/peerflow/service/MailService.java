@@ -24,47 +24,54 @@ public class MailService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    // 1. 비밀번호 재설정 토큰 생성 및 이메일 발송
-    public void sendPasswordResetToken(String email) {
-        Optional<User> optionalUser = userRepository.findByEmail(email);
-        if(optionalUser.isEmpty()) throw new RuntimeException("User not found");
+    // 1️⃣ 인증번호 생성 및 이메일 발송
+    public void sendVerificationCode(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        User user = optionalUser.get();
-        String token = UUID.randomUUID().toString();
-        user.setPasswordResetToken(token);
-        user.setPasswordResetTokenExpiration(LocalDateTime.now().plusMinutes(30)); // 30분 유효
+        // 6자리 인증번호 생성
+        String code = String.valueOf((int)(Math.random() * 900000) + 100000);
+
+        user.setVerificationCode(code);
+        user.setVerificationCodeExpiration(LocalDateTime.now().plusMinutes(1)); // 1분 유효
         userRepository.save(user);
 
-        // 이메일 발송
-        String subject = "비밀번호 재설정 안내";
-        String text = "안녕하세요!\n\n아래 링크를 클릭하여 비밀번호를 재설정하세요:\n"
-                + "http://localhost:8080/api/auth/password/update?token=" + token
-                + "\n\n(30분 동안 유효합니다)";
-
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(email);
-        message.setSubject(subject);
-        message.setText(text);
-
-        mailSender.send(message);
+        // 실제 메일 발송
+        String subject = "비밀번호 재설정 인증번호";
+        String text = "인증번호: " + code + "\n1분 안에 입력해주세요.";
+        sendMail(email, subject, text);
     }
 
-    // 2. 토큰 검증 후 비밀번호 변경
-    public void resetPassword(String token, String newPassword) {
-        Optional<User> optionalUser = userRepository.findByPasswordResetToken(token);
-        if(optionalUser.isEmpty()) throw new RuntimeException("Invalid token");
+    // 2️⃣ 인증번호 기반 비밀번호 변경
+    public void resetPasswordByCode(String email, String code, String newPassword) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        User user = optionalUser.get();
+        if (user.getVerificationCode() == null || !user.getVerificationCode().equals(code)) {
+            throw new RuntimeException("Invalid verification code");
+        }
 
-        if(user.getPasswordResetTokenExpiration() == null ||
-                user.getPasswordResetTokenExpiration().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("Token expired");
+        if (user.getVerificationCodeExpiration() == null ||
+                user.getVerificationCodeExpiration().isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("Verification code expired");
         }
 
         // 비밀번호 변경
         user.setPassword(passwordEncoder.encode(newPassword));
-        user.setPasswordResetToken(null);
-        user.setPasswordResetTokenExpiration(null);
+
+        // 사용한 인증번호 초기화
+        user.setVerificationCode(null);
+        user.setVerificationCodeExpiration(null);
+
         userRepository.save(user);
+    }
+
+    // 3️⃣ 실제 메일 전송
+    private void sendMail(String to, String subject, String text) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);
+        message.setSubject(subject);
+        message.setText(text);
+        mailSender.send(message);
     }
 }

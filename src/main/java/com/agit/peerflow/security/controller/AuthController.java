@@ -47,31 +47,45 @@ public class AuthController {
 
         return ResponseEntity.ok(response);
     }
+
+    // 1️⃣ 인증번호 발송
     @PostMapping("/password/reset")
-    public ResponseEntity<?> requestPasswordReset(@RequestParam String email) {
-        mailService.sendPasswordResetToken(email);
-        return ResponseEntity.ok("비밀번호 재설정 링크가 전송되었습니다.");
+    public ResponseEntity<?> sendVerificationCode(@RequestParam String email) {
+        mailService.sendVerificationCode(email);
+        return ResponseEntity.ok("인증번호가 발송되었습니다.");
     }
-    @GetMapping("/password/update")
-    public ResponseEntity<?> showResetForm(@RequestParam String token) {
-        // 토큰 검증
-        Optional<User> optionalUser = userRepository.findByPasswordResetToken(token);
-        if(optionalUser.isEmpty() || optionalUser.get().getPasswordResetTokenExpiration().isBefore(LocalDateTime.now())) {
-            return ResponseEntity.badRequest().body("Invalid or expired token");
+
+    // 2️⃣ 인증번호 검증
+    @PostMapping("/password/verify")
+    public ResponseEntity<?> verifyCode(@RequestBody Map<String, String> body) {
+        String email = body.get("email");
+        String code = body.get("code");
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (user.getVerificationCode() == null || !user.getVerificationCode().equals(code)) {
+            return ResponseEntity.badRequest().body("인증번호가 올바르지 않습니다.");
         }
 
-        // 토큰 유효 → 프론트에서 폼 보여주기
-        // API만 있다면 token을 그대로 프론트로 전달
-        Map<String, String> response = new HashMap<>();
-        response.put("token", token);
-        return ResponseEntity.ok(response);
+        if (user.getVerificationCodeExpiration().isBefore(LocalDateTime.now())) {
+            return ResponseEntity.badRequest().body("인증번호가 만료되었습니다.");
+        }
+
+        return ResponseEntity.ok("인증번호 확인 완료");
     }
+
+    // 3️⃣ 새 비밀번호 저장 (MailService 사용)
     @PostMapping("/password/update")
     public ResponseEntity<?> updatePassword(@RequestBody Map<String, String> body) {
-        String token = body.get("token");
+        String email = body.get("email");
+        String code = body.get("code"); // 인증번호 필요
         String newPassword = body.get("newPassword");
-        mailService.resetPassword(token, newPassword);
-        return ResponseEntity.ok("비밀번호가 변경되었습니다..");
+
+        // MailService로 검증 + 비밀번호 변경
+        mailService.resetPasswordByCode(email, code, newPassword);
+
+        return ResponseEntity.ok("비밀번호가 변경되었습니다.");
     }
 
 

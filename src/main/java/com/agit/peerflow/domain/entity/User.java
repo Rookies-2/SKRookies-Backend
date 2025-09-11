@@ -51,10 +51,14 @@ public class User implements UserDetails {
 
     private LocalDateTime approvedAt;
 
-    // 비밀번호 재설정 토큰 관련
+    // 비밀번호 재설정 인증번호 관련
     private String passwordResetToken;
 
-    private LocalDateTime passwordResetTokenExpiration;
+    @Column(name = "verification_code")
+    private String verificationCode;
+
+    @Column(name = "verification_code_expiration")
+    private LocalDateTime verificationCodeExpiration;
 
     @Builder
     private User(String username, String password, String nickname, String email, UserRole role, UserStatus status) {
