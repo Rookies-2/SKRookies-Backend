@@ -11,6 +11,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -51,6 +52,9 @@ public class User implements UserDetails {
 
     private LocalDateTime approvedAt;
 
+    @OneToMany(mappedBy="user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserChatRoom> userChatRooms = new ArrayList<>();
+
     // 비밀번호 재설정 인증번호 관련
     private String passwordResetToken;
 
@@ -71,6 +75,11 @@ public class User implements UserDetails {
         this.createdAt = LocalDateTime.now();
     }
 
+    // 유저-채팅방 중간 엔티티, 채팅방 추가 메서드
+    public void addChatRoom(ChatRoom chatRoom) {
+        UserChatRoom link = UserChatRoom.create(this, chatRoom);
+        userChatRooms.add(link);
+    }
     //== 비즈니스 로직 ==//
     public void approve() {
         if (this.status == UserStatus.PENDING) {

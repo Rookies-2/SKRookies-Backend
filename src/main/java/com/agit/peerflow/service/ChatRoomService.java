@@ -7,6 +7,7 @@ import com.agit.peerflow.domain.enums.ChatRoomType;
 import com.agit.peerflow.dto.chatroom.CreateRoomRequestDTO;
 import com.agit.peerflow.repository.ChatParticipantRepository;
 import com.agit.peerflow.repository.ChatRoomRepository;
+import com.agit.peerflow.repository.UserChatRoomRepository;
 import com.agit.peerflow.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,15 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * @author    백두현
+ * @version   1.0.0
+ * @since     2025-09-08
+ * @description
+ * - STOMP 기반 실시간 채팅 메시지 처리 컨트롤러
+ * - 클라이언트로부터 메시지를 수신하고 /topic/messages 구독자에게 브로드캐스트
+ * - Spring WebSocket + SimpMessagingTemplate 사용
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -23,6 +33,7 @@ public class ChatRoomService {
     private final ChatRoomRepository chatRoomRepository;
     private final UserRepository userRepository;
     private final ChatParticipantRepository chatParticipantRepository;
+    private final UserChatRoomRepository userChatRoomRepository;
 
     public ChatRoom createRoom(CreateRoomRequestDTO request, User creator) {
         // getter 대신 record의 접근자 메소드를 사용합니다.
@@ -53,5 +64,10 @@ public class ChatRoomService {
                 .stream()
                 .map(ChatParticipant::getChatRoom)
                 .collect(Collectors.toList());
+    }
+
+    // 모든 채팅방 리스트 조회
+    public List<ChatRoom> findAllChatRooms() {
+        return userChatRoomRepository.findAllChatRooms();
     }
 }
