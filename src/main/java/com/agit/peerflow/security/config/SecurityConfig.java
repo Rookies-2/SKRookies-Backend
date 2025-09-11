@@ -68,7 +68,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/users/**").authenticated()
                         .requestMatchers("/api/chatrooms/**").authenticated()
                         // 3. 관리자 전용
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/admin/**").hasAuthority("ADMIN")
                         // 4. 김현근 : 스웨거 문서 접근허용
                         .requestMatchers(
                                 "/swagger-ui.html",
