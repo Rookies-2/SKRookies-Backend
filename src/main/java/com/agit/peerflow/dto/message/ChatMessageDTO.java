@@ -8,6 +8,7 @@ public record ChatMessageDTO(
         String roomId,
         String senderId,
         String content,
+        String receiverId,
         Long sentAtEpochMs
 ) {
     public static ChatMessageDTO from(Message message) {
@@ -15,6 +16,7 @@ public record ChatMessageDTO(
                 String.valueOf(message.getChatRoom().getId()),
                 String.valueOf(message.getSender().getId()),
                 message.getContent(),
+                String.valueOf(message.getReceiver().getId()),
                 message.getSentAt().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
         );
     }

@@ -8,6 +8,7 @@ import java.time.Instant;
 public record SendMessageRequestDTO(
    @NotBlank String roomId,
    @NotBlank String content,
+   String receiverId,
    String fileUrl,
    @NotBlank MessageType type
 ) {}

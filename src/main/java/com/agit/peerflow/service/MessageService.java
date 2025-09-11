@@ -39,13 +39,17 @@ public class MessageService {
     private final ChatParticipantRepository chatParticipantRepository;
 
     @Transactional
-    public Message sendMessage(ChatRoom chatRoom, User sender, String content, MessageType type) {
-        Message message = Message.createMessage(sender, chatRoom, content, type);
+    public Message sendMessage(ChatRoom room, User sender, User receiver, String content, MessageType type) {
+        Message message = Message.createMessage(sender, room, receiver, content, type);
         return messageRepository.save(message);
     }
 
     public void broadcastMessage(Long roomId, ChatMessageDTO dto) {
         messagingTemplate.convertAndSend("/topic/rooms/" + roomId, dto);
+    }
+
+    public void privateMessage(String userName, ChatMessageDTO dto) {
+        messagingTemplate.convertAndSendToUser(userName, "/queue/messages/" + dto.roomId(), dto);
     }
 
     public List<Message> getMessages(ChatRoom chatRoom) {

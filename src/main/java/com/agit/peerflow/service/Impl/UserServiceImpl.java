@@ -77,4 +77,12 @@ public class UserServiceImpl implements UserService {
         user.changePassword(passwordEncoder.encode(newPassword));
         return user;
     }
+
+    @Override
+    public User getById(String id) {
+        return userRepository.findById(Long.valueOf(id))
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.RESOURCE_NOT_FOUND, "User", "id", String.valueOf(id)
+                ));
+    }
 }

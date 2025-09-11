@@ -3,6 +3,7 @@ package com.agit.peerflow.controller;
 import com.agit.peerflow.domain.entity.ChatRoom;
 import com.agit.peerflow.domain.entity.Message;
 import com.agit.peerflow.domain.entity.User;
+import com.agit.peerflow.domain.enums.ChatRoomType;
 import com.agit.peerflow.domain.enums.MessageType;
 import com.agit.peerflow.dto.message.ChatMessageDTO;
 import com.agit.peerflow.dto.message.ReadMessageRequestDTO;
@@ -41,6 +42,7 @@ public class ChatMessageController {
     @Operation(summary = "채팅 메시지 발신",
             description = "클라이언트가 서버로 메시지를 보냅니다. (STOMP: /app/chat/rooms/{roomId}) " +
                     "서버는 이 메시지를 /topic/chat/rooms/{roomId}를 구독 중인 모든 클라이언트에게 브로드캐스트합니다. " +
+                    "또한 메시지를 /queue/messages/{roomId}를 구독 중인 클라이언트에게 private 메시지를 전송합니다." +
                     "**Swagger UI에서는 직접 테스트할 수 없습니다.**")
     @MessageMapping("/chat/rooms/{roomId}")
     public void handleMessage(@DestinationVariable Long roomId,
@@ -60,18 +62,29 @@ public class ChatMessageController {
         }
 
         Message saved = null;
+        User receiver = null;
+
+        if (room.getType() == ChatRoomType.ONE_TO_ONE) {
+            receiver = userService.getById(dto.receiverId()); // 프론트에서 전달
+        }
 
         if(dto.type() == MessageType.TEXT) {
-            saved = messageService.sendMessage(room, sender, dto.content(), MessageType.TEXT);
+            saved = messageService.sendMessage(room, sender, receiver, dto.content(), MessageType.TEXT);
         } else if(dto.type() == MessageType.IMAGE) {
-            saved = messageService.sendMessage(room, sender, dto.fileUrl(), MessageType.IMAGE);
+            saved = messageService.sendMessage(room, sender, receiver, dto.fileUrl(), MessageType.IMAGE);
         } else if(dto.type() == MessageType.FILE) {
-            saved = messageService.sendMessage(room, sender, dto.fileUrl(), MessageType.FILE);
+            saved = messageService.sendMessage(room, sender, receiver, dto.fileUrl(), MessageType.FILE);
         }
 
         ChatMessageDTO response = ChatMessageDTO.from(saved);
 
-        messageService.broadcastMessage(roomId, response);
+        if(room.getType() == ChatRoomType.GROUP) {
+            messageService.broadcastMessage(roomId, response);
+        } else if (room.getType() == ChatRoomType.ONE_TO_ONE) {
+            // 수신자, 송신자에게 전송
+            messageService.privateMessage(response.senderId(), response);
+            messageService.privateMessage(response.receiverId(), response);
+        }
     }
 
     @Operation(summary = "유저 별 채팅창 읽은 채팅 메시지 표시",
