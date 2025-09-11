@@ -17,6 +17,7 @@ import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.security.Principal;
 
@@ -40,7 +41,7 @@ public class ChatMessageController {
             description = "클라이언트가 서버로 메시지를 보냅니다. (STOMP: /app/chat/rooms/{roomId}) " +
                     "서버는 이 메시지를 /topic/chat/rooms/{roomId}를 구독 중인 모든 클라이언트에게 브로드캐스트합니다. " +
                     "**Swagger UI에서는 직접 테스트할 수 없습니다.**")
-    @MessageMapping("/rooms/{roomId}")
+    @MessageMapping("/chat/rooms/{roomId}")
     public void handleMessage(@DestinationVariable Long roomId,
                               @Payload @Valid SendMessageRequestDTO dto,
                               Principal principal) {

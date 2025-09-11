@@ -32,6 +32,18 @@ public class UserDTO {
 
         private UserRole role;
     }
+    // ================= 비밀번호 변경 DTO =================
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class PasswordChangeRequest {
+        @NotBlank
+        private String currentPassword;
+
+        @NotBlank
+        private String newPassword;
+    }
 
     /**
      * 사용자 정보 '응답'에 사용되는 DTO
@@ -40,7 +52,30 @@ public class UserDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
+    public static class PasswordResetRequest {
+        @NotBlank
+        private String email;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class PasswordUpdateRequest {
+        @NotBlank
+        private String token;
+
+        @NotBlank
+        private String newPassword;
+    }
+
+    // ================= Response DTO =================
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
     public static class Response {
+
         private Long id;
         private String username;
         private String nickname;

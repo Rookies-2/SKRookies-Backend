@@ -55,8 +55,18 @@ public class ChatRoomController {
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary= "채팅방 들어가기", description = "현재 로그인된 사용자가 참여중인 채팅방에서 참여합니다.")
+    @PostMapping("/{roomId}/join")
+    public ResponseEntity<Void> joinRoom(
+            @PathVariable Long roomId,
+            @AuthenticationPrincipal User user) {
+          ChatRoom room = chatRoomService.getRoomById(roomId);
+          chatParticipantService.joinRoom(user, room);
+          return ResponseEntity.ok().build();
+    }
+
     @Operation(summary = "채팅방 나가기", description = "현재 로그인된 사용자가 참여중인 채팅방에서 나갑니다.")
-    @DeleteMapping("/{roomId}/participants")
+    @PutMapping("/{roomId}/leave")
     public ResponseEntity<Void> leaveRoom(
             @PathVariable Long roomId,
             @AuthenticationPrincipal User user) {
@@ -85,5 +95,15 @@ public class ChatRoomController {
                 .map(ChatMessageDTO::from)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "모든 방 조회", description = "사용자가 로그인 시 모든 방을 조회합니다.")
+    @GetMapping("/all")
+    public ResponseEntity<List<ChatRoomResponseDTO>> findAllChatRooms() {
+        List<ChatRoom> rooms = chatRoomService.findAllChatRooms();
+        List<ChatRoomResponseDTO> dto = rooms.stream()
+                .map(ChatRoomResponseDTO::from)
+                .toList();
+        return ResponseEntity.ok(dto);
     }
 }
