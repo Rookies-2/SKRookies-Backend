@@ -66,7 +66,7 @@ public class ChatRoomController {
     }
 
     @Operation(summary = "채팅방 나가기", description = "현재 로그인된 사용자가 참여중인 채팅방에서 나갑니다.")
-    @DeleteMapping("/{roomId}/leave")
+    @PutMapping("/{roomId}/leave")
     public ResponseEntity<Void> leaveRoom(
             @PathVariable Long roomId,
             @AuthenticationPrincipal User user) {

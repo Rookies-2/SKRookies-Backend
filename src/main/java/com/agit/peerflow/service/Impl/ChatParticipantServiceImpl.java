@@ -32,7 +32,7 @@ public class ChatParticipantServiceImpl implements ChatParticipantService {
     @Override
     @Transactional
     public void joinRoom(User user, ChatRoom chatRoom) {
-        // 사용자 상태 별 정책
+        // 사용자 상태 체크
         switch(user.getStatus()) {
             case PENDING -> throw new IllegalStateException("승인 대기 상태에서는 채팅방 입장이 제한됩니다.");
             case INACTIVE -> throw new IllegalStateException("비활성화 상태에서는 채팅방 입장이 제한됩니다.");
@@ -41,26 +41,14 @@ public class ChatParticipantServiceImpl implements ChatParticipantService {
                 // 활성화 상태일 때만 입장
             }
         }
-        Optional<ChatParticipant> existingOpt = chatParticipantRepository.findByUserAndChatRoom(user, chatRoom);
+        ChatParticipant participant = chatParticipantRepository
+                .findByUserAndChatRoom(user, chatRoom)
+                .orElseGet(() -> ChatParticipant.create(user, chatRoom));
 
-        if (existingOpt.isPresent()) {
-            ChatParticipant existing = existingOpt.get();
-//            if (existing.getStatus() == ParticipantType.ACTIVE) {
-//                throw new IllegalStateException("이미 참여 중인 방입니다.");
-//            }
-            if (existing.getStatus() == ParticipantType.BANNED) {
-                throw new IllegalStateException("강퇴된 사용자는 재참여할 수 없습니다.");
-            }
-            if (existing.getStatus() == ParticipantType.LEFT) {
-                existing.setStatus(ParticipantType.ACTIVE);
-                return;
-            }
-
-            throw new IllegalStateException("현재 상태(" + existing.getStatus() + ")에서는 참여할 수 없습니다.");
+        if (participant.getStatus() == ParticipantType.BANNED) {
+            throw new IllegalStateException("강퇴된 사용자는 재참여할 수 없습니다.");
         }
 
-        // 처음 참여하는 경우
-        ChatParticipant participant = ChatParticipant.create(user, chatRoom);
         // 처음 생성 시 상태를 ACTIVE로 설정
         participant.setStatus(ParticipantType.ACTIVE);
         chatParticipantRepository.save(participant);
@@ -70,7 +58,11 @@ public class ChatParticipantServiceImpl implements ChatParticipantService {
     @Transactional
     public void leaveRoom(User user, ChatRoom chatRoom) {
         chatParticipantRepository.findByUserAndChatRoom(user, chatRoom)
-                .ifPresent(chatParticipantRepository::delete);
+                .ifPresent(chatParticipant -> {
+                   if(chatParticipant.getStatus() != ParticipantType.BANNED) {
+                       chatParticipant.setStatus(ParticipantType.LEFT);
+                   }
+                });
     }
 
     @Override
