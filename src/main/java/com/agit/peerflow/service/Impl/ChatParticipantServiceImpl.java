@@ -67,6 +67,6 @@ public class ChatParticipantServiceImpl implements ChatParticipantService {
 
     @Override
     public List<ChatParticipant> getParticipants(ChatRoom chatRoom) {
-        return chatParticipantRepository.findByChatRoom(chatRoom);
+        return chatParticipantRepository.findByChatRoomWithUser(chatRoom);
     }
 }
