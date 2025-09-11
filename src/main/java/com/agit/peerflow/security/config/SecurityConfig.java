@@ -97,7 +97,6 @@ public class SecurityConfig {
                         // POST /api/assignments/{id}/submissions -> 과제 제출 (학생)
                         .requestMatchers(HttpMethod.POST, "/api/assignments/*/submissions").hasRole("STUDENT")
 
-
                         // 5. 그 외 모든 요청 인증 필요
                         .anyRequest().authenticated()
 
