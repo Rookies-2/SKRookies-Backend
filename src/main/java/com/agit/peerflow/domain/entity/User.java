@@ -72,7 +72,7 @@ public class User implements UserDetails {
         this.email = email;
         this.role = role;
         this.status = (status != null) ? status : UserStatus.PENDING;
-        this.createdAt = LocalDateTime.now();
+        //this.createdAt = LocalDateTime.now();
     }
 
     // 유저-채팅방 중간 엔티티, 채팅방 추가 메서드
