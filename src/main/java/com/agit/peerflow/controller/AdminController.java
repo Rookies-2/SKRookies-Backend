@@ -14,6 +14,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,7 +29,8 @@ public class AdminController {
 
     @Operation(summary = "전체 사용자 목록 조회", description = "모든 사용자를 페이징하여 조회합니다.")
     @GetMapping
-    public ResponseEntity<Page<UserDTO.Response>> getAllUsers(Pageable pageable) {
+    public ResponseEntity<Page<UserDTO.Response>> getAllUsers(
+            @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.ASC) Pageable pageable) {
         Page<User> users = adminService.getAllUsers(pageable);
         return ResponseEntity.ok(users.map(UserDTO.Response::fromEntity));
     }
@@ -35,7 +38,9 @@ public class AdminController {
     @Operation(summary = "상태별 사용자 목록 조회", description = "특정 상태(PENDING, ACTIVE 등)의 사용자를 페이징하여 조회합니다.")
     @Parameter(name = "status", description = "조회할 사용자 상태 (PENDING, ACTIVE, REJECTED 등)", example = "PENDING")
     @GetMapping("/status/{status}")
-    public ResponseEntity<Page<UserDTO.Response>> getUsersByStatus(@PathVariable String status, Pageable pageable) {
+    public ResponseEntity<Page<UserDTO.Response>> getUsersByStatus(
+            @PathVariable String status,
+           @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.ASC)Pageable pageable) {
         Page<User> users = adminService.getUsersByStatus(UserStatus.valueOf(status.toUpperCase()), pageable);
         return ResponseEntity.ok(users.map(UserDTO.Response::fromEntity));
     }
@@ -43,7 +48,9 @@ public class AdminController {
     @Operation(summary = "역할별 사용자 목록 조회", description = "특정 역할(STUDENT, TEACHER 등)의 사용자를 페이징하여 조회합니다.")
     @Parameter(name = "role", description = "조회할 사용자 역할 (STUDENT, TEACHER, ADMIN)", example = "STUDENT")
     @GetMapping("/role/{role}")
-    public ResponseEntity<Page<UserDTO.Response>> getUsersByRole(@PathVariable String role, Pageable pageable) {
+    public ResponseEntity<Page<UserDTO.Response>> getUsersByRole(
+            @PathVariable String role,
+            @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.ASC) Pageable pageable) {
         Page<User> users = adminService.getUsersByRole(UserRole.valueOf(role.toUpperCase()), pageable);
         return ResponseEntity.ok(users.map(UserDTO.Response::fromEntity));
     }

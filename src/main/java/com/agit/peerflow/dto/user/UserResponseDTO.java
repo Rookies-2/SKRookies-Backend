@@ -23,5 +23,6 @@ public class UserResponseDTO {
                 .role(user.getRole().name())
                 .status(user.getStatus().name())
                 .build();
+
     }
 }
