@@ -46,5 +46,11 @@ public class ChatParticipant {
         return participant;
     }
 
+    public void setStatus(ParticipantType type) {
+        if (this.status == ParticipantType.BANNED && type == ParticipantType.ACTIVE) {
+            throw new IllegalStateException("강퇴된 사용자는 재참여할 수 없습니다.");
+        }
 
+        this.status = type;
+    }
 }

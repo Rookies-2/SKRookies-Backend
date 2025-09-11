@@ -17,9 +17,9 @@ import java.util.Optional;
 
 /**
  * @author    백두현
- * @version   1.1
+ * @version   1.2
  * @since     2025-09-09
- * @description 채팅방 참여자 관련 비즈니스 로직 구현체 (수정)
+ * @description 채팅방 참여자 관련 비즈니스 로직 구현체
  */
 @Service
 @RequiredArgsConstructor
@@ -45,25 +45,25 @@ public class ChatParticipantServiceImpl implements ChatParticipantService {
 
         if (existingOpt.isPresent()) {
             ChatParticipant existing = existingOpt.get();
-            if (existing.getStatus() == ParticipantType.ACTIVE) {
-                throw new IllegalStateException("이미 참여 중인 방입니다.");
-            }
+//            if (existing.getStatus() == ParticipantType.ACTIVE) {
+//                throw new IllegalStateException("이미 참여 중인 방입니다.");
+//            }
             if (existing.getStatus() == ParticipantType.BANNED) {
                 throw new IllegalStateException("강퇴된 사용자는 재참여할 수 없습니다.");
             }
-//            if (existing.getStatus() == ParticipantType.LEFT) {
-//                existing.leave(ParticipantType.ACTIVE);
-//                return;
-//            }
+            if (existing.getStatus() == ParticipantType.LEFT) {
+                existing.setStatus(ParticipantType.ACTIVE);
+                return;
+            }
 
             throw new IllegalStateException("현재 상태(" + existing.getStatus() + ")에서는 참여할 수 없습니다.");
         }
 
+        // 처음 참여하는 경우
         ChatParticipant participant = ChatParticipant.create(user, chatRoom);
-
         // 처음 생성 시 상태를 ACTIVE로 설정
-//        participant.setStatus(ParticipantStatus.ACTIVE);
-//        chatParticipantRepository.save(participant);
+        participant.setStatus(ParticipantType.ACTIVE);
+        chatParticipantRepository.save(participant);
     }
 
     @Override
