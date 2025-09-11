@@ -62,7 +62,7 @@ public class User implements UserDetails {
         this.email = email;
         this.role = role;
         this.status = (status != null) ? status : UserStatus.PENDING;
-        this.createdAt = LocalDateTime.now();
+        //this.createdAt = LocalDateTime.now();
     }
 
     //== 비즈니스 로직 ==//

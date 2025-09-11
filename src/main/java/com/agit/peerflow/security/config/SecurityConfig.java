@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
@@ -74,6 +75,9 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**"
                         ).permitAll()
+                        // 현근 - 과제제출 권한 스튜던트만 할수있게설정
+                        .requestMatchers(HttpMethod.POST, "/api/assignments/*/submissions").hasRole("STUDENT")
+
                         // 5. 그 외 모든 요청 인증 필요
                         .anyRequest().authenticated()
 
