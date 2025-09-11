@@ -138,13 +138,13 @@ public class AssignmentServiceImpl implements AssignmentService {
                 .collect(Collectors.toList());
     }
 
-    @Override
-    public AssignmentDetailResponseDTO getAssignmentDetails(Long assignmentId) {
-        Assignment assignment = assignmentRepository.findByIdWithCreator(assignmentId)
-                .orElseThrow(() -> new IllegalArgumentException("과제를 찾을 수 없습니다. ID: " + assignmentId));
-
-        List<Submission> submissions = submissionRepository.findAllByAssignmentIdWithStudent(assignmentId);
-
-        return AssignmentDetailResponseDTO.from(assignment, submissions);
-    }
+//    @Override
+//    public AssignmentDetailResponseDTO getAssignmentDetails(Long assignmentId) {
+//        Assignment assignment = assignmentRepository.findByIdWithCreator(assignmentId)
+//                .orElseThrow(() -> new IllegalArgumentException("과제를 찾을 수 없습니다. ID: " + assignmentId));
+//
+//        List<Submission> submissions = submissionRepository.findAllByAssignmentIdWithStudent(assignmentId);
+//
+//        return AssignmentDetailResponseDTO.from(assignment, submissions);
+//    }
 }
