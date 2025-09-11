@@ -15,7 +15,6 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
 
     List<Submission> findAllByStudent(User student);
 
-    // ID로 Submission 조회 시 연관된 Student와 Assignment 정보도 함께 가져오는 메소드
     @Query("SELECT s FROM Submission s JOIN FETCH s.student JOIN FETCH s.assignment WHERE s.id = :id")
     Optional<Submission> findByIdWithStudentAndAssignment(@Param("id") Long id);
 
