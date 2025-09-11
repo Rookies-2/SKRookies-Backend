@@ -35,6 +35,10 @@ public class ChatParticipant {
     @Column(nullable = false)
     private ParticipantType status;
 
+    // 사용자가 마지막으로 읽은 메시지의 ID
+    @Column(name = "last_read_message_id")
+    private Long lastReadMessageId;
+
     // 사용자가 채팅방을 나간 시각
     @Column(name = "left_at")
     private LocalDateTime leftAt;
@@ -48,6 +52,7 @@ public class ChatParticipant {
     public static ChatParticipant create(User user, ChatRoom chatRoom) {
         ChatParticipant participant = new ChatParticipant(user, chatRoom);
         participant.status = ParticipantType.ACTIVE;
+        participant.lastReadMessageId = 0L;
 
         return participant;
     }
@@ -61,5 +66,9 @@ public class ChatParticipant {
 
     public void setLeftAt(LocalDateTime leftAt) {
         this.leftAt = leftAt;
+    }
+
+    public void updateLastReadMessageId(Long messageId) {
+        this.lastReadMessageId = messageId;
     }
 }

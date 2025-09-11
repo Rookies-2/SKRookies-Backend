@@ -12,4 +12,7 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
 
     // 채팅방의 메시지 삭제
     void deleteByChatRoom(ChatRoom chatRoom);
+
+    // 특정 채팅방에서 특정 메시지 ID 이후의 메시지 개수
+    long countByChatRoomIdAndIdGreaterThan(Long chatRoomId, Long messageId);
 }

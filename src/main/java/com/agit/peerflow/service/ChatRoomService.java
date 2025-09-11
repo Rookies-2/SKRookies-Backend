@@ -4,6 +4,7 @@ import com.agit.peerflow.domain.entity.ChatParticipant;
 import com.agit.peerflow.domain.entity.ChatRoom;
 import com.agit.peerflow.domain.entity.User;
 import com.agit.peerflow.domain.enums.ChatRoomType;
+import com.agit.peerflow.dto.chatroom.ChatRoomResponseDTO;
 import com.agit.peerflow.dto.chatroom.CreateRoomRequestDTO;
 import com.agit.peerflow.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -60,6 +61,27 @@ public class ChatRoomService {
                 .stream()
                 .map(ChatParticipant::getChatRoom)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<ChatRoomResponseDTO> findUnreadMessagesPerRoom(String userName) {
+        List<ChatParticipant> participants = chatParticipantRepository.findAllByUserUsername(userName);
+
+        return participants.stream().map(participant-> {
+           ChatRoom room = participant.getChatRoom();
+           Long lastReadMessageId = participant.getLastReadMessageId() == null ? 0L : participant.getLastReadMessageId();
+
+           // 마지막으로 읽은 메시지 ID 이후에 온 메시지 수를 계산
+           long unreadCount = messageRepository.countByChatRoomIdAndIdGreaterThan(room.getId(), lastReadMessageId);
+
+           return new ChatRoomResponseDTO(
+                room.getId(),
+                room.getRoomName(),
+                room.getType(),
+                room.getUserChatRooms().size(),
+                unreadCount
+           );
+        }).collect(Collectors.toList());
     }
 
     // 모든 채팅방 리스트 조회

@@ -5,6 +5,7 @@ import com.agit.peerflow.domain.entity.Message;
 import com.agit.peerflow.domain.entity.User;
 import com.agit.peerflow.domain.enums.MessageType;
 import com.agit.peerflow.dto.message.ChatMessageDTO;
+import com.agit.peerflow.dto.message.ReadMessageRequestDTO;
 import com.agit.peerflow.dto.message.SendMessageRequestDTO;
 import com.agit.peerflow.service.ChatRoomService;
 import com.agit.peerflow.service.MessageService;
@@ -61,6 +62,21 @@ public class ChatMessageController {
         ChatMessageDTO response = ChatMessageDTO.from(saved);
 
         messageService.broadcastMessage(roomId, response);
+    }
 
+    @Operation(summary = "유저 별 채팅창 읽은 채팅 메시지 표시",
+               description = "클라이언트는 채팅방에 들어왔을 때 이 엔드포인트로 마지막 메시지 ID를 보냅니다."
+    )
+    @MessageMapping("/chat/rooms/{roomId}/read")
+    public void markAsRead(@DestinationVariable Long roomId,
+                           Principal principal,
+                           @Payload ReadMessageRequestDTO requestDTO) {
+        String username = principal.getName();
+        if (username.isEmpty()) {
+            // 인증되지 않은 사용자는 메시지 마킹 표시 불가
+            throw new IllegalStateException("인증된 사용자만 읽은 메시지를 볼 수 있습니다.");
+        }
+
+        messageService.markAsRead(roomId, username, requestDTO.lastMessageId());
     }
 }

@@ -43,7 +43,7 @@ public class ChatRoomController {
             @RequestBody @Valid CreateRoomRequestDTO request,
             @AuthenticationPrincipal User user) {
         ChatRoom room = chatRoomService.createRoom(request, user);
-        return ResponseEntity.ok(ChatRoomResponseDTO.from(room));
+        return ResponseEntity.ok(ChatRoomResponseDTO.from(room,0));
     }
 
     @Operation(summary = "채팅방에 사용자 초대", description = "기존 그룹 채팅방에 ID에 해당하는 다른 사용자를 초대합니다.")
@@ -97,13 +97,11 @@ public class ChatRoomController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "모든 방 조회", description = "사용자가 로그인 시 모든 방을 조회합니다.")
+    @Operation(summary = "모든 방 조회", description = "사용자가 로그인 시 사용자의 모든 방을 조회합니다.")
     @GetMapping("/all")
-    public ResponseEntity<List<ChatRoomResponseDTO>> findAllChatRooms() {
-        List<ChatRoom> rooms = chatRoomService.findAllChatRooms();
-        List<ChatRoomResponseDTO> dto = rooms.stream()
-                .map(ChatRoomResponseDTO::from)
-                .toList();
+    public ResponseEntity<List<ChatRoomResponseDTO>> findAllChatRooms(@AuthenticationPrincipal User user) {
+        String userName = user.getUsername();
+        List<ChatRoomResponseDTO> dto = chatRoomService.findUnreadMessagesPerRoom(userName);
         return ResponseEntity.ok(dto);
     }
 }
