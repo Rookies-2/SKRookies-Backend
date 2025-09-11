@@ -54,6 +54,7 @@ public class UserServiceImpl implements UserService {
         User user = getMyInfo(username);
         user.updateProfile(null, requestDTO.getNickname());
         return user;
+
     }
 
     @Override
