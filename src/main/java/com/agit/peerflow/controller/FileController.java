@@ -19,7 +19,7 @@ import java.util.Map;
 public class FileController {
     private final FileStorageService fileStorageService;
 
-    // 파일 업로드
+    // 파일 업로드.
     @PostMapping("/upload")
     public ResponseEntity<?> uploadFile(@RequestParam("file")MultipartFile file) {
         if(file.isEmpty()) {
@@ -34,7 +34,7 @@ public class FileController {
 
     }
 
-    // 파일 다운로드
+    // 파일 다운로드.
     @PostMapping("/download/{fileName:.+}")
     public ResponseEntity<Resource> downloadFile(@PathVariable String fileName, HttpServletRequest request) {
         Resource resource = fileStorageService.loadFileAsResource(fileName);

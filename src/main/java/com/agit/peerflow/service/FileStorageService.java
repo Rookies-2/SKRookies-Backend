@@ -16,6 +16,14 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 
+/**
+ * @author    백두현
+ * @version   1.0
+ * @since     2025-09-11
+ * @description
+ * - 파일 업로드 및 다운로드를 처리하는 서비스 클래스
+ * - 업로드 디렉터리 생성, 파일 저장, 파일 로드 기능 제공
+ */
 @Service
 public class FileStorageService {
     private final Path fileStorageLocation;

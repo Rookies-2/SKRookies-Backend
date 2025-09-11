@@ -35,7 +35,7 @@ import java.security.Principal;
 @RequiredArgsConstructor
 public class ChatMessageController {
     private final MessageService messageService;
-    private final ChatRoomService chatroomService;
+    private final ChatRoomService chatRoomService;
     private final UserService userService;
 
     @Operation(summary = "채팅 메시지 발신",
@@ -53,12 +53,22 @@ public class ChatMessageController {
 
         String username = principal.getName();
         User sender = userService.getMyInfo(username);
+        ChatRoom room = chatRoomService.getRoomById(roomId);
+
         if (sender == null) {
             throw new IllegalStateException("사용자 정보를 찾을 수 없습니다: " + username);
         }
-        ChatRoom room = chatroomService.getRoomById(roomId);
 
-        Message saved = messageService.sendMessage(room, sender, dto.content(), MessageType.TEXT);
+        Message saved = null;
+
+        if(dto.type() == MessageType.TEXT) {
+            saved = messageService.sendMessage(room, sender, dto.content(), MessageType.TEXT);
+        } else if(dto.type() == MessageType.IMAGE) {
+            saved = messageService.sendMessage(room, sender, dto.fileUrl(), MessageType.IMAGE);
+        } else if(dto.type() == MessageType.FILE) {
+            saved = messageService.sendMessage(room, sender, dto.fileUrl(), MessageType.FILE);
+        }
+
         ChatMessageDTO response = ChatMessageDTO.from(saved);
 
         messageService.broadcastMessage(roomId, response);
