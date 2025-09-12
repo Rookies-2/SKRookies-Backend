@@ -29,6 +29,7 @@ public class ChatRoom {
     @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserChatRoom> userChatRooms = new ArrayList<>();
 
+
     // 유저-채팅방 중간 엔티티, 채팅방의 유저 추가 메서드
     public void addUser(User user) {
         UserChatRoom link = UserChatRoom.create(user, this);

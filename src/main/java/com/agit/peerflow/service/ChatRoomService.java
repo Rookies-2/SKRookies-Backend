@@ -4,11 +4,9 @@ import com.agit.peerflow.domain.entity.ChatParticipant;
 import com.agit.peerflow.domain.entity.ChatRoom;
 import com.agit.peerflow.domain.entity.User;
 import com.agit.peerflow.domain.enums.ChatRoomType;
+import com.agit.peerflow.dto.chatroom.ChatRoomResponseDTO;
 import com.agit.peerflow.dto.chatroom.CreateRoomRequestDTO;
-import com.agit.peerflow.repository.ChatParticipantRepository;
-import com.agit.peerflow.repository.ChatRoomRepository;
-import com.agit.peerflow.repository.UserChatRoomRepository;
-import com.agit.peerflow.repository.UserRepository;
+import com.agit.peerflow.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,12 +16,10 @@ import java.util.stream.Collectors;
 
 /**
  * @author    백두현
- * @version   1.0.0
- * @since     2025-09-08
+ * @version   2.0
+ * @since     2025-09-11
  * @description
- * - STOMP 기반 실시간 채팅 메시지 처리 컨트롤러
- * - 클라이언트로부터 메시지를 수신하고 /topic/messages 구독자에게 브로드캐스트
- * - Spring WebSocket + SimpMessagingTemplate 사용
+ * - 채팅방 관련 비즈니스 로직
  */
 @Service
 @RequiredArgsConstructor
@@ -34,6 +30,7 @@ public class ChatRoomService {
     private final UserRepository userRepository;
     private final ChatParticipantRepository chatParticipantRepository;
     private final UserChatRoomRepository userChatRoomRepository;
+    private final MessageRepository messageRepository;
 
     public ChatRoom createRoom(CreateRoomRequestDTO request, User creator) {
         // getter 대신 record의 접근자 메소드를 사용합니다.
@@ -66,8 +63,42 @@ public class ChatRoomService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
+    public List<ChatRoomResponseDTO> findUnreadMessagesPerRoom(String userName) {
+        List<ChatParticipant> participants = chatParticipantRepository.findAllByUserUsername(userName);
+
+        return participants.stream().map(participant-> {
+           ChatRoom room = participant.getChatRoom();
+           Long lastReadMessageId = participant.getLastReadMessageId() == null ? 0L : participant.getLastReadMessageId();
+
+           // 마지막으로 읽은 메시지 ID 이후에 온 메시지 수를 계산
+           long unreadCount = messageRepository.countByChatRoomIdAndIdGreaterThan(room.getId(), lastReadMessageId);
+
+           return new ChatRoomResponseDTO(
+                room.getId(),
+                room.getRoomName(),
+                room.getType(),
+                room.getUserChatRooms().size(),
+                unreadCount
+           );
+        }).collect(Collectors.toList());
+    }
+
     // 모든 채팅방 리스트 조회
     public List<ChatRoom> findAllChatRooms() {
         return userChatRoomRepository.findAllChatRooms();
+    }
+
+    // 참여자의 방 삭제
+    @Transactional
+    public void deleteRoom(ChatRoom chatRoom) {
+        // 채팅 메시지 삭제
+        messageRepository.deleteByChatRoom(chatRoom);
+
+        // 참여자 삭제
+        chatParticipantRepository.deleteByChatRoom(chatRoom);
+
+        // 채팅방 삭제
+        chatRoomRepository.delete(chatRoom);
     }
 }

@@ -2,7 +2,10 @@ package com.agit.peerflow.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import java.nio.file.Paths;
 
 /**
  * @author 백두현
@@ -23,5 +26,15 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
                 .allowedHeaders("*") // 모든 헤더 허용
                 .allowCredentials(true); // 쿠키 등 자격 증명 허용
+    }
+
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        // 프로젝트 루트/uploads 를 /files/** 로 노출
+        String uploadDir = Paths.get(System.getProperty("user.dir"), "uploads")
+                .toFile().getAbsolutePath();
+
+        registry.addResourceHandler("/files/**")
+                .addResourceLocations("file:" + uploadDir + "/");
     }
 }

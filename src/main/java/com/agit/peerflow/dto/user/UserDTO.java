@@ -31,6 +31,8 @@ public class UserDTO {
         private String email;
 
         private UserRole role;
+
+        private String avatarUrl;
     }
     // ================= 비밀번호 변경 DTO =================
     @Data
@@ -82,6 +84,7 @@ public class UserDTO {
         private String email;
         private String role;
         private String status;
+        private String avatarUrl;
 
         public static Response fromEntity(User user) {
             return Response.builder()
@@ -91,6 +94,7 @@ public class UserDTO {
                     .email(user.getEmail())
                     .role(user.getRole().name())
                     .status(user.getStatus().name())
+                    .avatarUrl(user.getAvatarUrl())
                     .build();
         }
     }

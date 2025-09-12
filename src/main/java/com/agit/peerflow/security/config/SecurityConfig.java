@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
@@ -71,6 +72,11 @@ public class SecurityConfig {
                                 "/api/auth/password/verify",
                                 "/api/auth/password/update"
                         ).permitAll()
+                        .requestMatchers(
+                                "/swagger-ui.html",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**"
+                        ).permitAll()
                         .requestMatchers("/api/users/signup").permitAll()
                         .requestMatchers("/stomp/**").permitAll()
                         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
@@ -78,13 +84,25 @@ public class SecurityConfig {
                         .requestMatchers("/api/users/**").authenticated()
                         .requestMatchers("/api/chatrooms/**").authenticated()
                         // 3. 관리자 전용
-                        .requestMatchers("/api/admin/**").hasAuthority("ADMIN")
-                        // 4. 김현근 : 스웨거 문서 접근허용
-                        .requestMatchers(
-                                "/swagger-ui.html",
-                                "/swagger-ui/**",
-                                "/v3/api-docs/**"
-                        ).permitAll()
+                        .requestMatchers("/api/admin/**").hasAnyRole("ADMIN")
+                        // 4. 과제관련 권한들
+                        // GET /api/assignments -> 전체 과제 조회 (로그인 사용자)
+                        .requestMatchers(HttpMethod.GET, "/api/assignments").authenticated()
+                        // GET /api/assignments/{id} -> 특정 과제 조회 (로그인 사용자)
+                        .requestMatchers(HttpMethod.GET, "/api/assignments/*").authenticated()
+                        // POST /api/assignments -> 과제 생성 (강사/관리자)
+                        .requestMatchers(HttpMethod.POST, "/api/assignments").hasAnyRole("ADMIN", "INSTRUCTOR")
+                        // PATCH /api/assignments/{id} -> 과제 수정 (생성자 또는 관리자)
+                        .requestMatchers(HttpMethod.PATCH, "/api/assignments/*").hasAnyRole("ADMIN", "INSTRUCTOR")
+                        // POST /api/assignments/{id}/submissions -> 과제 제출 (학생)
+                        .requestMatchers(HttpMethod.POST, "/api/assignments/*/submissions").hasRole("STUDENT")
+
+                        // 공지사항 생성, 수정, 삭제는 ADMIN 또는 TEACHER 역할만 가능
+                        .requestMatchers(HttpMethod.GET, "/api/announcements", "/api/announcements/**").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/announcements").hasAnyRole("ADMIN", "TEACHER")
+                        .requestMatchers(HttpMethod.PUT, "/api/announcements/**").hasAnyRole("ADMIN", "TEACHER")
+                        .requestMatchers(HttpMethod.DELETE, "/api/announcements/**").hasAnyRole("ADMIN", "TEACHER")
+
                         // 5. 그 외 모든 요청 인증 필요
                         .anyRequest().authenticated()
 

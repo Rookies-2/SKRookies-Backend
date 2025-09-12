@@ -26,7 +26,7 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 50)
+    @Column(nullable = false, length = 50)
     private String username;
 
     @Column(nullable = false, length = 255)
@@ -58,6 +58,10 @@ public class User implements UserDetails {
     // 비밀번호 재설정 인증번호 관련
     private String passwordResetToken;
 
+    // 프로필 이미지 URL
+    @Column(name = "avatar_url", length = 500)  // 길이는 넉넉히
+    private String avatarUrl;
+
     @Column(name = "verification_code")
     private String verificationCode;
 
@@ -81,14 +85,15 @@ public class User implements UserDetails {
     private Integer todayResetAttempts = 0;
 
     @Builder
-    private User(String username, String password, String nickname, String email, UserRole role, UserStatus status) {
+    private User(String username, String password, String nickname, String email, UserRole role, UserStatus status, String avatarUrl) {
         this.username = username;
         this.password = password;
         this.nickname = nickname;
         this.email = email;
         this.role = role;
         this.status = (status != null) ? status : UserStatus.PENDING;
-        this.createdAt = LocalDateTime.now();
+        this.avatarUrl = avatarUrl;
+        //this.createdAt = LocalDateTime.now();
     }
 
     // 유저-채팅방 중간 엔티티, 채팅방 추가 메서드
