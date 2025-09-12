@@ -10,7 +10,8 @@ public interface UserService {
 
     User getMyInfo(String username);
 
-    User updateMyInfo(String username, UserDTO.Request requestDTO);
+    User updateUsername(String email, String newUsername);
+    User updateNickname(String email, String newNickname);
 
     void deleteMyAccount(String username);
 

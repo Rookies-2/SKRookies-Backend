@@ -99,9 +99,24 @@ public class User implements UserDetails {
         }
     }
 
-    public void updateProfile(String newUsername, String newNickname) {
-        if (newUsername != null && !newUsername.isBlank()) this.username = newUsername;
-        if (newNickname != null && !newNickname.isBlank()) this.nickname = newNickname;
+    /**
+     * 사용자 이름(username)을 변경합니다.
+     * @param newUsername 새로운 사용자 이름
+     */
+    public void changeUsername(String newUsername) {
+        if (newUsername != null && !newUsername.isBlank()) {
+            this.username = newUsername;
+        }
+    }
+
+    /**
+     * 닉네임(nickname)을 변경합니다.
+     * @param newNickname 새로운 닉네임
+     */
+    public void changeNickname(String newNickname) {
+        if (newNickname != null && !newNickname.isBlank()) {
+            this.nickname = newNickname;
+        }
     }
 
     public void changePassword(String newEncodedPassword) {
