@@ -36,4 +36,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     //공지사항 역할
     List<User> findAllByRole(UserRole role);
+
+    //상태가 ACTIVE인 유저 전체 조회
+    List<User> findAllByStatus(UserStatus status);
 }
