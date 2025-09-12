@@ -1,7 +1,9 @@
 package com.agit.peerflow.service.impl;
 
 import com.agit.peerflow.domain.entity.User;
+import com.agit.peerflow.domain.enums.UserStatus;
 import com.agit.peerflow.dto.user.UserDTO;
+import com.agit.peerflow.dto.user.UserResponseDTO;
 import com.agit.peerflow.exception.BusinessException;
 import com.agit.peerflow.exception.ErrorCode;
 import com.agit.peerflow.repository.UserRepository;
@@ -16,6 +18,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 @Service("userServiceImpl")
 @RequiredArgsConstructor
@@ -166,5 +169,14 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new BusinessException(
                         ErrorCode.RESOURCE_NOT_FOUND, "User", "id", String.valueOf(id)
                 ));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<UserResponseDTO> getAllUsers() {
+        return userRepository.findAllByStatus(UserStatus.ACTIVE)
+                .stream()
+                .map(UserResponseDTO::fromEntity)
+                .toList();
     }
 }

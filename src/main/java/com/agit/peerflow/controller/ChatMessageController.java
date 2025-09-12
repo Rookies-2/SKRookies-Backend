@@ -65,7 +65,12 @@ public class ChatMessageController {
         User receiver = null;
 
         if (room.getType() == ChatRoomType.ONE_TO_ONE) {
-            receiver = userService.getById(dto.receiverId()); // 프론트에서 전달
+            if (dto.receiverId() == null || dto.receiverId().isBlank()) {
+                throw new IllegalArgumentException("1:1 채팅에서는 receiverId가 반드시 필요합니다.");
+            }
+            receiver = userService.getById(dto.receiverId());
+        } else {
+            receiver = null; // 그룹채팅은 수신자 설정 안함
         }
 
         if(dto.type() == MessageType.TEXT) {
@@ -76,11 +81,11 @@ public class ChatMessageController {
             saved = messageService.sendMessage(room, sender, receiver, dto.fileUrl(), MessageType.FILE);
         }
 
-        ChatMessageDTO response = ChatMessageDTO.from(saved);
-
         if(room.getType() == ChatRoomType.GROUP) {
+            ChatMessageDTO response = ChatMessageDTO.fromGroup(saved);
             messageService.broadcastMessage(roomId, response);
         } else if (room.getType() == ChatRoomType.ONE_TO_ONE) {
+            ChatMessageDTO response = ChatMessageDTO.fromOneToOne(saved);
             // 수신자, 송신자에게 전송
             messageService.privateMessage(response.senderId(), response);
             messageService.privateMessage(response.receiverId(), response);

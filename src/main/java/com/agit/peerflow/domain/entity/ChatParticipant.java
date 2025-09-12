@@ -43,6 +43,9 @@ public class ChatParticipant {
     @Column(name = "left_at")
     private LocalDateTime leftAt;
 
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
     // 생성 시점에 User와 ChatRoom을 반드시 받도록 강제
     private ChatParticipant(User user, ChatRoom chatRoom) {
         this.user = user;
@@ -70,5 +73,9 @@ public class ChatParticipant {
 
     public void updateLastReadMessageId(Long messageId) {
         this.lastReadMessageId = messageId;
+    }
+
+    public void updateLastMessageTime(LocalDateTime lastMessageTime) {
+        this.updatedAt = LocalDateTime.now();
     }
 }
