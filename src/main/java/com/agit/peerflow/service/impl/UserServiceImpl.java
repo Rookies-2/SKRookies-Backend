@@ -118,31 +118,30 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public User getMyInfo(String username) {
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "User", "username", username));
+    public User getMyInfo(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "User", "email", email));
     }
 
     @Override
     @Transactional
-    public User updateMyInfo(String username, UserDTO.Request requestDTO) {
-        User user = getMyInfo(username);
+    public User updateMyInfo(String email, UserDTO.Request requestDTO) { // 변경: username -> email
+        User user = getMyInfo(email); // 변경: username -> email
         user.updateProfile(null, requestDTO.getNickname());
         return user;
-
     }
 
     @Override
     @Transactional
-    public void deleteMyAccount(String username) {
-        User user = getMyInfo(username);
+    public void deleteMyAccount(String email) { // 변경: username -> email
+        User user = getMyInfo(email); // 변경: username -> email
         userRepository.delete(user);
     }
 
     @Override
     @Transactional
-    public User changePassword(String username, String oldPassword, String newPassword) {
-        User user = getMyInfo(username);
+    public User changePassword(String email, String oldPassword, String newPassword) { // 변경: username -> email
+        User user = getMyInfo(email); // 변경: username -> email
         if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE, "Password", "current password", "불일치");
         }

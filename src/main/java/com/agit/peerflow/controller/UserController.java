@@ -36,7 +36,7 @@ public class UserController {
     @Operation(summary = "내 정보 조회", description = "현재 로그인된 사용자의 상세 정보를 조회합니다.")
     @GetMapping("/me")
     public ResponseEntity<UserDTO.Response> getMyInfo(@AuthenticationPrincipal User user) {
-        User myInfo = userService.getMyInfo(user.getUsername());
+        User myInfo = userService.getMyInfo(user.getEmail());
         return ResponseEntity.ok(UserDTO.Response.fromEntity(myInfo));
 
     }
@@ -46,14 +46,14 @@ public class UserController {
     public ResponseEntity<UserDTO.Response> updateMyInfo(
             @AuthenticationPrincipal User user,
             @RequestBody UserDTO.Request request) {
-        User updatedUser = userService.updateMyInfo(user.getUsername(), request);
+        User updatedUser = userService.updateMyInfo(user.getEmail(), request);
         return ResponseEntity.ok(UserDTO.Response.fromEntity(updatedUser));
     }
 
     @Operation(summary = "회원 탈퇴", description = "현재 로그인된 사용자의 계정을 삭제합니다.")
     @DeleteMapping("/me")
     public ResponseEntity<Void> deleteMyAccount(@AuthenticationPrincipal User user) {
-        userService.deleteMyAccount(user.getUsername());
+        userService.deleteMyAccount(user.getEmail());
         return ResponseEntity.noContent().build();
     }
 
@@ -63,7 +63,7 @@ public class UserController {
             @AuthenticationPrincipal User user,
             @RequestParam String oldPassword,
             @RequestParam String newPassword) {
-        User updatedUser = userService.changePassword(user.getUsername(), oldPassword, newPassword);
+        User updatedUser = userService.changePassword(user.getEmail(), oldPassword, newPassword);
         return ResponseEntity.ok(UserDTO.Response.fromEntity(updatedUser));
     }
 
