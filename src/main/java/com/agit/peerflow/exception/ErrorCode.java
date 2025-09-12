@@ -15,8 +15,9 @@ public enum ErrorCode {
     // User Errors
     PASSWORD_SAME_AS_CURRENT("새 비밀번호는 현재 비밀번호와 동일할 수 없습니다.", HttpStatus.BAD_REQUEST),
     // 권한 관련
-    ACCESS_DENIED("권한이 없습니다.", HttpStatus.FORBIDDEN);
+    ACCESS_DENIED("권한이 없습니다.", HttpStatus.FORBIDDEN),
 
+    AI_BLOCKED("Access blocked by AI security system for %s: %s", HttpStatus.FORBIDDEN);
     private final String messageTemplate;
     private final HttpStatus httpStatus;
 

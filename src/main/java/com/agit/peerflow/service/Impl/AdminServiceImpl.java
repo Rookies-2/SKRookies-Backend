@@ -6,6 +6,7 @@ import com.agit.peerflow.domain.enums.UserStatus;
 import com.agit.peerflow.dto.user.UserDTO;
 import com.agit.peerflow.exception.BusinessException;
 import com.agit.peerflow.exception.ErrorCode;
+import com.agit.peerflow.repository.LoginAttemptLogRepository;
 import com.agit.peerflow.repository.UserRepository;
 import com.agit.peerflow.service.AdminService;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 @Service("adminServiceImpl")
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -22,7 +26,7 @@ public class AdminServiceImpl implements AdminService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-
+    private final LoginAttemptLogRepository loginAttemptLogRepository;
     @Override
     @Transactional
     public User approveUser(Long userId) {
@@ -77,5 +81,13 @@ public class AdminServiceImpl implements AdminService {
     private User findUserById(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "User", "id", id));
+    }
+    @Override
+    @Transactional
+    public int countTodayLoginAttempts(User user) {
+        LocalDateTime start = LocalDate.now().atStartOfDay();
+        LocalDateTime end = start.plusDays(1).minusNanos(1);
+        // loginAttemptLogRepository를 사용하여 오늘 시도 횟수 반환
+        return loginAttemptLogRepository.countTodayByUserEmail(user.getEmail(), start, end);
     }
 }

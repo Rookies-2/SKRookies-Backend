@@ -16,4 +16,5 @@ public interface AdminService {
     void updateUserByAdmin(Long userId, UserDTO.Request requestDTO);
     void resetPasswordByAdmin(Long userId, String newPassword);
     void deleteUserByAdmin(Long userId);
+    int countTodayLoginAttempts(User user);
 }

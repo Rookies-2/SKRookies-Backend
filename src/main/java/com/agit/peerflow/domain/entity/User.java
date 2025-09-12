@@ -64,6 +64,22 @@ public class User implements UserDetails {
     @Column(name = "verification_code_expiration")
     private LocalDateTime verificationCodeExpiration;
 
+    // ===============================
+    // AI 연동 관련 필드
+    // ===============================
+
+    @Column(name = "ai_login_blocked")
+    private Boolean aiLoginBlocked= false;
+
+    @Column(name = "ai_reset_blocked")
+    private Boolean aiResetBlocked= false;
+
+    @Column(name = "today_login_attempts")
+    private Integer todayLoginAttempts = 0;
+
+    @Column(name = "today_reset_attempts")
+    private Integer todayResetAttempts = 0;
+
     @Builder
     private User(String username, String password, String nickname, String email, UserRole role, UserStatus status) {
         this.username = username;
@@ -103,6 +119,25 @@ public class User implements UserDetails {
         this.password = newEncodedPassword;
     }
 
+    // ===============================
+    // AI 관련 비즈니스 로직
+    // ===============================
+    public void markAiLoginBlocked() {
+        this.aiLoginBlocked = true;
+    }
+
+    public void markAiResetBlocked() {
+        this.aiResetBlocked = true;
+    }
+
+    public void incrementLoginAttempts() {
+        this.todayLoginAttempts = this.todayLoginAttempts + 1;
+    }
+
+    public void incrementResetAttempts() {
+        this.todayResetAttempts = this.todayResetAttempts + 1;
+    }
+
     // --- UserDetails 구현 메소드 --- //
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -121,4 +156,5 @@ public class User implements UserDetails {
     public boolean isAccountNonLocked() { return true; }
     @Override
     public boolean isCredentialsNonExpired() { return true; }
+
 }

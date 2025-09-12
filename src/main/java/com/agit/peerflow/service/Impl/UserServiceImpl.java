@@ -16,22 +16,23 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
 
+
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+
+    private void validateDuplicate(UserDTO.Request requestDTO) {
+        if (userRepository.existsByUsername(requestDTO.getUsername()))
+            throw new BusinessException(ErrorCode.RESOURCE_DUPLICATE, "User", "username", requestDTO.getUsername());
+        if (userRepository.existsByNickname(requestDTO.getNickname()))
+            throw new BusinessException(ErrorCode.RESOURCE_DUPLICATE, "User", "nickname", requestDTO.getNickname());
+        if (userRepository.existsByEmail(requestDTO.getEmail()))
+            throw new BusinessException(ErrorCode.RESOURCE_DUPLICATE, "User", "email", requestDTO.getEmail());
+    }
 
     @Override
     @Transactional
     public User signup(UserDTO.Request requestDTO) {
-        if (userRepository.existsByUsername(requestDTO.getUsername())) {
-            throw new BusinessException(ErrorCode.RESOURCE_DUPLICATE, "User", "username", requestDTO.getUsername());
-        }
-        if (userRepository.existsByNickname(requestDTO.getNickname())) {
-            throw new BusinessException(ErrorCode.RESOURCE_DUPLICATE, "User", "nickname", requestDTO.getNickname());
-        }
-        if (userRepository.existsByEmail(requestDTO.getEmail())) {
-            throw new BusinessException(ErrorCode.RESOURCE_DUPLICATE, "User", "email", requestDTO.getEmail());
-        }
-
+        validateDuplicate(requestDTO);
         User newUser = User.builder()
                 .username(requestDTO.getUsername())
                 .password(passwordEncoder.encode(requestDTO.getPassword()))
@@ -52,9 +53,8 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public User updateMyInfo(String username, UserDTO.Request requestDTO) {
         User user = getMyInfo(username);
-        user.updateProfile(null, requestDTO.getNickname());
+        user.updateProfile(requestDTO.getUsername(), requestDTO.getNickname());
         return user;
-
     }
 
     @Override
@@ -68,12 +68,10 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public User changePassword(String username, String oldPassword, String newPassword) {
         User user = getMyInfo(username);
-        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+        if (!passwordEncoder.matches(oldPassword, user.getPassword()))
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE, "Password", "current password", "불일치");
-        }
-        if (passwordEncoder.matches(newPassword, user.getPassword())) {
+        if (passwordEncoder.matches(newPassword, user.getPassword()))
             throw new BusinessException(ErrorCode.PASSWORD_SAME_AS_CURRENT);
-        }
         user.changePassword(passwordEncoder.encode(newPassword));
         return user;
     }
