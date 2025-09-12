@@ -36,6 +36,10 @@ public class Message {
     @Column(name = "sent_at", nullable = false, updatable = false)
     private LocalDateTime sentAt;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "receiver_id")
+    private User receiver;
+
     // 연관관계 매핑
     // Message는 한 명의 User(sender)에 속함 (N:1)
     @ManyToOne(fetch = FetchType.LAZY)
@@ -47,10 +51,11 @@ public class Message {
     @JoinColumn(name = "chat_room_id")
     private ChatRoom chatRoom;
 
-    public static Message createMessage(User sender, ChatRoom chatRoom, String content, MessageType type) {
+    public static Message createMessage(User sender, ChatRoom chatRoom, User receiver, String content, MessageType type) {
         Message message = new Message();
         message.sender = sender;
         message.chatRoom = chatRoom;
+        message.receiver = receiver;
         message.content = content;
         message.type = type;
         message.sentAt = LocalDateTime.now();

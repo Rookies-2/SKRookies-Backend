@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
  * @version 1.0
  * @since   2025-09-10
  * @description User ↔ ChatRoom의 다대다 관계인 중간 엔티티.
+ * - 전체 방 조회
  * TODO 입장 시간, 역할, 상태 같은 부가 정보도 함께 관리
  */
 @Entity
@@ -45,5 +46,21 @@ public class UserChatRoom {
 
     public static UserChatRoom create(User user, ChatRoom chatRoom) {
         return new UserChatRoom(user, chatRoom);
+    }
+
+    public void toggleMute() {
+        this.muted = !this.muted;
+    }
+
+    public void togglePinned() {
+        this.pinned = !this.pinned;
+    }
+
+    public void setMute(boolean mute) {
+        this.muted = mute;
+    }
+
+    public void setPinned(boolean pinned) {
+        this.pinned = pinned;
     }
 }
