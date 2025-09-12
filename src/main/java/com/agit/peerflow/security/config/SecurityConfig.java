@@ -97,6 +97,12 @@ public class SecurityConfig {
                         // POST /api/assignments/{id}/submissions -> 과제 제출 (학생)
                         .requestMatchers(HttpMethod.POST, "/api/assignments/*/submissions").hasRole("STUDENT")
 
+                        // 공지사항 생성, 수정, 삭제는 ADMIN 또는 TEACHER 역할만 가능
+                        .requestMatchers(HttpMethod.GET, "/api/announcements", "/api/announcements/**").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/announcements").hasAnyRole("ADMIN", "TEACHER")
+                        .requestMatchers(HttpMethod.PUT, "/api/announcements/**").hasAnyRole("ADMIN", "TEACHER")
+                        .requestMatchers(HttpMethod.DELETE, "/api/announcements/**").hasAnyRole("ADMIN", "TEACHER")
+
                         // 5. 그 외 모든 요청 인증 필요
                         .anyRequest().authenticated()
 
