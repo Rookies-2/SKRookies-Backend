@@ -125,9 +125,17 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public User updateMyInfo(String email, UserDTO.Request requestDTO) { // 변경: username -> email
-        User user = getMyInfo(email); // 변경: username -> email
-        user.updateProfile(null, requestDTO.getNickname());
+    public User updateUsername(String email, String newUsername) {
+        User user = getMyInfo(email);
+        user.changeUsername(newUsername);
+        return user;
+    }
+
+    @Override
+    @Transactional
+    public User updateNickname(String email, String newNickname) {
+        User user = getMyInfo(email);
+        user.changeNickname(newNickname);
         return user;
     }
 
