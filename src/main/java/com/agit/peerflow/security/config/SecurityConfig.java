@@ -84,7 +84,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/users/**").authenticated()
                         .requestMatchers("/api/chatrooms/**").authenticated()
                         // 3. 관리자 전용
-                        .requestMatchers("/api/admin/**").hasAuthority("ADMIN")
+                        .requestMatchers("/api/admin/**").hasAnyRole("ADMIN")
                         // 4. 과제관련 권한들
                         // GET /api/assignments -> 전체 과제 조회 (로그인 사용자)
                         .requestMatchers(HttpMethod.GET, "/api/assignments").authenticated()
