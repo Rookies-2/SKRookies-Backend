@@ -29,9 +29,6 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public User signup(UserDTO.Request requestDTO) {
-        if (userRepository.existsByUsername(requestDTO.getUsername())) {
-            throw new BusinessException(ErrorCode.RESOURCE_DUPLICATE, "User", "username", requestDTO.getUsername());
-        }
         if (userRepository.existsByNickname(requestDTO.getNickname())) {
             throw new BusinessException(ErrorCode.RESOURCE_DUPLICATE, "User", "nickname", requestDTO.getNickname());
         }
