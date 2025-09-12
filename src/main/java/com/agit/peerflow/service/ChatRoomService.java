@@ -2,6 +2,7 @@ package com.agit.peerflow.service;
 
 import com.agit.peerflow.domain.entity.ChatParticipant;
 import com.agit.peerflow.domain.entity.ChatRoom;
+import com.agit.peerflow.domain.entity.Message;
 import com.agit.peerflow.domain.entity.User;
 import com.agit.peerflow.domain.enums.ChatRoomType;
 import com.agit.peerflow.dto.chatroom.ChatRoomResponseDTO;
@@ -11,7 +12,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 /**
@@ -74,12 +79,30 @@ public class ChatRoomService {
            // 마지막으로 읽은 메시지 ID 이후에 온 메시지 수를 계산
            long unreadCount = messageRepository.countByChatRoomIdAndIdGreaterThan(room.getId(), lastReadMessageId);
 
-           return new ChatRoomResponseDTO(
+           // 채팅방의 가장 최근 메시지 시각
+            LocalDateTime updatedAt = messageRepository.findTopByChatRoomIdOrderBySentAtDesc(room.getId())
+                                                       .map(Message::getSentAt)
+                                                       .orElse(null);
+
+            // 최근 메시지가 오늘이면 오전/오후 몇시 몇분, 아니면 yyyy-mm-dd
+            String formattedDate = null;
+            if(updatedAt != null) {
+                if(updatedAt.toLocalDate().isEqual(LocalDate.now())) {
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("a h:mm")
+                            .withLocale(Locale.KOREA);
+                } else {
+                    DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                    formattedDate = updatedAt.format(dateFormatter);
+                }
+            }
+
+            return new ChatRoomResponseDTO(
                 room.getId(),
                 room.getRoomName(),
                 room.getType(),
                 room.getUserChatRooms().size(),
-                unreadCount
+                unreadCount,
+                formattedDate
            );
         }).collect(Collectors.toList());
     }

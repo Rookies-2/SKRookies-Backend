@@ -19,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -43,7 +44,7 @@ public class ChatRoomController {
             @RequestBody @Valid CreateRoomRequestDTO request,
             @AuthenticationPrincipal User user) {
         ChatRoom room = chatRoomService.createRoom(request, user);
-        return ResponseEntity.ok(ChatRoomResponseDTO.from(room,0));
+        return ResponseEntity.ok(ChatRoomResponseDTO.from(room,0, String.valueOf(LocalDateTime.now())));
     }
 
     @Operation(summary = "채팅방에 사용자 초대", description = "기존 그룹 채팅방에 ID에 해당하는 다른 사용자를 초대합니다.")
