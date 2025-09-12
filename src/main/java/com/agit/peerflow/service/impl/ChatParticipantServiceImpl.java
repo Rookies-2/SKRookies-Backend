@@ -1,4 +1,4 @@
-package com.agit.peerflow.service.Impl;
+package com.agit.peerflow.service.impl;
 
 import com.agit.peerflow.domain.entity.ChatParticipant;
 import com.agit.peerflow.domain.entity.ChatRoom;
@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * @author    백두현

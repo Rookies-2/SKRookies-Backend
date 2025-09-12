@@ -1,4 +1,4 @@
-package com.agit.peerflow.service.Impl;
+package com.agit.peerflow.service.impl;
 
 import com.agit.peerflow.domain.entity.Assignment;
 import com.agit.peerflow.domain.entity.Submission;

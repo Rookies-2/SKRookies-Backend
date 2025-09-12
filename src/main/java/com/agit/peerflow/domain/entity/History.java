@@ -40,14 +40,14 @@ public class History {
     private boolean isRead = false;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 20)
     private HistoryType historyType;
 
     @CreatedDate
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    private History(User user, String content, String relatedUrl, HistoryType historyType) {
+    public History(User user, String content, String relatedUrl, HistoryType historyType) {
         this.user = user;
         this.content = content;
         this.relatedUrl = relatedUrl;
