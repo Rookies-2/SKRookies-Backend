@@ -21,4 +21,6 @@ public interface UserService {
     User uploadAvatarById(Long id, MultipartFile file);
 
     String saveAvatarFile(MultipartFile file, Long key);
+
+    User deleteAvatarById(Long id, String fileName);
 }

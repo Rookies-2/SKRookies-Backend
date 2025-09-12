@@ -87,4 +87,15 @@ public class UserController {
             return ResponseEntity.internalServerError().build();
         }
     }
+
+    // 파일명으로 프로필 이미지 삭제
+    @DeleteMapping(value = "/{id}/avatar/{fileName}")
+    public ResponseEntity<UserDTO.Response> deleteAvatarById(
+            @PathVariable Long id,
+            @PathVariable String fileName
+    ) {
+        User updatedUser = userService.deleteAvatarById(id, fileName);
+
+        return ResponseEntity.ok(UserDTO.Response.fromEntity(updatedUser));
+    }
 }

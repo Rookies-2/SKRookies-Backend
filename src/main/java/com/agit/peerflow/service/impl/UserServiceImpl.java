@@ -98,6 +98,29 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
+    public User deleteAvatarById(Long id, String fileName) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.RESOURCE_NOT_FOUND, "User", "id", String.valueOf(id)
+                ));
+
+        // 실제 파일 경로
+        Path filePath = Paths.get(AVATAR_UPLOAD_DIR).resolve(fileName);
+
+        try {
+            Files.deleteIfExists(filePath);
+        } catch (IOException e) {
+            throw new RuntimeException("아바타 파일 삭제 실패: " + fileName, e);
+        }
+
+        user.setAvatarUrl(null);
+
+        return userRepository.save(user);
+    }
+
+
+    @Override
     public User getMyInfo(String username) {
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "User", "username", username));
