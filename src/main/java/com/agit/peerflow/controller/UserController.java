@@ -37,6 +37,13 @@ public class UserController {
         return ResponseEntity.ok().body(users);
     }
 
+    @Operation(summary = "이메일 또는 이름으로 모든 유저 검색", description = "상태가 'ACTIVE'인 전체 사용자를 조회합니다.")
+    @GetMapping("/findUser")
+    public ResponseEntity<List<UserResponseDTO>> getAllUsersByUsernameOrEmail(@RequestParam String keyword) {
+        List<UserResponseDTO> user = userService.findActiveUsersByUsernameOrEmail(keyword);
+        return ResponseEntity.ok(user);
+    }
+
     @Operation(summary = "회원가입", description = "새로운 사용자를 등록합니다. 가입 시 상태는 'PENDING'이 됩니다.")
     @PostMapping("/signup")
     public ResponseEntity<UserDTO.Response> signupUser(@RequestBody UserDTO.Request request) {

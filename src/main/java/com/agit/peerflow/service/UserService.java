@@ -29,4 +29,6 @@ public interface UserService {
     User deleteAvatarById(Long id, String fileName);
 
     List<UserResponseDTO> getAllUsers();
+
+    List<UserResponseDTO> findActiveUsersByUsernameOrEmail(String keyword);
 }
