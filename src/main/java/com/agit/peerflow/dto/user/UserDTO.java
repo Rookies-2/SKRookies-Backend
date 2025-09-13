@@ -33,6 +33,14 @@ public class UserDTO {
         private UserRole role;
 
         private String avatarUrl;
+        // ---------------- 수동 Getter 추가 ----------------
+        public String getEmail() {
+            return this.email;
+        }
+
+        public String getPassword() {
+            return this.password;
+        }
     }
     // ================= 비밀번호 변경 DTO =================
     @Data
@@ -57,6 +65,11 @@ public class UserDTO {
     public static class PasswordResetRequest {
         @NotBlank
         private String email;
+        @NotBlank
+        private String code;
+        @NotBlank
+        private String newPassword;
+
     }
 
     @Data
