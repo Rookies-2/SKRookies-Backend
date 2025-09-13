@@ -179,4 +179,13 @@ public class UserServiceImpl implements UserService {
                 .map(UserResponseDTO::fromEntity)
                 .toList();
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<UserResponseDTO> findActiveUsersByUsernameOrEmail(String keyword) {
+        return userRepository.findActiveUsersByUsernameOrEmail(keyword).stream()
+                .map(UserResponseDTO::fromEntity) // 엔티티 → DTO 변환
+                .toList();
+    }
+
 }
