@@ -16,9 +16,11 @@ import java.util.Collection;
 import java.util.List;
 
 @Entity
-@Data
+// @Data 백두현: 해당 애노테이션이 채팅방 참여자 조회 시 .toString()호출에서 LazyInitializationException 문제 발생
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@ToString(exclude = "userChatRooms")
 @Table(name = "users")
+@Getter
 @EntityListeners(AuditingEntityListener.class)
 public class User implements UserDetails {
 
@@ -118,6 +120,41 @@ public class User implements UserDetails {
             this.nickname = newNickname;
         }
     }
+
+    // 인증 코드 설정
+    public void setVerificationCode(String verificationCode) {
+        this.verificationCode = verificationCode;
+    }
+
+    // 인증 코드 만료 시간 설정
+    public void setVerificationCodeExpiration(LocalDateTime verificationCodeExpiration) {
+        this.verificationCodeExpiration = verificationCodeExpiration;
+    }
+
+    // 비밀번호(문자열) 설정
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    // 아바타 URL 설정
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
+    }
+
+    // username 변경
+    public void setUsername(String username) {
+        if (username != null && !username.isBlank()) {
+            this.username = username;
+        }
+    }
+
+    // nickname 변경
+    public void setNickname(String nickname) {
+        if (nickname != null && !nickname.isBlank()) {
+            this.nickname = nickname;
+        }
+    }
+
 
     public void changePassword(String newEncodedPassword) {
         this.password = newEncodedPassword;

@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -53,12 +54,14 @@ public class ChatMessageController {
             throw new IllegalStateException("인증된 사용자만 메시지를 전송할 수 있습니다.");
         }
 
-        String username = principal.getName();
-        User sender = userService.getMyInfo(username);
+        Authentication auth = (Authentication) principal;
+        User user = (User) auth.getPrincipal();
+        String email = user.getEmail();
+        User sender = userService.getMyInfo(email);
         ChatRoom room = chatRoomService.getRoomById(roomId);
 
         if (sender == null) {
-            throw new IllegalStateException("사용자 정보를 찾을 수 없습니다: " + username);
+            throw new IllegalStateException("사용자 정보를 찾을 수 없습니다: " + user.getUsername());
         }
 
         Message saved = null;
