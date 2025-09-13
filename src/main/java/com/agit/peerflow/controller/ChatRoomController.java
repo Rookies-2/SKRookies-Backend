@@ -20,8 +20,12 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author    백두현
@@ -100,9 +104,9 @@ public class ChatRoomController {
 
     @Operation(summary = "모든 방 조회", description = "사용자가 로그인 시 사용자의 모든 방을 조회합니다.")
     @GetMapping("/all")
-    public ResponseEntity<List<ChatRoomResponseDTO>> findAllChatRooms(@AuthenticationPrincipal User user) {
-        String userName = user.getUsername();
-        List<ChatRoomResponseDTO> dto = chatRoomService.findUnreadMessagesPerRoom(userName);
-        return ResponseEntity.ok(dto);
+    public ResponseEntity<List<ChatRoom>> findAllChatRooms() {
+        List<ChatRoom> rooms = chatRoomService.findAllChatRooms();
+        ChatRoom r = rooms.get(0);
+        return ResponseEntity.ok(rooms);
     }
 }
