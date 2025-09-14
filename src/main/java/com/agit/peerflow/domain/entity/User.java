@@ -2,6 +2,7 @@ package com.agit.peerflow.domain.entity;
 
 import com.agit.peerflow.domain.enums.UserRole;
 import com.agit.peerflow.domain.enums.UserStatus;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -55,6 +56,7 @@ public class User implements UserDetails {
     private LocalDateTime approvedAt;
 
     @OneToMany(mappedBy="user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference // User를 직렬화할 때 userChatRooms는 포함
     private List<UserChatRoom> userChatRooms = new ArrayList<>();
 
     // 비밀번호 재설정 인증번호 관련

@@ -1,5 +1,6 @@
 package com.agit.peerflow.domain.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -25,10 +26,12 @@ public class UserChatRoom {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JsonManagedReference
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JsonManagedReference
     @JoinColumn(name = "chat_room_id", nullable = false)
     private ChatRoom chatRoom;
 

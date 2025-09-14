@@ -108,8 +108,27 @@ public class ChatRoomService {
     }
 
     // 모든 채팅방 리스트 조회
-    public List<ChatRoom> findAllChatRooms() {
-        return userChatRoomRepository.findAllChatRooms();
+    @Transactional(readOnly = true)
+    public List<ChatRoomResponseDTO> findAllChatRooms() {
+        List<ChatRoom> rooms = userChatRoomRepository.findAllChatRooms();
+
+        return rooms.stream()
+                .map(room -> {
+                    // 각 방의 최근 메시지 시간을 조회하여 포맷팅합니다.
+                    String lastMessageDate = messageRepository.findTopByChatRoomIdOrderBySentAtDesc(room.getId())
+                            .map(message -> {
+                                // 기존 로직을 재활용하여 날짜 포맷팅
+                                LocalDateTime sentAt = message.getSentAt();
+                                if (sentAt.toLocalDate().isEqual(LocalDate.now())) {
+                                    return sentAt.format(DateTimeFormatter.ofPattern("a h:mm", Locale.KOREA));
+                                } else {
+                                    return sentAt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+                                }
+                            })
+                            .orElse(null); // 메시지가 없는 방은 null
+                    return ChatRoomResponseDTO.from(room, 0, lastMessageDate);
+                })
+                .collect(Collectors.toList());
     }
 
     // 참여자의 방 삭제

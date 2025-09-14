@@ -1,6 +1,7 @@
 package com.agit.peerflow.domain.entity;
 
 import com.agit.peerflow.domain.enums.ChatRoomType;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -31,6 +32,7 @@ public class ChatRoom {
     private ChatRoomType type;
 
     @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<UserChatRoom> userChatRooms = new ArrayList<>();
 
     @CreatedDate
