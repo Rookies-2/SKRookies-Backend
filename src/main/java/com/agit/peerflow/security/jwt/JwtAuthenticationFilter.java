@@ -37,7 +37,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final String authHeader = request.getHeader("Authorization");
         String token = null;
         String username = null;
-
+        System.out.println(">>> Request URI: " + request.getRequestURI());
+        System.out.println(">>> Authorization Header: " + authHeader);
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             token = authHeader.substring(7);
             username = jwtTokenProvider.getUsernameFromToken(token); // 메서드명 변경
@@ -45,11 +46,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-
+            System.out.println(">>> userDetails: " + userDetails);
             // 토큰 유효성 검증 로직을 JwtTokenProvider에 맞춰 변경
             if (jwtTokenProvider.validateToken(token)) {
                 UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+
+                System.out.println(">>> authToken: " + authToken);
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
