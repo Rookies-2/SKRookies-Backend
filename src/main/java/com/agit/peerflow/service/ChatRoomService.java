@@ -46,7 +46,7 @@ public class ChatRoomService {
         chatParticipantRepository.save(creatorParticipant);
 
         if (request.type() == ChatRoomType.ONE_TO_ONE && request.receiverId() != null) {
-            User targetUser = userRepository.findById(Long.valueOf(request.receiverId()))
+            User targetUser = userRepository.findByEmail(request.receiverId())
                     .orElseThrow(() -> new IllegalArgumentException("상대방 사용자를 찾을 수 없습니다."));
             ChatParticipant targetParticipant = ChatParticipant.create(targetUser, newRoom);
             chatParticipantRepository.save(targetParticipant);
