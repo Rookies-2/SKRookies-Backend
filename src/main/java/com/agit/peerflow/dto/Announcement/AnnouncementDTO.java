@@ -1,6 +1,7 @@
 package com.agit.peerflow.dto.Announcement;
 
 import com.agit.peerflow.domain.entity.Announcement;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -13,6 +14,9 @@ public class AnnouncementDTO {
     public static class CreateRequest {
         private String title;
         private String content;
+
+        @JsonProperty("isPinned")
+        private boolean isPinned = false;
     }
 
     @Getter
@@ -20,6 +24,7 @@ public class AnnouncementDTO {
     public static class UpdateRequest {
         private String title;
         private String content;
+        private boolean isPinned;
     }
 
     @Getter
@@ -30,6 +35,7 @@ public class AnnouncementDTO {
         private final String authorNickname;
         private final LocalDateTime createdAt;
         private final LocalDateTime updatedAt;
+        private final boolean isPinned;
 
         public Response(Announcement announcement) {
             this.id = announcement.getId();
@@ -38,6 +44,7 @@ public class AnnouncementDTO {
             this.authorNickname = announcement.getAuthor().getNickname();
             this.createdAt = announcement.getCreatedAt();
             this.updatedAt = announcement.getUpdatedAt();
+            this.isPinned = announcement.isPinned();
         }
     }
 }

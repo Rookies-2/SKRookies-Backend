@@ -3,6 +3,7 @@ package com.agit.peerflow.service.impl;
 import com.agit.peerflow.domain.entity.Announcement;
 import com.agit.peerflow.domain.entity.History;
 import com.agit.peerflow.domain.entity.User;
+import com.agit.peerflow.domain.enums.HistoryType;
 import com.agit.peerflow.domain.enums.UserRole;
 import com.agit.peerflow.dto.Announcement.AnnouncementDTO;
 import com.agit.peerflow.repository.AnnouncementRepository;
@@ -16,13 +17,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.agit.peerflow.domain.enums.HistoryType;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class AnnouncementServiceImpl implements AnnouncementService {
 
     private final AnnouncementRepository announcementRepository;
@@ -30,9 +31,15 @@ public class AnnouncementServiceImpl implements AnnouncementService {
     private final HistoryRepository historyRepository;
 
     @Override
-    @Transactional
+    @Transactional // 쓰기 작업이므로 readOnly=false로 설정
     public AnnouncementDTO.Response createAnnouncement(AnnouncementDTO.CreateRequest requestDto, User author) {
-        Announcement announcement = new Announcement(requestDto.getTitle(), requestDto.getContent(), author);
+        // DTO에서 isPinned 값을 받아와 Announcement 엔티티 생성자에 전달
+        Announcement announcement = new Announcement(
+                requestDto.getTitle(),
+                requestDto.getContent(),
+                author,
+                requestDto.isPinned()
+        );
         announcementRepository.save(announcement);
 
         List<User> students = userRepository.findAllByRole(UserRole.STUDENT);
@@ -48,7 +55,6 @@ public class AnnouncementServiceImpl implements AnnouncementService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public AnnouncementDTO.Response getAnnouncement(Long announcementId) {
         Announcement announcement = announcementRepository.findById(announcementId)
                 .orElseThrow(() -> new EntityNotFoundException("공지사항을 찾을 수 없습니다. ID: " + announcementId));
@@ -56,7 +62,6 @@ public class AnnouncementServiceImpl implements AnnouncementService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Page<AnnouncementDTO.Response> getAnnouncements(Pageable pageable) {
         return announcementRepository.findAllByOrderByCreatedAtDesc(pageable)
                 .map(AnnouncementDTO.Response::new);
@@ -72,7 +77,12 @@ public class AnnouncementServiceImpl implements AnnouncementService {
             throw new AccessDeniedException("공지사항을 수정할 권한이 없습니다.");
         }
 
-        announcement.update(requestDto.getTitle(), requestDto.getContent());
+        // DTO에서 isPinned 값을 받아와 update 메서드에 전달
+        announcement.update(
+                requestDto.getTitle(),
+                requestDto.getContent(),
+                requestDto.isPinned()
+        );
         return new AnnouncementDTO.Response(announcement);
     }
 
