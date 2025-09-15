@@ -2,7 +2,10 @@ package com.agit.peerflow.service;
 
 import com.agit.peerflow.domain.entity.User;
 import com.agit.peerflow.dto.user.UserDTO;
+import com.agit.peerflow.dto.user.UserResponseDTO;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 public interface UserService {
 
@@ -24,4 +27,8 @@ public interface UserService {
     String saveAvatarFile(MultipartFile file, Long key);
 
     User deleteAvatarById(Long id, String fileName);
+
+    List<UserResponseDTO> getAllUsers();
+
+    List<UserResponseDTO> findActiveUsersByUsernameOrEmail(String keyword);
 }

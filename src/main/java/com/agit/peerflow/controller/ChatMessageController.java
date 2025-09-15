@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -53,21 +54,25 @@ public class ChatMessageController {
             throw new IllegalStateException("인증된 사용자만 메시지를 전송할 수 있습니다.");
         }
 
-        String username = principal.getName();
-        User sender = userService.getMyInfo(username);
+        Authentication auth = (Authentication) principal;
+        User user = (User) auth.getPrincipal();
+        String email = user.getEmail();
+        User sender = userService.getMyInfo(email);
         ChatRoom room = chatRoomService.getRoomById(roomId);
 
         if (sender == null) {
-            throw new IllegalStateException("사용자 정보를 찾을 수 없습니다: " + username);
+            throw new IllegalStateException("사용자 정보를 찾을 수 없습니다: " + user.getUsername());
+        }
+
+        User receiver = null;
+        if (room.getType() == ChatRoomType.ONE_TO_ONE) {
+            if (dto.receiverId() == null || dto.receiverId().isBlank()) {
+                throw new IllegalArgumentException("1:1 채팅에서는 receiverId가 반드시 필요합니다.");
+            }
+            receiver = userService.getById(dto.receiverId());
         }
 
         Message saved = null;
-        User receiver = null;
-
-        if (room.getType() == ChatRoomType.ONE_TO_ONE) {
-            receiver = userService.getById(dto.receiverId()); // 프론트에서 전달
-        }
-
         if(dto.type() == MessageType.TEXT) {
             saved = messageService.sendMessage(room, sender, receiver, dto.content(), MessageType.TEXT);
         } else if(dto.type() == MessageType.IMAGE) {
@@ -76,11 +81,11 @@ public class ChatMessageController {
             saved = messageService.sendMessage(room, sender, receiver, dto.fileUrl(), MessageType.FILE);
         }
 
-        ChatMessageDTO response = ChatMessageDTO.from(saved);
-
         if(room.getType() == ChatRoomType.GROUP) {
+            ChatMessageDTO response = ChatMessageDTO.fromGroup(saved);
             messageService.broadcastMessage(roomId, response);
         } else if (room.getType() == ChatRoomType.ONE_TO_ONE) {
+            ChatMessageDTO response = ChatMessageDTO.fromOneToOne(saved);
             // 수신자, 송신자에게 전송
             messageService.privateMessage(response.senderId(), response);
             messageService.privateMessage(response.receiverId(), response);
