@@ -91,9 +91,9 @@ public class SecurityConfig {
                         // GET /api/assignments/{id} -> 특정 과제 조회 (로그인 사용자)
                         .requestMatchers(HttpMethod.GET, "/api/assignments/*").authenticated()
                         // POST /api/assignments -> 과제 생성 (강사/관리자)
-                        .requestMatchers(HttpMethod.POST, "/api/assignments").hasAnyRole("ADMIN", "INSTRUCTOR")
+                        .requestMatchers(HttpMethod.POST, "/api/assignments").hasAnyRole("ADMIN", "TEACHER")
                         // PATCH /api/assignments/{id} -> 과제 수정 (생성자 또는 관리자)
-                        .requestMatchers(HttpMethod.PATCH, "/api/assignments/*").hasAnyRole("ADMIN", "INSTRUCTOR")
+                        .requestMatchers(HttpMethod.PATCH, "/api/assignments/*").hasAnyRole("ADMIN", "TEACHER")
                         // POST /api/assignments/{id}/submissions -> 과제 제출 (학생)
                         .requestMatchers(HttpMethod.POST, "/api/assignments/*/submissions").hasRole("STUDENT")
 
