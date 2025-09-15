@@ -118,7 +118,7 @@ public class PasswordService {
                             "User", "email", request.getEmail()));
 
 //            // 패킷 특성 추출 (테스트용)
-//            Map<String, Object> features = new HashMap<>();
+            Map<String, Object> features = new HashMap<>();
 //            // 패스워드 변경 성공 예시
 //                    features.put("dur", 0.000011);
 //                    features.put("proto", "udp");
@@ -161,59 +161,59 @@ public class PasswordService {
 //                    features.put("ct_srv_dst", 2);
 //                    features.put("is_sm_ips_ports", 0);
 //            // 패스워드 변경 차단 예시
-//            features.put("dur", 0.921987);
-//            features.put("proto", "ospf");
-//            features.put("service", "-");
-//            features.put("state", "INT");
-//            features.put("spkts", 20);
-//            features.put("dpkts", 0);
-//            features.put("sbytes", 1280);
-//            features.put("dbytes", 0);
-//            features.put("rate", 20.607666);
-//            features.put("sttl", 254);
-//            features.put("dttl", 0);
-//            features.put("sload", 10551.125);
-//            features.put("dload", 0);
-//            features.put("sloss", 0);
-//            features.put("dloss", 0);
-//            features.put("sinpkt", 48.525633);
-//            features.put("dinpkt", 0);
-//            features.put("sjit", 52.253805);
-//            features.put("djit", 0);
-//            features.put("swin", 0);
-//            features.put("dwin", 0);
-//            features.put("tcprtt", 0);
-//            features.put("synack", 0);
-//            features.put("ackdat", 0);
-//            features.put("smean", 64);
-//            features.put("dmean", 0);
-//            features.put("trans_depth", 0);
-//            features.put("response_body_len", 0);
-//            features.put("ct_srv_src", 1);
-//            features.put("ct_state_ttl", 2);
-//            features.put("ct_dst_ltm", 1);
-//            features.put("ct_src_dport_ltm", 1);
-//            features.put("ct_dst_sport_ltm", 1);
-//            features.put("ct_dst_src_ltm", 2);
-//            features.put("is_ftp_login", 0);
-//            features.put("ct_ftp_cmd", 0);
-//            features.put("ct_flw_http_mthd", 0);
-//            features.put("ct_src_ltm", 1);
-//            features.put("ct_srv_dst", 1);
-//            features.put("is_sm_ips_ports", 0);
-
-            //실제 네트워크 트래픽용 패킷 특성 추출
-        Map<String, Object> features;
-        try {
-            features = packetCaptureService.captureFeatures();
-        } catch (Exception e) {
-            log.warn("⚠️ 패킷 캡처 실패, 기본값으로 대체", e);
-            features = new HashMap<>();
-            features.put("dur", 0.0);
-            features.put("proto", "tcp");
+            features.put("dur", 0.921987);
+            features.put("proto", "ospf");
             features.put("service", "-");
             features.put("state", "INT");
-        }
+            features.put("spkts", 20);
+            features.put("dpkts", 0);
+            features.put("sbytes", 1280);
+            features.put("dbytes", 0);
+            features.put("rate", 20.607666);
+            features.put("sttl", 254);
+            features.put("dttl", 0);
+            features.put("sload", 10551.125);
+            features.put("dload", 0);
+            features.put("sloss", 0);
+            features.put("dloss", 0);
+            features.put("sinpkt", 48.525633);
+            features.put("dinpkt", 0);
+            features.put("sjit", 52.253805);
+            features.put("djit", 0);
+            features.put("swin", 0);
+            features.put("dwin", 0);
+            features.put("tcprtt", 0);
+            features.put("synack", 0);
+            features.put("ackdat", 0);
+            features.put("smean", 64);
+            features.put("dmean", 0);
+            features.put("trans_depth", 0);
+            features.put("response_body_len", 0);
+            features.put("ct_srv_src", 1);
+            features.put("ct_state_ttl", 2);
+            features.put("ct_dst_ltm", 1);
+            features.put("ct_src_dport_ltm", 1);
+            features.put("ct_dst_sport_ltm", 1);
+            features.put("ct_dst_src_ltm", 2);
+            features.put("is_ftp_login", 0);
+            features.put("ct_ftp_cmd", 0);
+            features.put("ct_flw_http_mthd", 0);
+            features.put("ct_src_ltm", 1);
+            features.put("ct_srv_dst", 1);
+            features.put("is_sm_ips_ports", 0);
+
+            //실제 네트워크 트래픽용 패킷 특성 추출
+//        Map<String, Object> features;
+//        try {
+//            features = packetCaptureService.captureFeatures();
+//        } catch (Exception e) {
+//            log.warn("⚠️ 패킷 캡처 실패, 기본값으로 대체", e);
+//            features = new HashMap<>();
+//            features.put("dur", 0.0);
+//            features.put("proto", "tcp");
+//            features.put("service", "-");
+//            features.put("state", "INT");
+//        }
 
             features.put("email", user.getEmail());
             features.put("ip", httpRequest.getRemoteAddr());
