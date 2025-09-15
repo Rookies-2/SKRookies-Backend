@@ -9,7 +9,7 @@ public class LoginRequestDto {
     private String email;
     private String password;
 
-    // AI 특징값 (프론트나 미들웨어에서 수집된 데이터)
+    // AI 특징값 (수집된 데이터)
     private Double dur;
     private String proto;
     private String service;

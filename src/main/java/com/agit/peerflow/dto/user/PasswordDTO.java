@@ -32,6 +32,5 @@ public class PasswordDTO {
         private String email;
         private String code;
         private String newPassword;
-        // AI 모델 필드 추가 가능
     }
 }

@@ -31,20 +31,20 @@ public class AuthController {
     @PostMapping("/password/reset")
     public ResponseEntity<?> sendVerificationCode(@RequestBody PasswordDTO.ResetRequest request,
                                                   HttpServletRequest httpRequest) {
-        passwordService.sendVerificationCode(request, httpRequest);
-        return ResponseEntity.ok("인증번호가 발송되었습니다.");
+
+        return passwordService.sendVerificationCode(request, httpRequest);
     }
 
     @PostMapping("/password/verify")
     public ResponseEntity<?> verifyCode(@RequestBody PasswordDTO.VerifyRequest request) {
-        passwordService.verifyCode(request);
-        return ResponseEntity.ok("인증번호 확인 완료");
+
+        return passwordService.verifyCode(request);
     }
 
     @PostMapping("/password/update")
     public ResponseEntity<?> updatePassword(@RequestBody PasswordDTO.UpdateRequest request,
                                             HttpServletRequest httpRequest) {
-        passwordService.updatePassword(request, httpRequest);
-        return ResponseEntity.ok("✅ 비밀번호가 정상적으로 변경되었습니다.");
+
+        return passwordService.updatePassword(request, httpRequest);
     }
 }
