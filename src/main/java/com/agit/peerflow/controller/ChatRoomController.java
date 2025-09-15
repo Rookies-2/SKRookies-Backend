@@ -107,6 +107,7 @@ public class ChatRoomController {
     public ResponseEntity<List<ChatRoomResponseDTO>> findAllChatRooms(@AuthenticationPrincipal User user) {
         String userName = user.getUsername();
         List<ChatRoomResponseDTO> dto = chatRoomService.findUnreadMessagesPerRoom(userName);
+
         return ResponseEntity.ok(dto);
     }
 }

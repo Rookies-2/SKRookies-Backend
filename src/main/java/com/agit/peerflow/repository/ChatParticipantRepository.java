@@ -3,6 +3,7 @@ package com.agit.peerflow.repository;
 import com.agit.peerflow.domain.entity.ChatParticipant;
 import com.agit.peerflow.domain.entity.ChatRoom;
 import com.agit.peerflow.domain.entity.User;
+import com.agit.peerflow.domain.enums.ParticipantType;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
@@ -29,7 +30,7 @@ public interface ChatParticipantRepository extends JpaRepository<ChatParticipant
     // 채팅방의 참여자 삭제
     void deleteByChatRoom(ChatRoom chatRoom);
 
-    List<ChatParticipant> findAllByUserUsername(String userName);
+    List<ChatParticipant> findAllByUserUsernameAndStatus(String userName, ParticipantType status);
 
     Optional<ChatParticipant> findByChatRoomIdAndUserUsername(Long roomId, String userName);
 }
