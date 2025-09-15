@@ -2,7 +2,10 @@ package com.agit.peerflow.service;
 
 import com.agit.peerflow.domain.entity.User;
 import com.agit.peerflow.dto.user.UserDTO;
+import com.agit.peerflow.dto.user.UserResponseDTO;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 public interface UserService {
 
@@ -10,7 +13,8 @@ public interface UserService {
 
     User getMyInfo(String username);
 
-    User updateMyInfo(String username, UserDTO.Request requestDTO);
+    User updateUsername(String email, String newUsername);
+    User updateNickname(String email, String newNickname);
 
     void deleteMyAccount(String username);
 
@@ -23,4 +27,8 @@ public interface UserService {
     String saveAvatarFile(MultipartFile file, Long key);
 
     User deleteAvatarById(Long id, String fileName);
+
+    List<UserResponseDTO> getAllUsers();
+
+    List<UserResponseDTO> findActiveUsersByUsernameOrEmail(String keyword);
 }

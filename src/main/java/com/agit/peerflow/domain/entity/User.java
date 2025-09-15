@@ -2,6 +2,7 @@ package com.agit.peerflow.domain.entity;
 
 import com.agit.peerflow.domain.enums.UserRole;
 import com.agit.peerflow.domain.enums.UserStatus;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -16,9 +17,11 @@ import java.util.Collection;
 import java.util.List;
 
 @Entity
-@Data
+// @Data 백두현: 해당 애노테이션이 채팅방 참여자 조회 시 .toString()호출에서 LazyInitializationException 문제 발생
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@ToString(exclude = "userChatRooms")
 @Table(name = "users")
+@Getter
 @EntityListeners(AuditingEntityListener.class)
 public class User implements UserDetails {
 
@@ -53,6 +56,7 @@ public class User implements UserDetails {
     private LocalDateTime approvedAt;
 
     @OneToMany(mappedBy="user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference // User를 직렬화할 때 userChatRooms는 포함
     private List<UserChatRoom> userChatRooms = new ArrayList<>();
 
     // 비밀번호 재설정 인증번호 관련
@@ -115,10 +119,60 @@ public class User implements UserDetails {
         }
     }
 
-    public void updateProfile(String newUsername, String newNickname) {
-        if (newUsername != null && !newUsername.isBlank()) this.username = newUsername;
-        if (newNickname != null && !newNickname.isBlank()) this.nickname = newNickname;
+    /**
+     * 사용자 이름(username)을 변경합니다.
+     * @param newUsername 새로운 사용자 이름
+     */
+    public void changeUsername(String newUsername) {
+        if (newUsername != null && !newUsername.isBlank()) {
+            this.username = newUsername;
+        }
     }
+
+    /**
+     * 닉네임(nickname)을 변경합니다.
+     * @param newNickname 새로운 닉네임
+     */
+    public void changeNickname(String newNickname) {
+        if (newNickname != null && !newNickname.isBlank()) {
+            this.nickname = newNickname;
+        }
+    }
+
+    // 인증 코드 설정
+    public void setVerificationCode(String verificationCode) {
+        this.verificationCode = verificationCode;
+    }
+
+    // 인증 코드 만료 시간 설정
+    public void setVerificationCodeExpiration(LocalDateTime verificationCodeExpiration) {
+        this.verificationCodeExpiration = verificationCodeExpiration;
+    }
+
+    // 비밀번호(문자열) 설정
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    // 아바타 URL 설정
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
+    }
+
+    // username 변경
+    public void setUsername(String username) {
+        if (username != null && !username.isBlank()) {
+            this.username = username;
+        }
+    }
+
+    // nickname 변경
+    public void setNickname(String nickname) {
+        if (nickname != null && !nickname.isBlank()) {
+            this.nickname = nickname;
+        }
+    }
+
 
     public void changePassword(String newEncodedPassword) {
         this.password = newEncodedPassword;

@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -36,4 +37,18 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     //공지사항 역할
     List<User> findAllByRole(UserRole role);
+
+    //상태가 ACTIVE인 유저 전체 조회
+    List<User> findAllByStatus(UserStatus status);
+
+    // 상태가 ACTIVE인 유저를 이메일이나 이름으로 알아내기
+    @Query("""
+        SELECT u 
+        FROM User u
+        WHERE u.status = com.agit.peerflow.domain.enums.UserStatus.ACTIVE
+          AND (LOWER(u.username) LIKE LOWER(CONCAT('%', :keyword, '%'))
+               OR LOWER(u.email) LIKE LOWER(CONCAT('%', :keyword, '%')))
+    """)
+    List<User> findActiveUsersByUsernameOrEmail(@Param("keyword") String keyword);
+
 }

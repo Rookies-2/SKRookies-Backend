@@ -1,7 +1,9 @@
 package com.agit.peerflow.service.Impl;
 
 import com.agit.peerflow.domain.entity.User;
+import com.agit.peerflow.domain.enums.UserStatus;
 import com.agit.peerflow.dto.user.UserDTO;
+import com.agit.peerflow.dto.user.UserResponseDTO;
 import com.agit.peerflow.exception.BusinessException;
 import com.agit.peerflow.exception.ErrorCode;
 import com.agit.peerflow.repository.UserRepository;
@@ -16,6 +18,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 @Service("userServiceImpl")
 @RequiredArgsConstructor
@@ -125,9 +128,17 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public User updateMyInfo(String email, UserDTO.Request requestDTO) { // 변경: username -> email
-        User user = getMyInfo(email); // 변경: username -> email
-        user.updateProfile(null, requestDTO.getNickname());
+    public User updateUsername(String email, String newUsername) {
+        User user = getMyInfo(email);
+        user.changeUsername(newUsername);
+        return user;
+    }
+
+    @Override
+    @Transactional
+    public User updateNickname(String email, String newNickname) {
+        User user = getMyInfo(email);
+        user.changeNickname(newNickname);
         return user;
     }
 
@@ -159,4 +170,22 @@ public class UserServiceImpl implements UserService {
                         ErrorCode.RESOURCE_NOT_FOUND, "User", "id", String.valueOf(id)
                 ));
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<UserResponseDTO> getAllUsers() {
+        return userRepository.findAllByStatus(UserStatus.ACTIVE)
+                .stream()
+                .map(UserResponseDTO::fromEntity)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<UserResponseDTO> findActiveUsersByUsernameOrEmail(String keyword) {
+        return userRepository.findActiveUsersByUsernameOrEmail(keyword).stream()
+                .map(UserResponseDTO::fromEntity) // 엔티티 → DTO 변환
+                .toList();
+    }
+
 }

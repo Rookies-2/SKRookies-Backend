@@ -17,6 +17,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+import java.util.Map;
+
 @Tag(name = "User API", description = "사용자 계정 관련 API (회원가입, 내 정보 관리 등)")
 @RestController
 @RequestMapping("/api/users")
@@ -25,6 +28,21 @@ public class UserController {
 
     private final UserService userService;
     private final UserRepository userRepository;
+
+    @Operation(summary = "모든 유저 검색", description = "상태가 'ACTIVE'인 전체 사용자를 조회합니다.")
+    @GetMapping("/all")
+    public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
+        List<UserResponseDTO> users = userService.getAllUsers();
+
+        return ResponseEntity.ok().body(users);
+    }
+
+    @Operation(summary = "이메일 또는 이름으로 모든 유저 검색", description = "상태가 'ACTIVE'인 전체 사용자를 조회합니다.")
+    @GetMapping("/findUser")
+    public ResponseEntity<List<UserResponseDTO>> getAllUsersByUsernameOrEmail(@RequestParam String keyword) {
+        List<UserResponseDTO> user = userService.findActiveUsersByUsernameOrEmail(keyword);
+        return ResponseEntity.ok(user);
+    }
 
     @Operation(summary = "회원가입", description = "새로운 사용자를 등록합니다. 가입 시 상태는 'PENDING'이 됩니다.")
     @PostMapping("/signup")
@@ -41,12 +59,23 @@ public class UserController {
 
     }
 
-    @Operation(summary = "내 정보 수정 (닉네임)", description = "현재 로그인된 사용자의 닉네임을 수정합니다.")
-    @PutMapping("/me")
-    public ResponseEntity<UserDTO.Response> updateMyInfo(
+    @Operation(summary = "사용자 이름(username) 수정", description = "현재 로그인된 사용자의 이름을 수정합니다.")
+    @PutMapping("/me/username")
+    public ResponseEntity<UserDTO.Response> updateUsername(
             @AuthenticationPrincipal User user,
-            @RequestBody UserDTO.Request request) {
-        User updatedUser = userService.updateMyInfo(user.getEmail(), request);
+            @RequestBody Map<String, String> requestBody) {
+        String newUsername = requestBody.get("username");
+        User updatedUser = userService.updateUsername(user.getEmail(), newUsername);
+        return ResponseEntity.ok(UserDTO.Response.fromEntity(updatedUser));
+    }
+
+    @Operation(summary = "닉네임 수정", description = "현재 로그인된 사용자의 닉네임을 수정합니다.")
+    @PutMapping("/me/nickname")
+    public ResponseEntity<UserDTO.Response> updateNickname(
+            @AuthenticationPrincipal User user,
+            @RequestBody Map<String, String> requestBody) {
+        String newNickname = requestBody.get("nickname");
+        User updatedUser = userService.updateNickname(user.getEmail(), newNickname);
         return ResponseEntity.ok(UserDTO.Response.fromEntity(updatedUser));
     }
 
