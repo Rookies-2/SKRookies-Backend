@@ -34,6 +34,7 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
         if (StompCommand.CONNECT.equals(accessor.getCommand())) {
             // 헤더에서 Authorization 토큰 추출
             String authToken = accessor.getFirstNativeHeader("Authorization");
+            System.out.println("StompAuthChannelInterceptor authToken: " + authToken);
 
             if (authToken != null && authToken.startsWith("Bearer ")) {
                 String jwt = authToken.substring(7);
