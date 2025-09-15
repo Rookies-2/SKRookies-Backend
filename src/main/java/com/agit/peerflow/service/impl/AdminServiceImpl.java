@@ -1,4 +1,4 @@
-package com.agit.peerflow.service.impl;
+package com.agit.peerflow.service.Impl;
 
 import com.agit.peerflow.domain.entity.User;
 import com.agit.peerflow.domain.enums.UserRole;
@@ -6,6 +6,7 @@ import com.agit.peerflow.domain.enums.UserStatus;
 import com.agit.peerflow.dto.user.UserDTO;
 import com.agit.peerflow.exception.BusinessException;
 import com.agit.peerflow.exception.ErrorCode;
+import com.agit.peerflow.repository.LoginAttemptLogRepository;
 import com.agit.peerflow.repository.UserRepository;
 import com.agit.peerflow.service.AdminService;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 @Service("adminServiceImpl")
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -22,7 +26,7 @@ public class AdminServiceImpl implements AdminService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-
+    private final LoginAttemptLogRepository loginAttemptLogRepository;
     @Override
     @Transactional
     public User approveUser(Long userId) {
@@ -38,7 +42,13 @@ public class AdminServiceImpl implements AdminService {
         user.reject();
         return user;
     }
-
+    @Override
+    @Transactional
+    public User deactivateUser(Long userId) {
+        User user = findUserById(userId);
+        user.deactivate(); // User 엔티티에 deactivate() 메서드를 호출하도록 합니다.
+        return user;
+    }
     @Override
     public Page<User> getAllUsers(Pageable pageable) {
         return userRepository.findAll(pageable);
@@ -81,4 +91,5 @@ public class AdminServiceImpl implements AdminService {
         return userRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "User", "id", id));
     }
+
 }

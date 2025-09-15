@@ -55,12 +55,11 @@ public class User implements UserDetails {
 
     private LocalDateTime approvedAt;
 
+    private LocalDateTime lastLoggedInAt;
+
     @OneToMany(mappedBy="user", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference // User를 직렬화할 때 userChatRooms는 포함
     private List<UserChatRoom> userChatRooms = new ArrayList<>();
-
-    // 비밀번호 재설정 인증번호 관련
-    private String passwordResetToken;
 
     // 프로필 이미지 URL
     @Column(name = "avatar_url", length = 500)  // 길이는 넉넉히
@@ -71,6 +70,22 @@ public class User implements UserDetails {
 
     @Column(name = "verification_code_expiration")
     private LocalDateTime verificationCodeExpiration;
+
+    // ===============================
+    // AI 연동 관련 필드
+    // ===============================
+
+    @Column(name = "ai_login_blocked")
+    private Boolean aiLoginBlocked= false;
+
+    @Column(name = "ai_reset_blocked")
+    private Boolean aiResetBlocked= false;
+
+    @Column(name = "today_login_attempts")
+    private Integer todayLoginAttempts = 0;
+
+    @Column(name = "today_reset_attempts")
+    private Integer todayResetAttempts = 0;
 
     @Builder
     private User(String username, String password, String nickname, String email, UserRole role, UserStatus status, String avatarUrl) {
@@ -91,18 +106,23 @@ public class User implements UserDetails {
     }
     //== 비즈니스 로직 ==//
     public void approve() {
-        if (this.status == UserStatus.PENDING) {
+        {
             this.status = UserStatus.ACTIVE;
             this.approvedAt = LocalDateTime.now();
         }
     }
 
     public void reject() {
-        if (this.status == UserStatus.PENDING) {
             this.status = UserStatus.REJECTED;
-        }
     }
 
+    public void deactivate() {
+        this.status = UserStatus.INACTIVE;
+    }
+    //사용자 마지막 로그인 1년후 자동 비활성화
+    public void updateLastLoginTime() {
+        this.lastLoggedInAt = LocalDateTime.now();
+    }
     /**
      * 사용자 이름(username)을 변경합니다.
      * @param newUsername 새로운 사용자 이름
@@ -180,4 +200,5 @@ public class User implements UserDetails {
     public boolean isAccountNonLocked() { return true; }
     @Override
     public boolean isCredentialsNonExpired() { return true; }
+
 }

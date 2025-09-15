@@ -1,4 +1,4 @@
-package com.agit.peerflow.service.impl;
+package com.agit.peerflow.service.Impl;
 
 import com.agit.peerflow.domain.entity.User;
 import com.agit.peerflow.domain.enums.UserStatus;

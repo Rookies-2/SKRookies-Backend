@@ -77,6 +77,17 @@ public class AdminController {
         return ResponseEntity.ok(UserDTO.Response.fromEntity(rejectedUser));
     }
 
+    @Operation(summary = "사용자 비활성화", description = "사용자 계정을 비활성(INACTIVE) 상태로 변경합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "비활성화 성공"),
+            @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음", content = @Content)
+    })
+    @PatchMapping("/{id}/deactivate")
+    public ResponseEntity<UserDTO.Response> deactivateUser(@Parameter(description = "비활성화할 사용자 ID") @PathVariable Long id) {
+        User deactivatedUser = adminService.deactivateUser(id);
+        return ResponseEntity.ok(UserDTO.Response.fromEntity(deactivatedUser));
+    }
+
     @Operation(summary = "사용자 정보 수정 (관리자용)", description = "관리자가 특정 사용자의 정보를 수정합니다.")
     @PutMapping("/{id}")
     public ResponseEntity<Void> updateUserByAdmin(@Parameter(description = "수정할 사용자 ID") @PathVariable Long id, @RequestBody UserDTO.Request request) {

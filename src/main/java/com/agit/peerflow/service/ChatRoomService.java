@@ -5,6 +5,7 @@ import com.agit.peerflow.domain.entity.ChatRoom;
 import com.agit.peerflow.domain.entity.Message;
 import com.agit.peerflow.domain.entity.User;
 import com.agit.peerflow.domain.enums.ChatRoomType;
+import com.agit.peerflow.domain.enums.ParticipantType;
 import com.agit.peerflow.dto.chatroom.ChatRoomResponseDTO;
 import com.agit.peerflow.dto.chatroom.CreateRoomRequestDTO;
 import com.agit.peerflow.repository.*;
@@ -15,8 +16,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -45,8 +48,8 @@ public class ChatRoomService {
         ChatParticipant creatorParticipant = ChatParticipant.create(creator, newRoom);
         chatParticipantRepository.save(creatorParticipant);
 
-        if (request.type() == ChatRoomType.ONE_TO_ONE && request.targetUserId() != null) {
-            User targetUser = userRepository.findById(request.targetUserId())
+        if (request.type() == ChatRoomType.ONE_TO_ONE && request.receiverId() != null) {
+            User targetUser = userRepository.findByEmail(request.receiverId())
                     .orElseThrow(() -> new IllegalArgumentException("상대방 사용자를 찾을 수 없습니다."));
             ChatParticipant targetParticipant = ChatParticipant.create(targetUser, newRoom);
             chatParticipantRepository.save(targetParticipant);
@@ -69,42 +72,48 @@ public class ChatRoomService {
     }
 
     @Transactional(readOnly = true)
-    public List<ChatRoomResponseDTO> findUnreadMessagesPerRoom(String userName) {
-        List<ChatParticipant> participants = chatParticipantRepository.findAllByUserUsername(userName);
+    public List<ChatRoomResponseDTO> findUnreadMessagesPerRoomIncludingGroups(String userName) {
+        // 사용자가 active한 상태인 방 조회
+        List<ChatParticipant> participants = chatParticipantRepository.findAllByUserUsernameAndStatus(userName, ParticipantType.ACTIVE);
+        // 모든 그룹채팅방
+        List<ChatRoom> groupRooms = chatRoomRepository.findByType(ChatRoomType.GROUP);
 
-        return participants.stream().map(participant-> {
-           ChatRoom room = participant.getChatRoom();
-           Long lastReadMessageId = participant.getLastReadMessageId() == null ? 0L : participant.getLastReadMessageId();
+        // 중복제거하여 합치기
+        Set<ChatRoom> allRooms = new HashSet<>();
+        participants.forEach(p -> allRooms.add(p.getChatRoom()));
+        allRooms.addAll(groupRooms);
 
-           // 마지막으로 읽은 메시지 ID 이후에 온 메시지 수를 계산
-           long unreadCount = messageRepository.countByChatRoomIdAndIdGreaterThan(room.getId(), lastReadMessageId);
+        return allRooms.stream().map(room -> {
+            Long lastReadMessageId = participants.stream()
+                    .filter(p -> p.getChatRoom().equals(room))
+                    .map(ChatParticipant::getLastReadMessageId)
+                    .findFirst()
+                    .orElse(0L);
 
-           // 채팅방의 가장 최근 메시지 시각
+            long unreadCount = messageRepository.countByChatRoomIdAndIdGreaterThan(room.getId(), lastReadMessageId);
+
             LocalDateTime updatedAt = messageRepository.findTopByChatRoomIdOrderBySentAtDesc(room.getId())
-                                                       .map(Message::getSentAt)
-                                                       .orElse(null);
+                    .map(Message::getSentAt)
+                    .orElse(null);
 
-            // 최근 메시지가 오늘이면 오전/오후 몇시 몇분, 아니면 yyyy-mm-dd
             String formattedDate = null;
-            if(updatedAt != null) {
-                if(updatedAt.toLocalDate().isEqual(LocalDate.now())) {
-                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("a h:mm")
-                            .withLocale(Locale.KOREA);
+            if (updatedAt != null) {
+                if (updatedAt.toLocalDate().isEqual(LocalDate.now())) {
+                    formattedDate = updatedAt.format(DateTimeFormatter.ofPattern("a h:mm", Locale.KOREA));
                 } else {
-                    DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-                    formattedDate = updatedAt.format(dateFormatter);
+                    formattedDate = updatedAt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
                 }
             }
 
             return new ChatRoomResponseDTO(
-                room.getId(),
-                room.getRoomName(),
-                room.getType(),
-                room.getUserChatRooms().size(),
-                unreadCount,
-                formattedDate
-           );
-        }).collect(Collectors.toList());
+                    room.getId(),
+                    room.getRoomName(),
+                    room.getType(),
+                    room.getUserChatRooms().size(),
+                    unreadCount,
+                    formattedDate
+            );
+        }).toList();
     }
 
     // 모든 채팅방 리스트 조회

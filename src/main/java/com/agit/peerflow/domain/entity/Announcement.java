@@ -37,14 +37,19 @@ public class Announcement {
     @LastModifiedDate
     private LocalDateTime updatedAt;
 
-    public Announcement(String title, String content, User author) {
+    @Column(nullable = false)
+    private boolean isPinned = false;
+
+    public Announcement(String title, String content, User author, boolean isPinned) {
         this.title = title;
         this.content = content;
         this.author = author;
+        this.isPinned = isPinned;
     }
 
-    public void update(String title, String content) {
+    public void update(String title, String content, boolean isPinned) {
         this.title = title;
         this.content = content;
+        this.isPinned = isPinned;
     }
 }

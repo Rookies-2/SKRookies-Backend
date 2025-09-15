@@ -64,6 +64,22 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-mail</artifactId>
         </dependency>
+        <!--네트워크 트래픽에서 메타데이터를 자동 수집-->
+            <dependency>
+                <groupId>org.pcap4j</groupId>
+                <artifactId>pcap4j-core</artifactId>
+                <version>1.8.2</version>
+            </dependency>
+            <dependency>
+                <groupId>org.pcap4j</groupId>
+                <artifactId>pcap4j-packetfactory-static</artifactId>
+                <version>1.8.2</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-webflux</artifactId>
+            </dependency>
+
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

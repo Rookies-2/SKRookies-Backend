@@ -104,8 +104,9 @@ public class ChatRoomController {
 
     @Operation(summary = "모든 방 조회", description = "사용자가 로그인 시 사용자의 모든 방을 조회합니다.")
     @GetMapping("/all")
-    public ResponseEntity<List<ChatRoomResponseDTO>> findAllChatRooms() {
-        List<ChatRoomResponseDTO> dto = chatRoomService.findAllChatRooms();
+    public ResponseEntity<List<ChatRoomResponseDTO>> findAllChatRooms(@AuthenticationPrincipal User user) {
+        String userName = user.getUsername();
+        List<ChatRoomResponseDTO> dto = chatRoomService.findUnreadMessagesPerRoomIncludingGroups(userName);
 
         return ResponseEntity.ok(dto);
     }
