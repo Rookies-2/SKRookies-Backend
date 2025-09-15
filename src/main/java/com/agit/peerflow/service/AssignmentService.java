@@ -28,6 +28,9 @@ public interface AssignmentService {
     //전체 과제 목록 조회
     List<AssignmentPreviewResponseDTO> getAllAssignments(User currentUser);
 
+    //과제삭제
+    void deleteAssignment(Long assignmentId, User currentUser);
+
      //과제 상세 정보 조회
 //    AssignmentDetailResponseDTO getAssignmentDetails(Long assignmentId);
 }
