@@ -8,6 +8,7 @@ public record ChatMessageDTO(
         String roomId,
         String senderId,
         String content,
+        SenderDTO sender,
         String receiverId,
         Long sentAtEpochMs
 ) {
@@ -17,8 +18,10 @@ public record ChatMessageDTO(
                 String.valueOf(message.getChatRoom().getId()),
                 String.valueOf(message.getSender().getId()),
                 message.getContent(),
+                SenderDTO.from(message.getSender()),
                 String.valueOf(message.getReceiver().getId()), // 1:1은 receiver가 반드시 존재
                 message.getSentAt().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+
         );
     }
 
@@ -28,6 +31,7 @@ public record ChatMessageDTO(
                 String.valueOf(message.getChatRoom().getId()),
                 String.valueOf(message.getSender().getId()),
                 message.getContent(),
+                SenderDTO.from(message.getSender()),
                 null, // 그룹 채팅은 수신자 없음
                 message.getSentAt().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
         );
@@ -39,6 +43,7 @@ public record ChatMessageDTO(
                 String.valueOf(message.getChatRoom().getId()),
                 String.valueOf(message.getSender().getId()),
                 message.getContent(),
+                SenderDTO.from(message.getSender()),
                 null,
                 message.getSentAt().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
         );

@@ -1,5 +1,6 @@
 package com.agit.peerflow.dto.message;
 
+import com.agit.peerflow.domain.entity.User;
 import com.agit.peerflow.domain.enums.MessageType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
