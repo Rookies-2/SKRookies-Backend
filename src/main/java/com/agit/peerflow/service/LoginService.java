@@ -2,6 +2,7 @@ package com.agit.peerflow.service;
 
 import com.agit.peerflow.ai.AiClient;
 import com.agit.peerflow.domain.entity.User;
+import com.agit.peerflow.domain.enums.UserStatus;
 import com.agit.peerflow.dto.auth.LoginRequestDto;
 import com.agit.peerflow.dto.user.UserDTO;
 import com.agit.peerflow.repository.UserRepository;
@@ -144,14 +145,20 @@ public class LoginService {
             User user = userRepository.findByEmail(requestDto.getEmail())
                     .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
-            // 2️⃣ 비밀번호 검증
+            // 비밀번호 검증
             if (!passwordEncoder.matches(requestDto.getPassword(), user.getPassword())) {
                 log.warn("❌ 비밀번호 불일치: email={}", requestDto.getEmail());
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                         .body(Map.of("error", "비밀번호가 일치하지 않습니다."));
             }
+            // 사용자 승인 단계 체크
+            if (user.getStatus() != UserStatus.ACTIVE) {
+                log.warn("⚠️ 사용자 로그인 차단: 승인 대기 상태. email={}", requestDto.getEmail());
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(Map.of("error", "사용자 승인 단계입니다."));
+            }
 
-            // 3️⃣ 패킷 특성 추출
+            // 패킷 특성 추출
             Map<String, Object> features;
             try {
                 features = packetCaptureService.captureFeatures();
@@ -166,15 +173,18 @@ public class LoginService {
                 // 최소 필드만 세팅 (AI 모델이 null 받지 않도록)
             }
 
-            // 4️⃣ AI 판단
+            // AI 판단
             boolean blocked = aiClient.checkBlocked(features);
             if (blocked) {
                 log.warn("🚫 로그인 차단됨: email={}, features={}", requestDto.getEmail(), features);
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
                         .body(Map.of("blocked", true, "message", "AI 판단에 의해 로그인 차단됨"));
             }
+            // ✅ 모든 검증 절차를 통과한 후, 마지막 로그인 시간 업데이트
+            user.updateLastLoginTime();
+            userRepository.save(user); // 변경된 엔티티 저장
 
-            // 5️⃣ JWT 생성
+            // JWT 생성
             Map<String, Object> claims = Map.of("role", user.getRole().name());
             String token = jwtTokenProvider.createToken(user.getEmail(), claims);
 

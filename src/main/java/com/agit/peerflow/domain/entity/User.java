@@ -55,12 +55,11 @@ public class User implements UserDetails {
 
     private LocalDateTime approvedAt;
 
+    private LocalDateTime lastLoggedInAt;
+
     @OneToMany(mappedBy="user", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference // User를 직렬화할 때 userChatRooms는 포함
     private List<UserChatRoom> userChatRooms = new ArrayList<>();
-
-    // 비밀번호 재설정 인증번호 관련
-    private String passwordResetToken;
 
     // 프로필 이미지 URL
     @Column(name = "avatar_url", length = 500)  // 길이는 넉넉히
@@ -107,18 +106,23 @@ public class User implements UserDetails {
     }
     //== 비즈니스 로직 ==//
     public void approve() {
-        if (this.status == UserStatus.PENDING) {
+        {
             this.status = UserStatus.ACTIVE;
             this.approvedAt = LocalDateTime.now();
         }
     }
 
     public void reject() {
-        if (this.status == UserStatus.PENDING) {
             this.status = UserStatus.REJECTED;
-        }
     }
 
+    public void deactivate() {
+        this.status = UserStatus.INACTIVE;
+    }
+    //사용자 마지막 로그인 1년후 자동 비활성화
+    public void updateLastLoginTime() {
+        this.lastLoggedInAt = LocalDateTime.now();
+    }
     /**
      * 사용자 이름(username)을 변경합니다.
      * @param newUsername 새로운 사용자 이름
@@ -176,25 +180,6 @@ public class User implements UserDetails {
 
     public void changePassword(String newEncodedPassword) {
         this.password = newEncodedPassword;
-    }
-
-    // ===============================
-    // AI 관련 비즈니스 로직
-    // ===============================
-    public void markAiLoginBlocked() {
-        this.aiLoginBlocked = true;
-    }
-
-    public void markAiResetBlocked() {
-        this.aiResetBlocked = true;
-    }
-
-    public void incrementLoginAttempts() {
-        this.todayLoginAttempts = this.todayLoginAttempts + 1;
-    }
-
-    public void incrementResetAttempts() {
-        this.todayResetAttempts = this.todayResetAttempts + 1;
     }
 
     // --- UserDetails 구현 메소드 --- //

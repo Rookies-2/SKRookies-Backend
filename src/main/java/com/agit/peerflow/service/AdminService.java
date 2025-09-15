@@ -10,11 +10,11 @@ import org.springframework.data.domain.Pageable;
 public interface AdminService {
     User approveUser(Long userId);
     User rejectUser(Long userId);
+    User deactivateUser(Long userId);
     Page<User> getAllUsers(Pageable pageable);
     Page<User> getUsersByStatus(UserStatus status, Pageable pageable);
     Page<User> getUsersByRole(UserRole role, Pageable pageable);
     void updateUserByAdmin(Long userId, UserDTO.Request requestDTO);
     void resetPasswordByAdmin(Long userId, String newPassword);
     void deleteUserByAdmin(Long userId);
-    int countTodayLoginAttempts(User user);
 }

@@ -1,4 +1,4 @@
-package com.agit.peerflow.service.impl;
+package com.agit.peerflow.service.Impl;
 
 import com.agit.peerflow.domain.entity.User;
 import com.agit.peerflow.domain.enums.UserRole;
@@ -42,7 +42,13 @@ public class AdminServiceImpl implements AdminService {
         user.reject();
         return user;
     }
-
+    @Override
+    @Transactional
+    public User deactivateUser(Long userId) {
+        User user = findUserById(userId);
+        user.deactivate(); // User 엔티티에 deactivate() 메서드를 호출하도록 합니다.
+        return user;
+    }
     @Override
     public Page<User> getAllUsers(Pageable pageable) {
         return userRepository.findAll(pageable);
@@ -85,12 +91,5 @@ public class AdminServiceImpl implements AdminService {
         return userRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "User", "id", id));
     }
-    @Override
-    @Transactional
-    public int countTodayLoginAttempts(User user) {
-        LocalDateTime start = LocalDate.now().atStartOfDay();
-        LocalDateTime end = start.plusDays(1).minusNanos(1);
-        // loginAttemptLogRepository를 사용하여 오늘 시도 횟수 반환
-        return loginAttemptLogRepository.countTodayByUserEmail(user.getEmail(), start, end);
-    }
+
 }
