@@ -54,7 +54,7 @@ public class MessageService {
     }
 
     public void privateMessage(String userName, ChatMessageDTO dto) {
-        messagingTemplate.convertAndSendToUser(userName, "/topic/messages/" + dto.roomId(), dto);
+        messagingTemplate.convertAndSendToUser(userName, "/queue/messages/" + dto.roomId(), dto);
     }
 
     public List<Message> getMessages(ChatRoom chatRoom) {
