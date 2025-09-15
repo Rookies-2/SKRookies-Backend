@@ -5,6 +5,7 @@ import com.agit.peerflow.domain.entity.ChatRoom;
 import com.agit.peerflow.domain.entity.Message;
 import com.agit.peerflow.domain.entity.User;
 import com.agit.peerflow.domain.enums.ChatRoomType;
+import com.agit.peerflow.domain.enums.ParticipantType;
 import com.agit.peerflow.dto.chatroom.ChatRoomResponseDTO;
 import com.agit.peerflow.dto.chatroom.CreateRoomRequestDTO;
 import com.agit.peerflow.repository.*;
@@ -68,9 +69,11 @@ public class ChatRoomService {
                 .collect(Collectors.toList());
     }
 
+
+
     @Transactional(readOnly = true)
     public List<ChatRoomResponseDTO> findUnreadMessagesPerRoom(String userName) {
-        List<ChatParticipant> participants = chatParticipantRepository.findAllByUserUsername(userName);
+        List<ChatParticipant> participants = chatParticipantRepository.findAllByUserUsernameAndStatus(userName, ParticipantType.ACTIVE);
 
         return participants.stream().map(participant-> {
            ChatRoom room = participant.getChatRoom();
