@@ -40,7 +40,7 @@
 ### AI / ML
 - Python (데이터 처리 및 모델링)
 - Pandas, NumPy (데이터 전처리)
-- scikit-learn (머신러닝 모델)
+- scikit-learn RandomForestClassifier (머신러닝 모델)
 - Joblib / Pickle (모델 저장 및 배포)
 - REST API / Spring Boot 연동 (AI 모델 서버화)
 ### Infra & Tools
