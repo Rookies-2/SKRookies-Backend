@@ -7,5 +7,5 @@ import jakarta.validation.constraints.NotNull;
 public record CreateRoomRequestDTO(
         @NotBlank String roomName,
         @NotNull ChatRoomType type,
-        Long targetUserId
+        String receiverId
 ) {}
