@@ -12,8 +12,10 @@ import com.agit.peerflow.repository.SubmissionRepository;
 import com.agit.peerflow.repository.UserRepository;
 import com.agit.peerflow.service.AssignmentService;
 import com.agit.peerflow.service.HistoryService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -136,6 +138,25 @@ public class AssignmentServiceImpl implements AssignmentService {
                     return AssignmentPreviewResponseDTO.from(assignment, status);
                 })
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public void deleteAssignment(Long assignmentId, User currentUser) {
+        // 1. 삭제할 과제 조회
+        Assignment assignment = assignmentRepository.findById(assignmentId)
+                .orElseThrow(() -> new EntityNotFoundException("과제를 찾을 수 없습니다. ID: " + assignmentId));
+
+        // 2. ‼️ 권한 확인: 현재 사용자가 과제 생성자이거나, ADMIN인지 확인
+        boolean isCreator = assignment.getCreator().getId().equals(currentUser.getId());
+        boolean isAdmin = currentUser.getRole() == UserRole.ADMIN;
+
+        if (!isCreator && !isAdmin) {
+            throw new AccessDeniedException("이 과제를 삭제할 권한이 없습니다.");
+        }
+
+        // 3. 과제 삭제
+        assignmentRepository.delete(assignment);
     }
 
 //    @Override
