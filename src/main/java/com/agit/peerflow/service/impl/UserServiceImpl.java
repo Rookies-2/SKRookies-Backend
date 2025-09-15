@@ -165,7 +165,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getById(String id) {
-        return userRepository.findById(Long.valueOf(id))
+        return userRepository.findByEmail(id)
                 .orElseThrow(() -> new BusinessException(
                         ErrorCode.RESOURCE_NOT_FOUND, "User", "id", String.valueOf(id)
                 ));

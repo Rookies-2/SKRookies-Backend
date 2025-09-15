@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
  * @since 2025-09-10
  * @description
  * - 알림(History) 관련 비즈니스 로직을 처리하는 서비스 클래스
- * - 알림 생성, 조회, 읽음 처리 기능 제공
+ * - 알림 생성, 조회, 읽음 처리, 삭제 기능 제공
  */
 @Service
 @RequiredArgsConstructor
@@ -77,5 +77,26 @@ public class HistoryService {
 
         // 알림 엔티티의 상태를 '읽음'으로 변경합니다.
         history.markAsRead();
+    }
+
+    /**
+     * 특정 알림을 삭제합니다.
+     *
+     * @param historyId 삭제할 알림의 ID
+     * @param userId    현재 요청을 보낸 사용자의 ID (권한 확인용)
+     */
+    @Transactional
+    public void deleteHistory(Long historyId, Long userId) {
+        // 알림 ID로 알림 엔티티를 조회합니다.
+        History history = historyRepository.findById(historyId)
+                .orElseThrow(() -> new IllegalArgumentException("알림을 찾을 수 없습니다."));
+
+        // 현재 요청을 보낸 사용자가 알림의 주인인지 확인합니다.
+        if (!history.getUser().getId().equals(userId)) {
+            throw new SecurityException("자신의 알림만 삭제할 수 있습니다.");
+        }
+
+        // 알림을 삭제합니다.
+        historyRepository.delete(history);
     }
 }

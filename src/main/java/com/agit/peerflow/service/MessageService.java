@@ -4,6 +4,7 @@ import com.agit.peerflow.domain.entity.ChatParticipant;
 import com.agit.peerflow.domain.entity.ChatRoom;
 import com.agit.peerflow.domain.entity.Message;
 import com.agit.peerflow.domain.entity.User;
+import com.agit.peerflow.domain.enums.ChatRoomType;
 import com.agit.peerflow.domain.enums.MessageType;
 import com.agit.peerflow.dto.message.ChatMessageDTO;
 import com.agit.peerflow.dto.message.ReadReceiptDTO;
@@ -40,8 +41,12 @@ public class MessageService {
 
     @Transactional
     public Message sendMessage(ChatRoom room, User sender, User receiver, String content, MessageType type) {
-        Message message = Message.createMessage(sender, room, receiver, content, type);
-        return messageRepository.save(message);
+        Message saved = messageRepository.save(
+                Message.createMessage(sender, room, receiver, content, type)
+        );
+
+        return messageRepository.findByIdWithSender(saved.getId())
+                .orElseThrow(()-> new EntityNotFoundException("메시지를 찾을 수 없습니다."));
     }
 
     public void broadcastMessage(Long roomId, ChatMessageDTO dto) {
@@ -49,7 +54,7 @@ public class MessageService {
     }
 
     public void privateMessage(String userName, ChatMessageDTO dto) {
-        messagingTemplate.convertAndSendToUser(userName, "/queue/messages/" + dto.roomId(), dto);
+        messagingTemplate.convertAndSendToUser(userName, "/topic/messages/" + dto.roomId(), dto);
     }
 
     public List<Message> getMessages(ChatRoom chatRoom) {

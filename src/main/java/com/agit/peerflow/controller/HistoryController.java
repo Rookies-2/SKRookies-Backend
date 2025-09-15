@@ -35,4 +35,14 @@ public class HistoryController {
         historyService.markAsRead(historyId, user.getId());
         return ResponseEntity.ok().build();
     }
+
+    @Operation(summary = "특정 알림 삭제", description = "ID에 해당하는 자신의 알림을 삭제합니다.")
+    @DeleteMapping("/{historyId}")
+    public ResponseEntity<Void> deleteHistory(
+            @PathVariable Long historyId,
+            @AuthenticationPrincipal User user) {
+        historyService.deleteHistory(historyId, user.getId());
+        // 성공적으로 삭제되면 204 No Content 응답을 보냅니다.
+        return ResponseEntity.noContent().build();
+    }
 }

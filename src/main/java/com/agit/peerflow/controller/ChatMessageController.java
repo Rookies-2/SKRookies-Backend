@@ -64,18 +64,15 @@ public class ChatMessageController {
             throw new IllegalStateException("사용자 정보를 찾을 수 없습니다: " + user.getUsername());
         }
 
-        Message saved = null;
         User receiver = null;
-
         if (room.getType() == ChatRoomType.ONE_TO_ONE) {
             if (dto.receiverId() == null || dto.receiverId().isBlank()) {
                 throw new IllegalArgumentException("1:1 채팅에서는 receiverId가 반드시 필요합니다.");
             }
             receiver = userService.getById(dto.receiverId());
-        } else {
-            receiver = null; // 그룹채팅은 수신자 설정 안함
         }
 
+        Message saved = null;
         if(dto.type() == MessageType.TEXT) {
             saved = messageService.sendMessage(room, sender, receiver, dto.content(), MessageType.TEXT);
         } else if(dto.type() == MessageType.IMAGE) {
