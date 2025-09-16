@@ -16,8 +16,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-@Entity
+
 // @Data 백두현: 해당 애노테이션이 채팅방 참여자 조회 시 .toString()호출에서 LazyInitializationException 문제 발생
+@Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @ToString(exclude = "userChatRooms")
 @Table(name = "users")
@@ -54,7 +55,6 @@ public class User implements UserDetails {
     private LocalDateTime createdAt;
 
     private LocalDateTime approvedAt;
-
     private LocalDateTime lastLoggedInAt;
 
     @OneToMany(mappedBy="user", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -71,22 +71,6 @@ public class User implements UserDetails {
     @Column(name = "verification_code_expiration")
     private LocalDateTime verificationCodeExpiration;
 
-    // ===============================
-    // AI 연동 관련 필드
-    // ===============================
-
-    @Column(name = "ai_login_blocked")
-    private Boolean aiLoginBlocked= false;
-
-    @Column(name = "ai_reset_blocked")
-    private Boolean aiResetBlocked= false;
-
-    @Column(name = "today_login_attempts")
-    private Integer todayLoginAttempts = 0;
-
-    @Column(name = "today_reset_attempts")
-    private Integer todayResetAttempts = 0;
-
     @Builder
     private User(String username, String password, String nickname, String email, UserRole role, UserStatus status, String avatarUrl) {
         this.username = username;
@@ -96,20 +80,12 @@ public class User implements UserDetails {
         this.role = role;
         this.status = (status != null) ? status : UserStatus.PENDING;
         this.avatarUrl = avatarUrl;
-        //this.createdAt = LocalDateTime.now();
     }
 
-    // 유저-채팅방 중간 엔티티, 채팅방 추가 메서드
-    public void addChatRoom(ChatRoom chatRoom) {
-        UserChatRoom link = UserChatRoom.create(this, chatRoom);
-        userChatRooms.add(link);
-    }
     //== 비즈니스 로직 ==//
     public void approve() {
-        {
             this.status = UserStatus.ACTIVE;
             this.approvedAt = LocalDateTime.now();
-        }
     }
 
     public void reject() {
@@ -123,28 +99,25 @@ public class User implements UserDetails {
     public void updateLastLoginTime() {
         this.lastLoggedInAt = LocalDateTime.now();
     }
-    /**
-     * 사용자 이름(username)을 변경합니다.
-     * @param newUsername 새로운 사용자 이름
-     */
+
     public void changeUsername(String newUsername) {
         if (newUsername != null && !newUsername.isBlank()) {
             this.username = newUsername;
         }
     }
 
-    /**
-     * 닉네임(nickname)을 변경합니다.
-     * @param newNickname 새로운 닉네임
-     */
     public void changeNickname(String newNickname) {
         if (newNickname != null && !newNickname.isBlank()) {
             this.nickname = newNickname;
         }
     }
 
+    public void changePassword(String newEncodedPassword) {
+        this.password = newEncodedPassword;
+    }
     // 인증 코드 설정
     public void setVerificationCode(String verificationCode) {
+
         this.verificationCode = verificationCode;
     }
 
@@ -175,11 +148,6 @@ public class User implements UserDetails {
         if (nickname != null && !nickname.isBlank()) {
             this.nickname = nickname;
         }
-    }
-
-
-    public void changePassword(String newEncodedPassword) {
-        this.password = newEncodedPassword;
     }
 
     // --- UserDetails 구현 메소드 --- //

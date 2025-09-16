@@ -145,8 +145,8 @@ public class LoginService {
 //            features.put("ct_srv_dst", 1);
 //            features.put("is_sm_ips_ports", 0);
 
-//            //실제 네트워크 트래픽용
-//            // 패킷 특성 추출
+            //실제 네트워크 트래픽용
+            // 패킷 특성 추출
             Map<String, Object> features;
             try {
                 features = packetCaptureService.captureFeatures();
@@ -160,6 +160,7 @@ public class LoginService {
                 features.put("state", "INT");
                 // 최소 필드만 세팅 (AI 모델이 null 받지 않도록)
             }
+
             // AI 판단
             if (aiClient.checkBlocked(features)) {
                 log.warn("🚫 로그인 차단됨: email={}, features={}", requestDto.getEmail(), features);

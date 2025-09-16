@@ -1,10 +1,12 @@
 package com.agit.peerflow.service;
 
 import com.agit.peerflow.ai.AiClient;
+import com.agit.peerflow.domain.entity.PasswordResetLog;
 import com.agit.peerflow.domain.entity.User;
 import com.agit.peerflow.dto.user.PasswordDTO;
 import com.agit.peerflow.exception.BusinessException;
 import com.agit.peerflow.exception.ErrorCode;
+import com.agit.peerflow.repository.PasswordResetLogRepository;
 import com.agit.peerflow.repository.UserRepository;
 import com.agit.peerflow.security.service.PacketCaptureService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -30,21 +33,24 @@ public class PasswordService {
     private final AiClient aiClient;
     private final MailService mailService;
     private final PacketCaptureService packetCaptureService;
-
-    // ================== 공통 ResponseEntity 헬퍼 ==================
-    private ResponseEntity<Map<String, Object>> buildResponse(boolean blocked, String message, HttpStatus status) {
-        return ResponseEntity.status(status).body(Map.of("blocked", blocked, "message", message));
-    }
-
-    private ResponseEntity<Map<String, Object>> buildAiBlockedResponse(String action, String email) {
-        String message = ErrorCode.AI_BLOCKED.formatMessage(action, email);
-        return ResponseEntity.status(ErrorCode.AI_BLOCKED.getHttpStatus())
-                .body(Map.of("blocked", true, "message", message));
-    }
+    private final PasswordResetLogRepository passwordResetLogRepository;
+    private static final int MAX_RESET_ATTEMPTS = 5;
 
     // ================== 인증번호 발송 ==================
     public ResponseEntity<?> sendVerificationCode(PasswordDTO.ResetRequest request, HttpServletRequest httpRequest) {
         try {
+            // 오늘 비밀번호 재설정 시도 횟수 조회
+            int todayAttempts = passwordResetLogRepository.countTodayByEmail(
+                    request.getEmail(),
+                    LocalDateTime.of(LocalDateTime.now().toLocalDate(), LocalTime.MIN),
+                    LocalDateTime.of(LocalDateTime.now().toLocalDate(), LocalTime.MAX)
+            );
+
+            if (todayAttempts >= MAX_RESET_ATTEMPTS) {
+                log.warn("❌ 비밀번호 재설정 시도 횟수 초과: email={}", request.getEmail());
+                throw new BusinessException(ErrorCode.TOO_MANY_REQUESTS, "비밀번호 재설정 시도 횟수를 초과했습니다.");
+            }
+
             User user = userRepository.findByEmail(request.getEmail())
                     .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND,
                             "User", "email", request.getEmail()));
@@ -60,23 +66,29 @@ public class PasswordService {
                 features.put("service", "-");
                 features.put("state", "INT");
             }
+            boolean isBlocked = aiClient.checkBlocked(features);
 
-            // 이메일/IP/Device 정보 추가
-            features.put("email", request.getEmail());
-            features.put("ip", httpRequest.getRemoteAddr());
-            features.put("device", httpRequest.getHeader("User-Agent"));
+            PasswordResetLog logEntry = PasswordResetLog.builder()
+                    .user(user)
+                    .email(request.getEmail())
+                    .ip(httpRequest.getRemoteAddr())
+                    .device(httpRequest.getHeader("User-Agent"))
+                    .aiBlocked(isBlocked)
+                    .attempts(todayAttempts + 1)
+                    .build();
+            passwordResetLogRepository.save(logEntry);
 
             // AI 판단
-            if (aiClient.checkBlocked(features)) {
-                log.warn("🚨 비정상적인 비밀번호 재설정 시도로 차단됨: email={}", user.getEmail());
+            if (isBlocked) {
+                log.warn("🚫 AI에 의해 비밀번호 재설정 시도 차단됨: email={}", request.getEmail());
                 String message = ErrorCode.AI_BLOCKED.formatMessage("비밀번호 재설정", user.getEmail());
-                return buildResponse(true, message, ErrorCode.AI_BLOCKED.getHttpStatus());
+                throw new BusinessException(ErrorCode.AI_BLOCKED, "비밀번호 재설정", user.getEmail());
             }
 
             // 인증번호 발송
             mailService.sendVerificationCode(request.getEmail());
             log.info("✅ 인증번호 발송 성공: email={}", request.getEmail());
-            return buildResponse(false, "✅ 인증번호가 발송되었습니다.", HttpStatus.OK);
+            return ResponseEntity.ok(Map.of("message", "✅ 인증 코드가 이메일로 전송되었습니다."));
 
         } catch (Exception e) {
             log.error("❌ 인증번호 발송 실패: email={}", request.getEmail(), e);
@@ -92,21 +104,21 @@ public class PasswordService {
                     .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND,
                             "User", "email", request.getEmail()));
 
-            if (!request.getCode().equals(user.getVerificationCode())) {
-                return buildResponse(false, "❌ 인증번호가 올바르지 않습니다.", HttpStatus.BAD_REQUEST);
+            if (user.getVerificationCode() == null || !user.getVerificationCode().equals(request.getCode())) {
+                throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE, "유효하지 않은 인증 코드입니다.");
             }
 
-            if (user.getVerificationCodeExpiration().isBefore(LocalDateTime.now())) {
-                return buildResponse(false, "⏰ 인증번호가 만료되었습니다.", HttpStatus.BAD_REQUEST);
+            if (user.getVerificationCodeExpiration() == null || user.getVerificationCodeExpiration().isBefore(LocalDateTime.now())) {
+                throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE, "인증 코드가 만료되었습니다.");
             }
 
-            log.info("✅ 인증번호 확인 성공: email={}", user.getEmail());
-            return buildResponse(false, "✅ 인증번호 확인이 완료되었습니다.", HttpStatus.OK);
+        return ResponseEntity.ok(Map.of("message", "인증 코드가 확인되었습니다."));
+
 
         } catch (Exception e) {
             log.error("❌ 인증번호 확인 중 오류 발생: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "인증번호 확인 중 서버 오류가 발생했습니다."));
+                    .body(Map.of("error", "❌ 인증번호 확인 중 서버 오류가 발생했습니다."));
         }
     }
 
@@ -215,21 +227,17 @@ public class PasswordService {
 //            features.put("state", "INT");
 //        }
 
-            features.put("email", user.getEmail());
-            features.put("ip", httpRequest.getRemoteAddr());
-            features.put("device", httpRequest.getHeader("User-Agent"));
-
             // AI 판단
             if (aiClient.checkBlocked(features)) {
-                log.warn("🚨 비정상적인 비밀번호 변경 시도로 차단됨: email={}", user.getEmail());
-                log.warn("🚨 비정상적인 비밀번호 변경 시도로 차단됨: email={}", user.getEmail());
-                return buildAiBlockedResponse("비밀번호 변경", user.getEmail());
+                log.warn("🚨 AI에 의해 비정상적인 비밀번호 변경 시도로 차단됨: email={}", request.getEmail());
+                String message = ErrorCode.AI_BLOCKED.formatMessage("비밀번호 변경", user.getEmail());
+                throw new BusinessException(ErrorCode.AI_BLOCKED, "비밀번호 변경", user.getEmail());
             }
 
             // 비밀번호 변경
             mailService.resetPasswordByCode(request.getEmail(), request.getCode(), request.getNewPassword());
             log.info("✅ 비밀번호 변경 성공: email={}", user.getEmail());
-            return buildResponse(false, "✅ 비밀번호가 성공적으로 변경되었습니다.", HttpStatus.OK);
+            return ResponseEntity.ok(Map.of("message", "비밀번호가 성공적으로 변경되었습니다."));
 
         } catch (Exception e) {
             log.error("❌ 비밀번호 변경 처리 중 예외 발생", e);

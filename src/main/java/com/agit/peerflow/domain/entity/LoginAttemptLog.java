@@ -1,28 +1,30 @@
 package com.agit.peerflow.domain.entity;
 
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Entity
 @Getter
 @Setter
-@EntityListeners(AuditingEntityListener.class)
 @Table(name = "login_attempt_log")
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@EntityListeners(AuditingEntityListener.class)
 public class LoginAttemptLog {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private Long userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @Column(nullable = false)
     private String email;
@@ -38,11 +40,10 @@ public class LoginAttemptLog {
     @Column(name = "attempt_count")
     private int attemptCount;
 
-    // Flask AI 모델 예측 결과
-    private Integer modelPrediction;
-
-    @Column(name = "ai_blocked")
     private boolean aiBlocked;
+
+    @Column(name = "features", columnDefinition = "JSON")
+    private String features; // JSON 형태로 특징 데이터 저장
 
     @Column(name = "created_at")
     @CreatedDate
