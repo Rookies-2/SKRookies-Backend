@@ -50,9 +50,10 @@ public class UserServiceImpl implements UserService {
         return userRepository.save(newUser);
     }
 
+    @Transactional
     public User uploadAvatarById(Long id, MultipartFile file)  {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "User", "id", String.valueOf(id)));
         String savedPath = saveAvatarFile(file, id);
         user.setAvatarUrl(savedPath);            // User 엔티티에 avatarUrl 필드가 있어야 함
         return userRepository.save(user);
@@ -61,7 +62,7 @@ public class UserServiceImpl implements UserService {
     //실제 파일 저장 처리 (폴더 자동 생성 + 고유 파일명 생성)
     public String saveAvatarFile(MultipartFile file, Long key) {
         if (file == null || file.isEmpty()) {
-            throw new IllegalArgumentException("Empty file");
+            throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE, "Empty file");
         }
 
         // 저장 디렉터리 보장
@@ -70,7 +71,7 @@ public class UserServiceImpl implements UserService {
             try {
                 Files.createDirectories(uploadDir);
             } catch (IOException e) {
-                System.out.println("Error creating directory");
+                throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR, "Error creating directory", e);
             }
         }
 
@@ -89,7 +90,7 @@ public class UserServiceImpl implements UserService {
             // 저장
             Files.write(target, file.getBytes());
         } catch (IOException e) {
-            System.out.println("Error writing file");
+            throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR, "Error writing file", e);
         }
 
         // 브라우저에서 접근할 때를 고려하여 상대경로 저장
@@ -111,7 +112,7 @@ public class UserServiceImpl implements UserService {
         try {
             Files.deleteIfExists(filePath);
         } catch (IOException e) {
-            throw new RuntimeException("아바타 파일 삭제 실패: " + fileName, e);
+            throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR, "아바타 파일 삭제 실패: " + fileName, e);
         }
 
         user.setAvatarUrl(null);

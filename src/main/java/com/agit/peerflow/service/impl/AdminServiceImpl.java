@@ -1,4 +1,4 @@
-package com.agit.peerflow.service.Impl;
+package com.agit.peerflow.service.impl;
 
 import com.agit.peerflow.domain.entity.User;
 import com.agit.peerflow.domain.enums.UserRole;
@@ -15,9 +15,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Service("adminServiceImpl")
 @RequiredArgsConstructor
@@ -69,9 +66,8 @@ public class AdminServiceImpl implements AdminService {
     public void updateUserByAdmin(Long userId, UserDTO.Request requestDTO) {
         User user = findUserById(userId);
 
-        // ✅ 개별 메서드를 사용하여 각 필드를 업데이트
-        user.setUsername(requestDTO.getUsername());
-        user.setNickname(requestDTO.getNickname());
+        user.changeUsername(requestDTO.getUsername());
+        user.changeNickname(requestDTO.getNickname());
     }
 
     @Override
@@ -84,12 +80,13 @@ public class AdminServiceImpl implements AdminService {
     @Override
     @Transactional
     public void deleteUserByAdmin(Long userId) {
-        userRepository.deleteById(userId);
+        User user = findUserById(userId);
+        userRepository.delete(user);
     }
 
     private User findUserById(Long id) {
         return userRepository.findById(id)
-                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "User", "id", id));
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "User", "id", String.valueOf(id)));
     }
 
 }
