@@ -1,31 +1,14 @@
 package com.agit.peerflow.service;
 
-import com.agit.peerflow.domain.entity.UserChatRoom;
-import com.agit.peerflow.repository.UserChatRoomRepository;
-import jakarta.persistence.EntityNotFoundException;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+public interface UserChatRoomService {
 
-@Service
-@RequiredArgsConstructor
-public class UserChatRoomService {
-    private final UserChatRoomRepository userChatRoomRepository;
+    /**
+     * 채팅방 알림 끄기/켜기 상태를 토글합니다.
+     */
+    void toggleMute(String username, Long roomId);
 
-    @Transactional
-    public void toggleMute(String username, Long roomId) {
-        UserChatRoom link = userChatRoomRepository
-                .findByUserUsernameAndChatRoomId(username, roomId)
-                .orElseThrow(() -> new EntityNotFoundException("참여 정보가 없습니다."));
-        link.toggleMute();
-    }
-
-    @Transactional
-    public void togglePin(String username, Long roomId) {
-        UserChatRoom link = userChatRoomRepository
-                .findByUserUsernameAndChatRoomId(username, roomId)
-                .orElseThrow(() -> new EntityNotFoundException("참여 정보가 없습니다."));
-        link.togglePinned();
-    }
-
+    /**
+     * 채팅방 상단 고정/해제 상태를 토글합니다.
+     */
+    void togglePin(String username, Long roomId);
 }
