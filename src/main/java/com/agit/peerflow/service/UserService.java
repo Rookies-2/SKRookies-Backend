@@ -11,14 +11,14 @@ public interface UserService {
 
     User signup(UserDTO.Request requestDTO);
 
-    User getMyInfo(String username);
+    User getMyInfo(String email);
 
     User updateUsername(String email, String newUsername);
     User updateNickname(String email, String newNickname);
 
-    void deleteMyAccount(String username);
+    void deleteMyAccount(String email);
 
-    User changePassword(String username, String oldPassword, String newPassword);
+    User changePassword(String email, String oldPassword, String newPassword);
 
     User getById(String id);
 
