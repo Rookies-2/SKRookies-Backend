@@ -1,8 +1,11 @@
 package com.agit.peerflow.repository;
 
 import com.agit.peerflow.domain.entity.History;
+import com.agit.peerflow.domain.entity.User;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+
 import java.util.List;
 /**
  * @author  김현근
@@ -15,4 +18,7 @@ import java.util.List;
 public interface HistoryRepository extends JpaRepository<History, Long> {
     @EntityGraph(attributePaths = "user")
     List<History> findAllByUserIdOrderByCreatedAtDesc(Long userId);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    void deleteByUser(User user);
 }

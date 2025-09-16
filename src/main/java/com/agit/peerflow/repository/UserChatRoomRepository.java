@@ -1,6 +1,7 @@
 package com.agit.peerflow.repository;
 
 import com.agit.peerflow.domain.entity.ChatRoom;
+import com.agit.peerflow.domain.entity.User;
 import com.agit.peerflow.domain.entity.UserChatRoom;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -28,4 +29,6 @@ public interface UserChatRoomRepository extends JpaRepository<UserChatRoom, Long
 
     @EntityGraph(attributePaths = "chatRoom")
     List<UserChatRoom> findByUserId(Long userId);
+
+    void deleteByUser(User user);
 }
