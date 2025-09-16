@@ -27,15 +27,25 @@ public class AssignmentDetailResponseDTO {
     private final List<String> attachmentUrls;
     private final List<SubmissionResponseDTO> submissions;
 
-    public static AssignmentDetailResponseDTO from(Assignment assignment, List<Submission> submissionList) {
+    // 엔티티 대신, 서비스에서 꺼낸 값들을 받음
+    public static AssignmentDetailResponseDTO of(
+            Long id,
+            String title,
+            String description,
+            String creatorName,
+            LocalDateTime createdAt,
+            LocalDateTime dueDate,
+            List<String> attachmentUrls,
+            List<Submission> submissionList
+    ) {
         return AssignmentDetailResponseDTO.builder()
-                .id(assignment.getId())
-                .title(assignment.getTitle())
-                .description(assignment.getDescription())
-                .creatorName(assignment.getCreator().getNickname())
-                .createdAt(assignment.getCreatedAt())
-                .dueDate(assignment.getDueDate())
-                .attachmentUrls(assignment.getAttachmentUrls())
+                .id(id)
+                .title(title)
+                .description(description)
+                .creatorName(creatorName)
+                .createdAt(createdAt)
+                .dueDate(dueDate)
+                .attachmentUrls(attachmentUrls)
                 .submissions(submissionList.stream()
                         .map(SubmissionResponseDTO::from)
                         .collect(Collectors.toList()))

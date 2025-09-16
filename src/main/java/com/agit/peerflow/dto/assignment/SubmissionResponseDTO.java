@@ -27,7 +27,11 @@ public class SubmissionResponseDTO {
     public static SubmissionResponseDTO from(Submission submission) {
         return SubmissionResponseDTO.builder()
                 .submissionId(submission.getId())
-                .studentName(submission.getStudent().getNickname())
+                .studentName(
+                        submission.getStudent() != null
+                                ? submission.getStudent().getNickname()
+                                : null
+                )
                 .fileUrl(submission.getFileUrl())
                 .status(submission.getStatus())
                 .submittedAt(submission.getSubmittedAt())
@@ -35,4 +39,5 @@ public class SubmissionResponseDTO {
                 .feedback(submission.getFeedback())
                 .build();
     }
+
 }

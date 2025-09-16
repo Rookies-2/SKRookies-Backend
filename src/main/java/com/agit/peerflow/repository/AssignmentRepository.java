@@ -8,6 +8,13 @@ import org.springframework.data.repository.query.Param;
 import java.util.Optional;
 
 public interface AssignmentRepository extends JpaRepository<Assignment, Long> {
-    @Query("SELECT a FROM Assignment a JOIN FETCH a.creator WHERE a.id = :id")
+    @Query("""
+            SELECT a
+              FROM Assignment a
+        JOIN FETCH a.creator
+   LEFT JOIN FETCH a.attachmentUrls
+             WHERE a.id = :id
+   """)
     Optional<Assignment> findByIdWithCreator(@Param("id") Long id);
 }
+

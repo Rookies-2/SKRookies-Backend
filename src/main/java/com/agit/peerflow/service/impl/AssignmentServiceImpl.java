@@ -165,7 +165,21 @@ public class AssignmentServiceImpl implements AssignmentService {
                 .orElseThrow(() -> new IllegalArgumentException("과제를 찾을 수 없습니다. ID: " + assignmentId));
 
         List<Submission> submissions = submissionRepository.findAllByAssignmentIdWithStudent(assignmentId);
+        String creatorName = assignment.getCreator() != null ? assignment.getCreator().getNickname() : null;
+        List<String> attachmentUrls = assignment.getAttachmentUrls() != null
+                ? List.copyOf(assignment.getAttachmentUrls())
+                : List.of();
 
-        return AssignmentDetailResponseDTO.from(assignment, submissions);
+        return AssignmentDetailResponseDTO.of(
+                assignment.getId(),
+                assignment.getTitle(),
+                assignment.getDescription(),
+                creatorName,
+                assignment.getCreatedAt(),
+                assignment.getDueDate(),
+                attachmentUrls,
+                submissions
+        );
+
     }
 }

@@ -102,7 +102,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/announcements").hasAnyRole("ADMIN", "TEACHER")
                         .requestMatchers(HttpMethod.PUT, "/api/announcements/**").hasAnyRole("ADMIN", "TEACHER")
                         .requestMatchers(HttpMethod.DELETE, "/api/announcements/**").hasAnyRole("ADMIN", "TEACHER")
-
+                        // 에러 허용
+                        .requestMatchers("/error").permitAll()
                         // 5. 그 외 모든 요청 인증 필요
                         .anyRequest().authenticated()
                 )
