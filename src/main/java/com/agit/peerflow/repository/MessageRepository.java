@@ -2,6 +2,7 @@ package com.agit.peerflow.repository;
 
 import com.agit.peerflow.domain.entity.ChatRoom;
 import com.agit.peerflow.domain.entity.Message;
+import com.agit.peerflow.domain.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -52,4 +53,6 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
     WHERE m.id = :id
 """)
     Optional<Message> findByIdWithSender(@Param("id") Long id);
+
+    void deleteBySender(User sender);
 }
