@@ -15,23 +15,17 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Long> {
     // 이메일로 검색
     Optional<User> findByEmail(String email);
-
     // 이메일 존재 여부 확인
     boolean existsByEmail(String email);
-
     // 닉네임 존재 여부 확인
     boolean existsByNickname(String nickname);
-
     //Paging 과 Search(검색) 관련 메서드들
     // 사용자 승인상태
     Page<User> findByStatus(UserStatus status, Pageable pageable);
-
     // 사용자 역할로 검색
     Page<User> findByRole(UserRole role, Pageable pageable);
-
     //공지사항 역할
     List<User> findAllByRole(UserRole role);
-
     //상태가 ACTIVE인 유저 전체 조회
     List<User> findAllByStatus(UserStatus status);
 

@@ -20,6 +20,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.web.SecurityFilterChain;
@@ -66,7 +67,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // 백두현: Spring Security의 필터체인은 순차적으로 검사하므로 아래 순서를 지켜야 함.
                         // 1. 인증 없이 접근 가능한 경로
-                        .requestMatchers("/api/auth/login").permitAll()
+                        .requestMatchers("/api/auth/login","/api/users/signup").permitAll()
                         .requestMatchers(
                                 "/api/auth/password/reset",
                                 "/api/auth/password/verify",
@@ -77,7 +78,6 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**"
                         ).permitAll()
-                        .requestMatchers("/api/users/signup").permitAll()
                         .requestMatchers("/stomp/**").permitAll()
                         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                         // 2. 나머지 /api/users/**, /api/chatrooms/**는 인증 필요
@@ -105,16 +105,13 @@ public class SecurityConfig {
 
                         // 5. 그 외 모든 요청 인증 필요
                         .anyRequest().authenticated()
-
-
                 )
                 .formLogin(AbstractHttpConfigurer::disable)
                 .logout(AbstractHttpConfigurer::disable)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 // spring security6 부턴 람다 스타일로 authenticationManager 설정
                 .authenticationProvider(authenticationProvider(userDetailsService, passwordEncoder))
-                .exceptionHandling(ex -> ex
-                        .accessDeniedHandler(customAccessDeniedHandler)
+                .exceptionHandling(ex -> ex.accessDeniedHandler(customAccessDeniedHandler)
                 ); // 권한 예외 처리기 등록
 
         return http.build();

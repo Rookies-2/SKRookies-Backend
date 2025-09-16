@@ -12,6 +12,10 @@ public enum ErrorCode {
     RESOURCE_NOT_FOUND("%s(을)를 찾을 수 없습니다. (%s: %s)", HttpStatus.NOT_FOUND),
     RESOURCE_DUPLICATE("이미 존재하는 %s입니다. (%s: %s)", HttpStatus.CONFLICT),
 
+    // Request Errors
+    TOO_MANY_REQUESTS("요청 횟수를 초과했습니다. 잠시 후 다시 시도해주세요.", HttpStatus.TOO_MANY_REQUESTS),
+
+
     // User Errors
     PASSWORD_SAME_AS_CURRENT("새 비밀번호는 현재 비밀번호와 동일할 수 없습니다.", HttpStatus.BAD_REQUEST),
     // 권한 관련
