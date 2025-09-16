@@ -21,7 +21,11 @@ public enum ErrorCode {
     // 권한 관련
     ACCESS_DENIED("🚫 권한이 없습니다.", HttpStatus.FORBIDDEN),
 
-    AI_BLOCKED("🚫 AI 보안 시스템에 의해 %s 차단되었습니다. 사용자: %s", HttpStatus.FORBIDDEN);
+    AI_BLOCKED("🚫 AI 보안 시스템에 의해 %s 차단되었습니다. 사용자: %s", HttpStatus.FORBIDDEN),
+
+    // 서버 내부 오류 (500)
+    INTERNAL_SERVER_ERROR("서버 내부 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
+
     private final String messageTemplate;
     private final HttpStatus httpStatus;
 
