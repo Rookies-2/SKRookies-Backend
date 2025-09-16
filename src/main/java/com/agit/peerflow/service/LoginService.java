@@ -159,20 +159,9 @@ public class LoginService {
             boolean isBlocked = aiClient.checkBlocked(features);
             boolean isPasswordMatch = passwordEncoder.matches(requestDto.getPassword(), user.getPassword());
 
-            LoginAttemptLog logEntry = LoginAttemptLog.builder()
-                    .user(user)
-                    .email(requestDto.getEmail())
-                    .ip(httpRequest.getRemoteAddr())
-                    .device(httpRequest.getHeader("User-Agent"))
-                    .aiBlocked(isBlocked)
-                    .success(isPasswordMatch)
-                    .attemptCount(todayAttempts + 1)
-                    .features(objectMapper.writeValueAsString(features))
-                    .build();
-            loginAttemptLogRepository.save(logEntry);
-
             // AI 판단
             if (isBlocked) {
+                saveFailedLoginLog(requestDto, httpRequest, true, null, features);
                 log.warn("🚫 로그인 차단됨: email={}, features={}", requestDto.getEmail(), features);
                 throw new BusinessException(ErrorCode.AI_BLOCKED, "로그인", user.getEmail());
             }
@@ -202,6 +191,37 @@ public class LoginService {
             log.error("❌ 로그인 처리 중 예외 발생", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "로그인 처리 중 오류가 발생했습니다."));
+        }
+
+    }
+
+    private void saveFailedLoginLog(LoginRequestDto requestDto, HttpServletRequest httpRequest, boolean isAiBlocked, User user, Map<String, Object> features) {
+        int todayAttempts = loginAttemptLogRepository.countTodayByUserEmail(
+                requestDto.getEmail(),
+                LocalDateTime.of(LocalDateTime.now().toLocalDate(), LocalTime.MIN),
+                LocalDateTime.of(LocalDateTime.now().toLocalDate(), LocalTime.MAX)
+        );
+
+        // 최대 시도 횟수 초과 여부 검증
+        if (todayAttempts >= MAX_LOGIN_ATTEMPTS) {
+            log.warn("❌ 로그인 시도 횟수 초과: email={}", requestDto.getEmail());
+            throw new BusinessException(ErrorCode.TOO_MANY_REQUESTS, "로그인 시도 횟수를 초과했습니다. 잠시 후 다시 시도해주세요.");
+        }
+
+        try {
+            LoginAttemptLog logEntry = LoginAttemptLog.builder()
+                    .user(user)
+                    .email(requestDto.getEmail())
+                    .ip(httpRequest.getRemoteAddr())
+                    .device(httpRequest.getHeader("User-Agent"))
+                    .aiBlocked(isAiBlocked)
+                    .success(false)
+                    .attemptCount(todayAttempts + 1)
+                    .features(objectMapper.writeValueAsString(features))
+                    .build();
+            loginAttemptLogRepository.save(logEntry);
+        } catch (Exception e) {
+            log.error("⚠️ 로그인 실패 로그 저장 중 예외 발생: email={}", requestDto.getEmail(), e);
         }
     }
 }
