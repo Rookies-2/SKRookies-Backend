@@ -28,7 +28,7 @@ import java.util.List;
 // @Data 백두현: 해당 애노테이션이 채팅방 참여자 조회 시 .toString()호출에서 LazyInitializationException 문제 발생
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@ToString(exclude = "userChatRooms")
+@ToString(exclude = {"userChatRooms", "loginAttemptLogs"})
 @Table(name = "users")
 @Getter
 @EntityListeners(AuditingEntityListener.class)
@@ -72,6 +72,9 @@ public class User implements UserDetails {
 
     private LocalDateTime approvedAt;
     private LocalDateTime lastLoggedInAt;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<LoginAttemptLog> loginAttemptLogs = new ArrayList<>();
 
     @OneToMany(mappedBy="user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonManagedReference // User를 직렬화할 때 userChatRooms는 포함

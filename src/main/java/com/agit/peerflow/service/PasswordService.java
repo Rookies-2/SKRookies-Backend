@@ -132,47 +132,6 @@ public class PasswordService {
 
 //            // 패킷 특성 추출 (테스트용)
 //            Map<String, Object> features = new HashMap<>();
-//            // 패스워드 변경 성공 예시
-//                    features.put("dur", 0.000011);
-//                    features.put("proto", "udp");
-//                    features.put("service", "-");
-//                    features.put("state", "INT");
-//                    features.put("spkts", 2);
-//                    features.put("dpkts", 0);
-//                    features.put("sbytes", 496);
-//                    features.put("dbytes", 0);
-//                    features.put("rate", 90909.0902);
-//                    features.put("sttl", 254);
-//                    features.put("dttl", 0);
-//                    features.put("sload", 180363632);
-//                    features.put("dload", 0);
-//                    features.put("sloss", 0);
-//                    features.put("dloss", 0);
-//                    features.put("sinpkt", 0.011);
-//                    features.put("dinpkt", 0);
-//                    features.put("sjit", 0);
-//                    features.put("djit", 0);
-//                    features.put("swin", 0);
-//                    features.put("dwin", 0);
-//                    features.put("tcprtt", 0);
-//                    features.put("synack", 0);
-//                    features.put("ackdat", 0);
-//                    features.put("smean", 248);
-//                    features.put("dmean", 0);
-//                    features.put("trans_depth", 0);
-//                    features.put("response_body_len", 0);
-//                    features.put("ct_srv_src", 2);
-//                    features.put("ct_state_ttl", 2);
-//                    features.put("ct_dst_ltm", 1);
-//                    features.put("ct_src_dport_ltm", 1);
-//                    features.put("ct_dst_sport_ltm", 1);
-//                    features.put("ct_dst_src_ltm", 2);
-//                    features.put("is_ftp_login", 0);
-//                    features.put("ct_ftp_cmd", 0);
-//                    features.put("ct_flw_http_mthd", 0);
-//                    features.put("ct_src_ltm", 1);
-//                    features.put("ct_srv_dst", 2);
-//                    features.put("is_sm_ips_ports", 0);
 //            // 패스워드 변경 차단 예시
 //            features.put("dur", 0.921987);
 //            features.put("proto", "ospf");
