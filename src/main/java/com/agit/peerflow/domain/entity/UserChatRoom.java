@@ -1,7 +1,9 @@
 package com.agit.peerflow.domain.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,7 +16,6 @@ import java.time.LocalDateTime;
  * @since   2025-09-10
  * @description User ↔ ChatRoom의 다대다 관계인 중간 엔티티.
  * - 전체 방 조회
- * TODO 입장 시간, 역할, 상태 같은 부가 정보도 함께 관리
  */
 @Entity
 @Getter
@@ -25,18 +26,25 @@ public class UserChatRoom {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
-    @JsonManagedReference
+    @JsonBackReference
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
-    @JsonManagedReference
+    @JsonBackReference
     @JoinColumn(name = "chat_room_id", nullable = false)
     private ChatRoom chatRoom;
 
+    @Column(nullable = false, updatable = false)
     private LocalDateTime joinedAt;
+
+    @Column(nullable = false)
     private boolean muted; // 알림 끔 여부
+
+    @Column(nullable = false)
     private boolean pinned; // 상단 고정 여부
 
     private UserChatRoom(User user, ChatRoom chatRoom) {

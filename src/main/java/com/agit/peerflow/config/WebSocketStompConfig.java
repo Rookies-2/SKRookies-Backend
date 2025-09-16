@@ -42,7 +42,7 @@ public class WebSocketStompConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
         // /topic - 브로드캐스트용, 1:1 messaging
-        registry.enableSimpleBroker("/topic")
+        registry.enableSimpleBroker("/topic", "/queue")
                 .setHeartbeatValue(new long[]{10000, 10000})
                 .setTaskScheduler(myMessageBrokerTaskScheduler()); // 서버 <-> 클라이언트 간 heartbeat
         // /app - @MessageMapping 메서드로 라우팅, 클라이언트가 메시지 발행

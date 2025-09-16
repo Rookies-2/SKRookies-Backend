@@ -20,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.agit.peerflow.security.component.JwtTokenProvider;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -46,7 +47,7 @@ public class LoginService {
                     .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND,
                             "User", "email", requestDto.getEmail()));
             // 1. 오늘 로그인 시도 횟수 확인
-            int todayAttempts = loginAttemptLogRepository.countTodayByUserEmail(
+            long todayAttempts = loginAttemptLogRepository.countTodayByUserEmail(
                     requestDto.getEmail(),
                     LocalDateTime.of(LocalDateTime.now().toLocalDate(), LocalTime.MIN),
                     LocalDateTime.of(LocalDateTime.now().toLocalDate(), LocalTime.MAX)
@@ -156,23 +157,28 @@ public class LoginService {
 //            features.put("ct_srv_dst", 1);
 //            features.put("is_sm_ips_ports", 0);
 
-            boolean isBlocked = aiClient.checkBlocked(features);
-            boolean isPasswordMatch = passwordEncoder.matches(requestDto.getPassword(), user.getPassword());
+            boolean isBlockedByAi = aiClient.checkBlocked(features);
+            boolean isPasswordCorrect = passwordEncoder.matches(requestDto.getPassword(), user.getPassword());
 
-            // AI 판단
-            if (isBlocked) {
-                saveFailedLoginLog(requestDto, httpRequest, true, null, features);
-                log.warn("🚫 로그인 차단됨: email={}, features={}", requestDto.getEmail(), features);
-                throw new BusinessException(ErrorCode.AI_BLOCKED, "로그인", user.getEmail());
-            }
-            // 비밀번호 검증
-            if (!isPasswordMatch) {
-                log.warn("❌ 비밀번호 불일치: email={}", requestDto.getEmail());
-                throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE, "비밀번호가 일치하지 않습니다.");
+            // 로그인 실패 시 로그 저장 후 예외 발생
+            if (isBlockedByAi || !isPasswordCorrect) {
+                int currentAttemptCount = (int) todayAttempts + 1;
+                // 실패 로그를 저장합니다.
+                saveLoginAttemptLog(httpRequest, user, features, isBlockedByAi, isPasswordCorrect, currentAttemptCount);
 
+                // 로그 저장 후 예외를 던집니다.
+                if (isBlockedByAi) {
+                    log.warn("🚫 AI에 의해 로그인 차단됨: email={}", requestDto.getEmail());
+                    throw new BusinessException(ErrorCode.AI_BLOCKED, "로그인", user.getEmail());
+                } else {
+                    log.warn("❌ 비밀번호 불일치: email={}", requestDto.getEmail());
+                    throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE, "비밀번호가 일치하지 않습니다.");
+                }
             }
-            // 사용자 승인 단계 체크
+            // 사용자 승인 단계 체크 (로그인 성공으로 간주하지 않으므로 실패 로그를 남깁니다)
             if (user.getStatus() != UserStatus.ACTIVE) {
+                int currentAttemptCount = (int) todayAttempts + 1;
+                saveLoginAttemptLog(httpRequest, user, features, false, false, currentAttemptCount);
                 log.warn("⚠️ 사용자 로그인 차단: 승인 대기 상태. email={}", requestDto.getEmail());
                 throw new BusinessException(ErrorCode.ACCESS_DENIED, "사용자 승인 단계입니다.");
             }
@@ -196,7 +202,7 @@ public class LoginService {
     }
 
     private void saveFailedLoginLog(LoginRequestDto requestDto, HttpServletRequest httpRequest, boolean isAiBlocked, User user, Map<String, Object> features) {
-        int todayAttempts = loginAttemptLogRepository.countTodayByUserEmail(
+        long todayAttempts = loginAttemptLogRepository.countTodayByUserEmail(
                 requestDto.getEmail(),
                 LocalDateTime.of(LocalDateTime.now().toLocalDate(), LocalTime.MIN),
                 LocalDateTime.of(LocalDateTime.now().toLocalDate(), LocalTime.MAX)
@@ -216,12 +222,31 @@ public class LoginService {
                     .device(httpRequest.getHeader("User-Agent"))
                     .aiBlocked(isAiBlocked)
                     .success(false)
-                    .attemptCount(todayAttempts + 1)
+                    .attemptCount((int)todayAttempts + 1)
                     .features(objectMapper.writeValueAsString(features))
                     .build();
             loginAttemptLogRepository.save(logEntry);
         } catch (Exception e) {
             log.error("⚠️ 로그인 실패 로그 저장 중 예외 발생: email={}", requestDto.getEmail(), e);
+        }
+    }
+    @Transactional
+    private void saveLoginAttemptLog(HttpServletRequest httpRequest, User user,
+                                     Map<String, Object> features, boolean isAiBlocked, boolean isSuccess, int attemptCount) {
+        try {
+            LoginAttemptLog logEntry = LoginAttemptLog.builder()
+                    .user(user)
+                    .email(user.getEmail())
+                    .ip(httpRequest.getRemoteAddr())
+                    .device(httpRequest.getHeader("User-Agent"))
+                    .aiBlocked(isAiBlocked)
+                    .success(isSuccess)
+                    .attemptCount(attemptCount)
+                    .features(objectMapper.writeValueAsString(features))
+                    .build();
+            loginAttemptLogRepository.save(logEntry);
+        } catch (Exception e) {
+            log.error("⚠️ 로그인 시도 로그 저장 중 예외 발생: email={}", user.getEmail(), e);
         }
     }
 }

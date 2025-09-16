@@ -12,8 +12,10 @@ import com.agit.peerflow.repository.SubmissionRepository;
 import com.agit.peerflow.repository.UserRepository;
 import com.agit.peerflow.service.AssignmentService;
 import com.agit.peerflow.service.HistoryService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -126,8 +128,14 @@ public class AssignmentServiceImpl implements AssignmentService {
     @Override
     public List<AssignmentPreviewResponseDTO> getAllAssignments(User currentUser) {
         List<Assignment> assignments = assignmentRepository.findAll();
-        Map<Long, Submission> userSubmissions = submissionRepository.findAllByStudent(currentUser)
-                .stream().collect(Collectors.toMap(sub -> sub.getAssignment().getId(), sub -> sub));
+        Map<Long, Submission> userSubmissions =
+                submissionRepository.findAllByStudent(currentUser)
+                        .stream()
+                        .collect(Collectors.toMap(
+                                sub -> sub.getAssignment().getId(),
+                                sub -> sub,
+                                (existing, duplicate) -> existing // 중복 시 기존 값 유지
+                        ));
 
         return assignments.stream()
                 .map(assignment -> {
@@ -138,13 +146,46 @@ public class AssignmentServiceImpl implements AssignmentService {
                 .collect(Collectors.toList());
     }
 
-//    @Override
-//    public AssignmentDetailResponseDTO getAssignmentDetails(Long assignmentId) {
-//        Assignment assignment = assignmentRepository.findByIdWithCreator(assignmentId)
-//                .orElseThrow(() -> new IllegalArgumentException("과제를 찾을 수 없습니다. ID: " + assignmentId));
-//
-//        List<Submission> submissions = submissionRepository.findAllByAssignmentIdWithStudent(assignmentId);
-//
-//        return AssignmentDetailResponseDTO.from(assignment, submissions);
-//    }
+    @Override
+    @Transactional
+    public void deleteAssignment(Long assignmentId, User currentUser) {
+        Assignment assignment = assignmentRepository.findById(assignmentId)
+                .orElseThrow(() -> new EntityNotFoundException("과제를 찾을 수 없습니다. ID: " + assignmentId));
+
+        boolean isCreator = assignment.getCreator().getId().equals(currentUser.getId());
+        boolean isAdmin = currentUser.getRole() == UserRole.ADMIN;
+        if (!isCreator && !isAdmin) {
+            throw new AccessDeniedException("이 과제를 삭제할 권한이 없습니다.");
+        }
+
+        // DB에서 삭제 시 자식 먼저 삭제 후 부모 테이블의 row 삭제해야 함.
+        submissionRepository.deleteAllByAssignmentId(assignmentId);
+
+        assignmentRepository.delete(assignment);
+
+    }
+
+    @Override
+    public AssignmentDetailResponseDTO getAssignmentDetails(Long assignmentId) {
+        Assignment assignment = assignmentRepository.findByIdWithCreator(assignmentId)
+                .orElseThrow(() -> new IllegalArgumentException("과제를 찾을 수 없습니다. ID: " + assignmentId));
+
+        List<Submission> submissions = submissionRepository.findAllByAssignmentIdWithStudent(assignmentId);
+        String creatorName = assignment.getCreator() != null ? assignment.getCreator().getNickname() : null;
+        List<String> attachmentUrls = assignment.getAttachmentUrls() != null
+                ? List.copyOf(assignment.getAttachmentUrls())
+                : List.of();
+
+        return AssignmentDetailResponseDTO.of(
+                assignment.getId(),
+                assignment.getTitle(),
+                assignment.getDescription(),
+                creatorName,
+                assignment.getCreatedAt(),
+                assignment.getDueDate(),
+                attachmentUrls,
+                submissions
+        );
+
+    }
 }

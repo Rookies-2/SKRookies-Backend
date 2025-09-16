@@ -4,6 +4,9 @@ import com.agit.peerflow.domain.entity.User;
 import com.agit.peerflow.dto.assignment.*;
 import com.agit.peerflow.service.AssignmentService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -38,13 +41,13 @@ public class AssignmentController {
         return ResponseEntity.ok(assignments);
     }
 
-//    @Operation(summary = "특정 과제 상세 조회", description = "ID에 해당하는 과제의 상세 정보와 제출물 목록을 조회합니다.")
-//    @GetMapping("/{assignmentId}")
-//    public ResponseEntity<AssignmentDetailResponseDTO> getAssignmentDetails(
-//            @PathVariable Long assignmentId) {
-//        AssignmentDetailResponseDTO assignmentDetails = assignmentService.getAssignmentDetails(assignmentId);
-//        return ResponseEntity.ok(assignmentDetails);
-//    }
+    @Operation(summary = "특정 과제 상세 조회", description = "ID에 해당하는 과제의 상세 정보와 제출물 목록을 조회합니다.")
+    @GetMapping("/{assignmentId}")
+    public ResponseEntity<AssignmentDetailResponseDTO> getAssignmentDetails(
+            @PathVariable Long assignmentId) {
+        AssignmentDetailResponseDTO assignmentDetails = assignmentService.getAssignmentDetails(assignmentId);
+        return ResponseEntity.ok(assignmentDetails);
+    }
 
     @Operation(summary = "과제 제출 (학생)", description = "ID에 해당하는 과제에 텍스트 또는 파일을 제출합니다. 학생 권한이 필요합니다.")
     @PostMapping("/{assignmentId}/submissions")
@@ -74,5 +77,21 @@ public class AssignmentController {
             @AuthenticationPrincipal User grader) {
         assignmentService.gradeSubmission(submissionId, request, grader);
         return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "과제 삭제", description = "ID에 해당하는 과제를 삭제합니다. 과제 생성자 또는 관리자만 삭제할 수 있습니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "과제 삭제 성공"),
+            @ApiResponse(responseCode = "403", description
+                    = "삭제 권한 없음"),
+            @ApiResponse(responseCode = "404", description = "해당 과제를 찾을 수 없음")
+    })
+    @DeleteMapping("/{assignmentId}")
+    public ResponseEntity<Void> deleteAssignment(
+            @Parameter(description = "삭제할 과제의 ID") @PathVariable Long assignmentId,
+            @AuthenticationPrincipal User currentUser) {
+
+        assignmentService.deleteAssignment(assignmentId, currentUser);
+        return ResponseEntity.noContent().build();
     }
 }

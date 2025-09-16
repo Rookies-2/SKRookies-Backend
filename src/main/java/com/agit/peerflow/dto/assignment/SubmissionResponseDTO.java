@@ -19,6 +19,7 @@ public class SubmissionResponseDTO {
     private final Long submissionId;
     private final String studentName;
     private final String fileUrl;
+    private final String textContent;
     private final AssignmentStatus status;
     private final LocalDateTime submittedAt;
     private final String grade;
@@ -27,12 +28,18 @@ public class SubmissionResponseDTO {
     public static SubmissionResponseDTO from(Submission submission) {
         return SubmissionResponseDTO.builder()
                 .submissionId(submission.getId())
-                .studentName(submission.getStudent().getNickname())
+                .studentName(
+                        submission.getStudent() != null
+                                ? submission.getStudent().getNickname()
+                                : null
+                )
                 .fileUrl(submission.getFileUrl())
+                .textContent(submission.getTextContent())
                 .status(submission.getStatus())
                 .submittedAt(submission.getSubmittedAt())
                 .grade(submission.getGrade())
                 .feedback(submission.getFeedback())
                 .build();
     }
+
 }

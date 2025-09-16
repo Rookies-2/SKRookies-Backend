@@ -25,5 +25,7 @@ public class AiClient {
                 .bodyToMono(Map.class)
                 .map(response -> Boolean.TRUE.equals(response.get("blocked")))
                 .block();
+//        // AI 서버 호출 없이 항상 로그인 허용
+//        return false;
     }
 }

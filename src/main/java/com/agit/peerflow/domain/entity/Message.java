@@ -12,6 +12,14 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.Instant;
 import java.time.LocalDateTime;
 
+/**
+ * @author  백두현
+ * @version 1.0
+ * @since   2025-09-16
+ * @description 채팅 메시지를 저장하는 엔티티.
+ *              발신자(sender), 수신자(receiver), 채팅방(chatRoom), 메시지 내용(content),
+ *              메시지 유형(type), 발송 시각(sentAt) 등의 정보를 관리한다.
+ */
 @Entity
 @Getter
 @Table(name = "message")

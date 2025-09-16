@@ -68,20 +68,19 @@ public class PasswordService {
             }
             boolean isBlocked = aiClient.checkBlocked(features);
 
-            PasswordResetLog logEntry = PasswordResetLog.builder()
-                    .user(user)
-                    .email(request.getEmail())
-                    .ip(httpRequest.getRemoteAddr())
-                    .device(httpRequest.getHeader("User-Agent"))
-                    .aiBlocked(isBlocked)
-                    .attempts(todayAttempts + 1)
-                    .build();
-            passwordResetLogRepository.save(logEntry);
-
             // AI 판단
             if (isBlocked) {
                 log.warn("🚫 AI에 의해 비밀번호 재설정 시도 차단됨: email={}", request.getEmail());
-                String message = ErrorCode.AI_BLOCKED.formatMessage("비밀번호 재설정", user.getEmail());
+                PasswordResetLog logEntry = PasswordResetLog.builder()
+                        .user(user)
+                        .email(request.getEmail())
+                        .ip(httpRequest.getRemoteAddr())
+                        .device(httpRequest.getHeader("User-Agent"))
+                        .aiBlocked(true)
+                        .attempts(todayAttempts + 1)
+                        .build();
+                passwordResetLogRepository.save(logEntry);
+
                 throw new BusinessException(ErrorCode.AI_BLOCKED, "비밀번호 재설정", user.getEmail());
             }
 
@@ -92,6 +91,7 @@ public class PasswordService {
 
         } catch (Exception e) {
             log.error("❌ 인증번호 발송 실패: email={}", request.getEmail(), e);
+
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "❌ 인증번호 발송 중 오류가 발생했습니다."));
         }
@@ -117,6 +117,7 @@ public class PasswordService {
 
         } catch (Exception e) {
             log.error("❌ 인증번호 확인 중 오류 발생: {}", e.getMessage());
+
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "❌ 인증번호 확인 중 서버 오류가 발생했습니다."));
         }
