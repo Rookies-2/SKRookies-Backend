@@ -82,7 +82,8 @@ public class AssignmentController {
     @Operation(summary = "과제 삭제", description = "ID에 해당하는 과제를 삭제합니다. 과제 생성자 또는 관리자만 삭제할 수 있습니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "과제 삭제 성공"),
-            @ApiResponse(responseCode = "403", description = "삭제 권한 없음"),
+            @ApiResponse(responseCode = "403", description
+                    = "삭제 권한 없음"),
             @ApiResponse(responseCode = "404", description = "해당 과제를 찾을 수 없음")
     })
     @DeleteMapping("/{assignmentId}")

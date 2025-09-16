@@ -143,20 +143,20 @@ public class AssignmentServiceImpl implements AssignmentService {
     @Override
     @Transactional
     public void deleteAssignment(Long assignmentId, User currentUser) {
-        // 1. 삭제할 과제 조회
         Assignment assignment = assignmentRepository.findById(assignmentId)
                 .orElseThrow(() -> new EntityNotFoundException("과제를 찾을 수 없습니다. ID: " + assignmentId));
 
-        // 2. ‼️ 권한 확인: 현재 사용자가 과제 생성자이거나, ADMIN인지 확인
         boolean isCreator = assignment.getCreator().getId().equals(currentUser.getId());
         boolean isAdmin = currentUser.getRole() == UserRole.ADMIN;
-
         if (!isCreator && !isAdmin) {
             throw new AccessDeniedException("이 과제를 삭제할 권한이 없습니다.");
         }
 
-        // 3. 과제 삭제
+        // DB에서 삭제 시 자식 먼저 삭제 후 부모 테이블의 row 삭제해야 함.
+        submissionRepository.deleteAllByAssignmentId(assignmentId);
+
         assignmentRepository.delete(assignment);
+
     }
 
     @Override

@@ -4,6 +4,7 @@ import com.agit.peerflow.domain.entity.Submission;
 import com.agit.peerflow.domain.entity.User;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -30,8 +31,12 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
     @EntityGraph(attributePaths = {"assignment"})
     List<Submission> findAllByStudent(User student);
 
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("DELETE FROM Submission s WHERE s.assignment.id = :assignmentId")
+    void deleteAllByAssignmentId(@Param("assignmentId") Long assignmentId);
+
     @Query("""
-                SELECT s 
+                SELECT s
                   FROM Submission s 
             JOIN FETCH s.student 
             JOIN FETCH s.assignment 

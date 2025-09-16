@@ -8,6 +8,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -47,7 +48,10 @@ public class Assignment {
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "assignment_attachments", joinColumns = @JoinColumn(name = "assignment_id"))
     @Column(name = "attachment_url")
-    private List<String> attachmentUrls;
+    private List<String> attachmentUrls = new ArrayList<>();
+
+    @OneToMany(mappedBy = "assignment", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Submission> submissions = new ArrayList<>();
 
     // 생성자에서 createdAt 필드를 제거
     private Assignment(String title, String description, User creator, LocalDateTime dueDate, List<String> attachmentUrls) {

@@ -9,6 +9,13 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * @author  백두현
+ * @version 1.0
+ * @since   2025-09-16
+ * @description 채팅 메시지(Message) 엔티티에 대한 데이터 접근을 담당하는 JPA Repository.
+ *              채팅방별 메시지 조회, 발신자 정보 로딩, 메시지 삭제, 개수 집계, 최신 메시지 조회 등의 기능을 제공한다.
+ */
 public interface MessageRepository extends JpaRepository<Message, Long> {
     // 특정 채팅방의 메시지 시간순 조회
     @Query("""
