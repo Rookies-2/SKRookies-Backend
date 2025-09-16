@@ -75,7 +75,7 @@ public class ChatParticipantServiceImpl implements ChatParticipantService {
                     chatParticipant.setLeftAt(LocalDateTime.now());
 
                     boolean allLeft = chatParticipantRepository
-                            .findByChatRoomWithUser(chatRoom).stream()
+                            .findByChatRoomWithUser(chatRoom, ParticipantType.ACTIVE).stream()
                             .allMatch(p -> p.getStatus() != ParticipantType.ACTIVE);
                     if(allLeft) {
                         chatRoomService.deleteRoom(chatRoom);
@@ -85,6 +85,6 @@ public class ChatParticipantServiceImpl implements ChatParticipantService {
 
     @Override
     public List<ChatParticipant> getParticipants(ChatRoom chatRoom) {
-        return chatParticipantRepository.findByChatRoomWithUser(chatRoom);
+        return chatParticipantRepository.findByChatRoomWithUser(chatRoom, ParticipantType.ACTIVE);
     }
 }

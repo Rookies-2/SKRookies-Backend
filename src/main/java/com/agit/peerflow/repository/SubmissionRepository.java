@@ -29,6 +29,9 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
     List<Submission> findAllByAssignmentIdWithStudent(@Param("assignmentId") Long assignmentId);
 
     @EntityGraph(attributePaths = {"assignment"})
+    @Query("""
+            SELECT DISTINCT s FROM Submission s WHERE s.student = :student
+    """)
     List<Submission> findAllByStudent(User student);
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)

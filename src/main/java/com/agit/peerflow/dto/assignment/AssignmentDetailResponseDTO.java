@@ -22,6 +22,7 @@ public class AssignmentDetailResponseDTO {
     private final String title;
     private final String description;
     private final String creatorName;
+    //private final String textContext;
     private final LocalDateTime createdAt;
     private final LocalDateTime dueDate;
     private final List<String> attachmentUrls;
@@ -33,6 +34,7 @@ public class AssignmentDetailResponseDTO {
             String title,
             String description,
             String creatorName,
+          //  String textContext,
             LocalDateTime createdAt,
             LocalDateTime dueDate,
             List<String> attachmentUrls,
@@ -43,6 +45,7 @@ public class AssignmentDetailResponseDTO {
                 .title(title)
                 .description(description)
                 .creatorName(creatorName)
+              //  .textContext(textContext)
                 .createdAt(createdAt)
                 .dueDate(dueDate)
                 .attachmentUrls(attachmentUrls)

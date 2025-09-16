@@ -128,8 +128,14 @@ public class AssignmentServiceImpl implements AssignmentService {
     @Override
     public List<AssignmentPreviewResponseDTO> getAllAssignments(User currentUser) {
         List<Assignment> assignments = assignmentRepository.findAll();
-        Map<Long, Submission> userSubmissions = submissionRepository.findAllByStudent(currentUser)
-                .stream().collect(Collectors.toMap(sub -> sub.getAssignment().getId(), sub -> sub));
+        Map<Long, Submission> userSubmissions =
+                submissionRepository.findAllByStudent(currentUser)
+                        .stream()
+                        .collect(Collectors.toMap(
+                                sub -> sub.getAssignment().getId(),
+                                sub -> sub,
+                                (existing, duplicate) -> existing // 중복 시 기존 값 유지
+                        ));
 
         return assignments.stream()
                 .map(assignment -> {

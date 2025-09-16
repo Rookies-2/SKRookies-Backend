@@ -80,7 +80,7 @@ public class UserController {
     }
 
     @Operation(summary = "회원 탈퇴", description = "현재 로그인된 사용자의 계정을 삭제합니다.")
-    @DeleteMapping("/me")
+    @DeleteMapping("/me/delete")
     public ResponseEntity<Void> deleteMyAccount(@AuthenticationPrincipal User user) {
         userService.deleteMyAccount(user.getEmail());
         return ResponseEntity.noContent().build();

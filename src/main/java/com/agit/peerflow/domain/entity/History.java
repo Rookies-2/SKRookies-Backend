@@ -2,9 +2,13 @@ package com.agit.peerflow.domain.entity;
 
 import com.agit.peerflow.domain.enums.HistoryType;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.URL;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -19,9 +23,9 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "history")
 @EntityListeners(AuditingEntityListener.class)
 public class History {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -30,13 +34,17 @@ public class History {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(nullable = false)
+    @NotBlank
+    @Size(max = 255)
+    @Column(nullable = false, length = 255)
     private String content;
 
-    @Column(nullable = false)
+    @NotBlank
+    @Size(max = 500)
+    @Column(name = "related_url", nullable = false, length = 500)
     private String relatedUrl;
 
-    @Column(nullable = false)
+    @Column(name = "is_read", nullable = false)
     private boolean isRead = false;
 
     @Enumerated(EnumType.STRING)
