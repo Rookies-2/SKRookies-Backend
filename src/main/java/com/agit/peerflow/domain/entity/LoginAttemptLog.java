@@ -45,8 +45,8 @@ public class LoginAttemptLog {
     private String ip;
 
     @NotBlank
-    @Size(max = 100)
-    @Column(nullable = false, length = 100)
+    @Size(max = 255)
+    @Column(nullable = false)
     private String device;
 
     @Column(nullable = false)
