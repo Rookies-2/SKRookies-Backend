@@ -41,13 +41,13 @@ public class AssignmentController {
         return ResponseEntity.ok(assignments);
     }
 
-//    @Operation(summary = "특정 과제 상세 조회", description = "ID에 해당하는 과제의 상세 정보와 제출물 목록을 조회합니다.")
-//    @GetMapping("/{assignmentId}")
-//    public ResponseEntity<AssignmentDetailResponseDTO> getAssignmentDetails(
-//            @PathVariable Long assignmentId) {
-//        AssignmentDetailResponseDTO assignmentDetails = assignmentService.getAssignmentDetails(assignmentId);
-//        return ResponseEntity.ok(assignmentDetails);
-//    }
+    @Operation(summary = "특정 과제 상세 조회", description = "ID에 해당하는 과제의 상세 정보와 제출물 목록을 조회합니다.")
+    @GetMapping("/{assignmentId}")
+    public ResponseEntity<AssignmentDetailResponseDTO> getAssignmentDetails(
+            @PathVariable Long assignmentId) {
+        AssignmentDetailResponseDTO assignmentDetails = assignmentService.getAssignmentDetails(assignmentId);
+        return ResponseEntity.ok(assignmentDetails);
+    }
 
     @Operation(summary = "과제 제출 (학생)", description = "ID에 해당하는 과제에 텍스트 또는 파일을 제출합니다. 학생 권한이 필요합니다.")
     @PostMapping("/{assignmentId}/submissions")

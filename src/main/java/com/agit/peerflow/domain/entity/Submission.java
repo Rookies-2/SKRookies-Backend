@@ -2,6 +2,8 @@ package com.agit.peerflow.domain.entity;
 
 import com.agit.peerflow.domain.enums.AssignmentStatus;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,6 +20,7 @@ import java.time.LocalDateTime;
  */
 @Entity
 @Getter
+@Table(name = "submission")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
 public class Submission {
@@ -26,10 +29,13 @@ public class Submission {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "assignment_id", nullable = false)
     private Assignment assignment;
 
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "student_id", nullable = false)
     private User student;
@@ -37,16 +43,17 @@ public class Submission {
     @Lob
     private String textContent;
 
-    @Column(nullable = true)
+    @Column(length = 500)
     private String fileUrl;
 
+    @Size(max = 20)
     private String grade;
 
     @Lob
     private String feedback;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 20)
     private AssignmentStatus status;
 
     @CreatedDate
@@ -69,6 +76,10 @@ public class Submission {
     }
 
     public void grade(String grade, String feedback) {
+        if (grade == null || grade.isBlank()) {
+            throw new IllegalArgumentException("성적은 필수입니다.");
+        }
+
         this.grade = grade;
         this.feedback = feedback;
         this.status = AssignmentStatus.GRADED;

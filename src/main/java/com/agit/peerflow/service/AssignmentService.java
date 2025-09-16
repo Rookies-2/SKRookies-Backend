@@ -32,5 +32,5 @@ public interface AssignmentService {
     void deleteAssignment(Long assignmentId, User currentUser);
 
      //과제 상세 정보 조회
-//    AssignmentDetailResponseDTO getAssignmentDetails(Long assignmentId);
+    AssignmentDetailResponseDTO getAssignmentDetails(Long assignmentId);
 }

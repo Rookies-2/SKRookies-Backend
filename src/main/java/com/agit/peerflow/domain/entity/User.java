@@ -4,6 +4,9 @@ import com.agit.peerflow.domain.enums.UserRole;
 import com.agit.peerflow.domain.enums.UserStatus;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -16,7 +19,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-
+/**
+ * @author  백두현
+ * @version 1.0
+ * @since   2025-09-16
+ * @description UserDetails를 구현한 User 엔티티.
+ */
 // @Data 백두현: 해당 애노테이션이 채팅방 참여자 조회 시 .toString()호출에서 LazyInitializationException 문제 발생
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -30,15 +38,23 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank
+    @Size(max = 50)
     @Column(nullable = false, length = 50)
     private String username;
 
+    @NotBlank
+    @Size(min = 8, max = 255)
     @Column(nullable = false, length = 255)
     private String password;
 
+    @NotBlank
+    @Size(max = 50)
     @Column(nullable = false, unique = true, length = 50)
     private String nickname;
 
+    @Email
+    @NotBlank
     @Column(nullable = false, unique = true)
     private String email;
 
@@ -57,15 +73,16 @@ public class User implements UserDetails {
     private LocalDateTime approvedAt;
     private LocalDateTime lastLoggedInAt;
 
-    @OneToMany(mappedBy="user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy="user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonManagedReference // User를 직렬화할 때 userChatRooms는 포함
     private List<UserChatRoom> userChatRooms = new ArrayList<>();
 
     // 프로필 이미지 URL
+    @Size(max = 500)
     @Column(name = "avatar_url", length = 500)  // 길이는 넉넉히
     private String avatarUrl;
 
-    @Column(name = "verification_code")
+    @Column(name = "verification_code", length = 500)
     private String verificationCode;
 
     @Column(name = "verification_code_expiration")

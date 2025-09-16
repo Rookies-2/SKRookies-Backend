@@ -4,6 +4,7 @@ import com.agit.peerflow.domain.entity.User;
 import com.agit.peerflow.domain.enums.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -12,6 +13,13 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * @author  백두현
+ * @version 1.0
+ * @since   2025-09-16
+ * @description User 엔티티에 대한 데이터 접근을 담당하는 JPA Repository 인터페이스.
+ *              이메일, 닉네임, 상태, 역할 등을 기준으로 사용자 조회 및 검색 기능을 제공한다.
+ */
 public interface UserRepository extends JpaRepository<User, Long> {
     // 이메일로 검색
     Optional<User> findByEmail(String email);
@@ -41,4 +49,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     List<User> findByLastLoggedInAtBeforeAndStatus(LocalDateTime dateTime, UserStatus status);
 
+    @EntityGraph(attributePaths = "userChatRooms")
+    Optional<User> findWithChatRoomsById(Long id);
 }
