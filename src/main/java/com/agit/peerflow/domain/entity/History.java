@@ -41,6 +41,7 @@ public class History {
 
     @NotBlank
     @Size(max = 500)
+    @Pattern(regexp = "^/\\S*$", message = "경로는 '/'로 시작해야 하며 공백을 포함할 수 없습니다.")
     @Column(name = "related_url", nullable = false, length = 500)
     private String relatedUrl;
 

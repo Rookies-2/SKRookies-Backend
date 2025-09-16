@@ -6,7 +6,7 @@ import com.agit.peerflow.dto.user.UserDTO;
 import com.agit.peerflow.dto.user.UserResponseDTO;
 import com.agit.peerflow.exception.BusinessException;
 import com.agit.peerflow.exception.ErrorCode;
-import com.agit.peerflow.repository.UserRepository;
+import com.agit.peerflow.repository.*;
 import com.agit.peerflow.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,6 +27,14 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final MessageRepository messageRepository;
+    private final ChatParticipantRepository chatParticipantRepository;
+    private final UserChatRoomRepository userChatRoomRepository;
+    private final SubmissionRepository submissionRepository;
+    private final AssignmentRepository assignmentRepository;
+    private final AnnouncementRepository announcementRepository;
+    private final HistoryRepository historyRepository;
+
     private static final String AVATAR_UPLOAD_DIR = "uploads/avatars";
 
     @Override
@@ -147,6 +155,21 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void deleteMyAccount(String email) { // 변경: username -> email
         User user = getMyInfo(email); // 변경: username -> email
+
+        historyRepository.deleteByUser(user);
+
+        messageRepository.deleteBySender(user);
+
+        chatParticipantRepository.deleteByUser(user);
+
+        userChatRoomRepository.deleteByUser(user);
+
+        submissionRepository.deleteByStudent(user);
+
+        // 5. 과제/공지 등 작성 데이터 처리
+//        assignmentRepository.deleteByCreator(user);
+//        announcementRepository.deleteByAuthor(user);
+
         userRepository.delete(user);
     }
 

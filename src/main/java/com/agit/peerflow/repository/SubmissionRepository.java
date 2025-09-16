@@ -47,4 +47,5 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
     """)
     Optional<Submission> findByIdWithStudentAndAssignment(@Param("id") Long id);
 
+    void deleteByStudent(User student);
 }
