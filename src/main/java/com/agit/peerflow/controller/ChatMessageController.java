@@ -88,7 +88,6 @@ public class ChatMessageController {
             ChatMessageDTO response = ChatMessageDTO.fromGroup(saved);
             messageService.broadcastMessage(roomId, response);
 
-            String content = ("새로운 메시지가 왔습니다.");
         } else if (room.getType() == ChatRoomType.ONE_TO_ONE) {
             ChatMessageDTO response = ChatMessageDTO.fromOneToOne(saved);
             // 수신자, 송신자에게 전송
@@ -97,7 +96,7 @@ public class ChatMessageController {
         }
 
         // 알림 history 저장
-        historyService.createHistory(user, "새로운 메시지가 왔습니다.", "", HistoryType.MESSAGE);
+        historyService.createHistory(user, "새로운 메시지가 왔습니다.", "/rooms/" + roomId, HistoryType.MESSAGE);
     }
 
     @Operation(summary = "유저 별 채팅창 읽은 채팅 메시지 표시",
