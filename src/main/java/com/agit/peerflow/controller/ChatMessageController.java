@@ -4,11 +4,13 @@ import com.agit.peerflow.domain.entity.ChatRoom;
 import com.agit.peerflow.domain.entity.Message;
 import com.agit.peerflow.domain.entity.User;
 import com.agit.peerflow.domain.enums.ChatRoomType;
+import com.agit.peerflow.domain.enums.HistoryType;
 import com.agit.peerflow.domain.enums.MessageType;
 import com.agit.peerflow.dto.message.ChatMessageDTO;
 import com.agit.peerflow.dto.message.ReadMessageRequestDTO;
 import com.agit.peerflow.dto.message.SendMessageRequestDTO;
 import com.agit.peerflow.service.ChatRoomService;
+import com.agit.peerflow.service.HistoryService;
 import com.agit.peerflow.service.MessageService;
 import com.agit.peerflow.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -39,6 +41,7 @@ public class ChatMessageController {
     private final MessageService messageService;
     private final ChatRoomService chatRoomService;
     private final UserService userService;
+    private final HistoryService historyService;
 
     @Operation(summary = "채팅 메시지 발신",
             description = "클라이언트가 서버로 메시지를 보냅니다. (STOMP: /app/chat/rooms/{roomId}) " +
@@ -84,12 +87,17 @@ public class ChatMessageController {
         if(room.getType() == ChatRoomType.GROUP) {
             ChatMessageDTO response = ChatMessageDTO.fromGroup(saved);
             messageService.broadcastMessage(roomId, response);
+
+            String content = ("새로운 메시지가 왔습니다.");
         } else if (room.getType() == ChatRoomType.ONE_TO_ONE) {
             ChatMessageDTO response = ChatMessageDTO.fromOneToOne(saved);
             // 수신자, 송신자에게 전송
             messageService.privateMessage(response.senderId(), response);
             messageService.privateMessage(response.receiverId(), response);
         }
+
+        // 알림 history 저장
+        historyService.createHistory(user, "새로운 메시지가 왔습니다.", "", HistoryType.MESSAGE);
     }
 
     @Operation(summary = "유저 별 채팅창 읽은 채팅 메시지 표시",
