@@ -49,7 +49,7 @@
 
 ---
 
-## 자료구조
+## 📂 폴더 구조
 ```
 src/main/java/com/agit/peerflow
 ├── ai/          # ML 관련 모듈 (비밀번호 변경 공격 탐지 및 차단 모듈)
@@ -65,7 +65,7 @@ src/main/java/com/agit/peerflow
 ```
 
 ---
-## 📂 주요 기능 (MVP)
+## 🌟 주요 기능 (MVP)
 1. **회원 관리**
    - 회원가입 / 로그인 / 로그아웃
    - JWT 기반 인증
