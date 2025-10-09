@@ -50,17 +50,19 @@
 ---
 
 ## 자료구조
+```
 src/main/java/com/agit/peerflow
-├── ai/               # ML 관련 모듈 (비밀번호 변경 공격 탐지 및 차단 모듈)
-├── config/           # 전역 설정 (WebConfig, StompAuthChannelInterceptor 등)
-├── controller/       # REST API 엔드포인트, 요청/응답 처리
-├── domain/           # 엔티티, ENUMS 객체 (JPA Entity, Enum)
-├── dto/              # 데이터 전송 객체 (Request/Response DTO)
-├── exception/        # 예외 처리 클래스 (Custom Exception, Handler)
-├── repository/       # 데이터 접근 계층 (JPA Repository)
-├── scheduler/        # 스케줄링 작업 (비활성 사용자 계정 정리 스케줄러)
-├── security/         # 인증/인가 관련 (JWT, Security Config)
-└── service/          # 비즈니스 로직 계층
+├── ai/          # ML 관련 모듈 (비밀번호 변경 공격 탐지 및 차단 모듈)
+├── config/      # 전역 설정 (WebConfig, StompAuthChannelInterceptor 등)
+├── controller/  # REST API 엔드포인트, 요청/응답 처리
+├── domain/      # 엔티티, ENUMS 객체 (JPA Entity, Enum)
+├── dto/         # 데이터 전송 객체 (Request/Response DTO)
+├── exception/   # 예외 처리 클래스 (Custom Exception, Handler)
+├── repository/  # 데이터 접근 계층 (JPA Repository)
+├── scheduler/   # 스케줄링 작업 (비활성 사용자 계정 정리 스케줄러)
+├── security/    # 인증/인가 관련 (JWT, Security Config)
+└── service/     # 비즈니스 로직 계층
+```
 
 ---
 ## 📂 주요 기능 (MVP)
